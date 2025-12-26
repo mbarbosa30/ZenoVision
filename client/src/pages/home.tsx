@@ -366,7 +366,7 @@ const PortfolioGrid = () => (
           </a>
         ))}
         <div className="flex items-center justify-center p-6 border border-dashed border-border rounded-lg text-muted-foreground text-sm font-mono">
-          + More experiments
+          Our experiments
         </div>
       </div>
     </div>
