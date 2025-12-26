@@ -18,14 +18,14 @@ import quantumBg from "@assets/generated_images/abstract_quantum_physics_backgro
 // --- Types & Data ---
 
 const PORTFOLIO_ITEMS = [
-  { name: "Miniplay.studio", description: "Casual gaming platform", highlight: "100K users / 1 week" },
-  { name: "nanoPay.live", description: "Micro-transactions rail", highlight: "10K txns / 2 weeks" },
-  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "1,250+ signals" },
-  { name: "tempos.bet", description: "Prediction market primitive", highlight: "Experiment" },
-  { name: "inspector.markets", description: "Market analysis tool", highlight: "Live" },
-  { name: "x4pp.xyz", description: "Cross-chain identity", highlight: "Prototype" },
-  { name: "prosperon.market", description: "Economic simulation", highlight: "Beta" },
-  { name: "timecapsule.social", description: "Long-term data storage", highlight: "Live" },
+  { name: "Miniplay.studio", description: "Cognition gaming platform", highlight: "100K users / 1 week", url: "https://miniplay.studio" },
+  { name: "nanoPay.live", description: "Digital financial utility", highlight: "10K txns / 2 weeks", url: "https://nanopay.live" },
+  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "1,250+ signals", url: "https://maxflow.one" },
+  { name: "tempos.bet", description: "Conviction markets primitive", highlight: "Experiment", url: "https://tempos.bet" },
+  { name: "inspector.markets", description: "Tor network analysis", highlight: "Live", url: "https://inspector.markets" },
+  { name: "x4pp.xyz", description: "Attention-driven messaging", highlight: "Prototype", url: "https://x4pp.xyz" },
+  { name: "prosperon.market", description: "Economic simulation", highlight: "Beta", url: "https://prosperon.market" },
+  { name: "timecapsule.social", description: "Long-term data storage", highlight: "Live", url: "https://timecapsule.social" },
 ];
 
 const PARTNER_TYPES = [
@@ -354,7 +354,7 @@ const PortfolioGrid = () => (
       <h2 className="text-3xl font-bold font-heading mb-12">Selected Works</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {PORTFOLIO_ITEMS.map((item, i) => (
-          <div key={i} className="group relative p-6 bg-secondary/10 border border-border rounded-lg overflow-hidden hover:bg-secondary/20 transition-all">
+          <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="group relative p-6 bg-secondary/10 border border-border rounded-lg overflow-hidden hover:bg-secondary/20 transition-all block cursor-pointer">
             <div className="flex justify-between items-start mb-4">
               <h3 className="font-bold text-lg font-heading group-hover:text-primary transition-colors">{item.name}</h3>
               <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity" />
@@ -363,7 +363,7 @@ const PortfolioGrid = () => (
             <div className="text-xs font-mono text-primary/80 py-1 px-2 bg-primary/5 rounded inline-block">
               {item.highlight}
             </div>
-          </div>
+          </a>
         ))}
         <div className="flex items-center justify-center p-6 border border-dashed border-border rounded-lg text-muted-foreground text-sm font-mono">
           + More experiments
