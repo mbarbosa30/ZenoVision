@@ -96,6 +96,26 @@ const Hero = () => {
           ease: "easeInOut" 
         }}
       />
+      <motion.div 
+        className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay z-0"
+        style={{
+          backgroundImage: `url(${quantumBg})`,
+          backgroundSize: '120% 120%',
+          backgroundPosition: 'center',
+          filter: 'hue-rotate(90deg)'
+        }}
+        animate={{ 
+          scale: [1.2, 1.0, 1.2],
+          opacity: [0.1, 0.2, 0.1],
+          rotate: [0, 2, 0, -2, 0],
+          backgroundPosition: ["40% 40%", "60% 60%", "40% 40%"]
+        }}
+        transition={{ 
+          duration: 33, 
+          repeat: Infinity, 
+          ease: "linear" 
+        }}
+      />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none z-0" />
       
       <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
