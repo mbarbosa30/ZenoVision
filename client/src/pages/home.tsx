@@ -99,7 +99,7 @@ const Hero = () => {
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold font-heading leading-tight mb-6 tracking-tight">
             <span className="text-muted-foreground">Measure what matters.</span> <br />
-            Ship what moves.
+            <span className="text-[1.1em]">Ship what moves.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             We build internal ventures and co-build with partners.
