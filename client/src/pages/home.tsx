@@ -103,7 +103,7 @@ const Hero = () => {
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             We build internal ventures and co-build with partners.
-            AI reduces the cost of building, while our partner ecosystem unlocks distribution and traction.
+            AI maximizes efficiency and reduces the cost of building, while our partners' ecosystems unlock distribution and traction.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
