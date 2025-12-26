@@ -155,7 +155,7 @@ const ProofStrip = () => {
 const Introduction = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-3xl">
-      <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno Vision?</h2>
+      <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
       <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
         We are a venture studio that ships internal products and co-builds with ecosystem partners.
         By leveraging partner rails, we run rapid traction experiments to validate ideas before scaling.
@@ -176,7 +176,7 @@ const Introduction = () => (
 
       <div className="p-6 rounded-lg bg-secondary/30 border border-primary/20">
         <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
-          <Activity className="w-4 h-4" /> Why "Zeno Vision"?
+          <Activity className="w-4 h-4" /> Why "Zeno <span className="font-normal opacity-60">Vision</span>"?
         </h3>
         <p className="text-muted-foreground text-sm leading-relaxed italic">
           "There’s a phenomenon called the Zeno effect: observe the wrong way and you can freeze progress. 
@@ -305,7 +305,7 @@ const WhatWeDo = () => (
 const WhyUs = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-4xl">
-      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why Zeno Vision?</h2>
+      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
           "Demonstrated shipping velocity (multiple live products)",
@@ -485,7 +485,7 @@ const InterestForm = () => {
       
       <div className="container mx-auto px-6 max-w-2xl">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in Zeno Vision?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
           <p className="text-muted-foreground">
             We’re sharing this to get feedback and find high-fit partners, investors, and collaborators.
           </p>
@@ -642,7 +642,7 @@ const FAQ = () => (
           </div>
         ))}
         <div className="space-y-2">
-          <h4 className="font-bold text-foreground/90">Why the name “Zeno Vision”?</h4>
+          <h4 className="font-bold text-foreground/90">Why the name “Zeno <span className="font-normal opacity-60">Vision</span>”?</h4>
           <div className="text-sm text-muted-foreground space-y-4">
             <p>“Zeno” is a name with layered meanings, and we chose it because each layer maps to how we build.</p>
             <p>First, Zeno of Elea is famous for paradoxes about motion and progress: when you slice movement into infinite steps, progress can start to look impossible. In startups, the modern version is analysis paralysis, endless planning, and measuring everything until momentum evaporates. Zeno is our reminder that you can’t think your way into traction. You have to move.</p>
