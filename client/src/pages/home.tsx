@@ -78,13 +78,23 @@ const Hero = () => {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
-      <div 
+      <motion.div 
         className="absolute inset-0 opacity-30 pointer-events-none mix-blend-screen dark:mix-blend-lighten z-0"
         style={{
           backgroundImage: `url(${quantumBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-        }} 
+        }}
+        animate={{ 
+          scale: [1.1, 1.2, 1.1],
+          opacity: [0.3, 0.4, 0.3],
+          backgroundPosition: ["50% 50%", "51% 51%", "50% 50%"]
+        }}
+        transition={{ 
+          duration: 20, 
+          repeat: Infinity, 
+          ease: "easeInOut" 
+        }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none z-0" />
       
