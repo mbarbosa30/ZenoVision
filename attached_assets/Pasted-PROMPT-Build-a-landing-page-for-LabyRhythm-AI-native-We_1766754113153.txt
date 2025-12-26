@@ -1,0 +1,169 @@
+PROMPT: Build a landing page for “LabyRhythm” (AI-native Web3 venture studio) with partner-powered distribution rails
+
+ROLE & GOAL
+You are a senior product marketer + web designer + founder.
+Create a single-page landing site (desktop + mobile) to share with potential partners, investors, and collaborators.
+Primary goal: capture qualified interest via a form where visitors select Investor / Partner / Collaborator.
+Secondary goal: clearly explain (1) what LabyRhythm is, (2) why our portfolio proves we can ship, and (3) how our PARTNER NETWORK unlocks distribution rails and traction experiments.
+
+IMPORTANT CORRECTION (MUST FOLLOW)
+The apps/products already launched with traction (and the others listed) are our CURRENT PORTFOLIO and proof-of-shipping.
+They are NOT “parts of an engine.”
+Distribution rails and traction experiments are unlocked primarily through our ecosystem partners such as:
+- MiniPay
+- Celo
+- Funding the Commons
+- Local organizations supporting vulnerable communities in emerging markets
+The “engine” is therefore not “app A feeds app B,” but a partnership-enabled experimentation loop:
+Partner rails + studio execution → rapid experiments → validated traction → scale/spin out/co-build.
+
+BRAND
+Name: LabyRhythm
+Core meaning: disciplined experimentation + consistency, even when the destination is unknown.
+Tone: confident, grounded, builder-forward, low-hype, precise, warm.
+Avoid: crypto buzzword soup, “moon” language, grandiose claims, regulatory predictions.
+Style: clean, minimal, “lab notebook” meets “shipping dashboard.”
+Motifs: subtle labyrinth linework + subtle rhythm/pulse line (tasteful, not loud).
+
+REQUIRED FACTS (DO NOT INVENT NUMBERS)
+Portfolio traction (use exactly these, no extra context numbers unless provided):
+- Miniplay.studio: 100K users and 500K games played after 1 week (preparing a utility token).
+- nanoPay.live: 3,000+ users and 10K onchain transactions after 2 weeks.
+- MaxFlow.one: 1,250+ signals computed.
+Other shipped experiments/products (as portfolio examples):
+tempos.bet, inspector.markets, x4pp.xyz, prosperon.market, timecapsule.social (and others).
+
+CORE THESIS (MUST BE CLEAR)
+AI has reduced the cost of building. The real moats are:
+- shipping cadence and taste,
+- trusted distribution rails through partners,
+- repeatable experimentation discipline.
+LabyRhythm is a venture studio that ships internal products and co-builds with partners, using partner rails to run traction experiments fast and scale what works.
+
+HERO REQUIREMENTS (IMPORTANT)
+- Main hero headline must be SHORT (max 7 words).
+- It must convey: “even when the destination is unknown.”
+- Provide 3 hero headline options that meet the constraints (choose one as default).
+Examples (you must create your own, keep them short):
+  - “Ship in rhythm. Destination unknown.”
+  - “Build fast, even in fog.”
+  - “Consistent shipping, unknown destination.”
+- Subheadline: 1–2 lines explaining what LabyRhythm is (venture studio) + why it matters now (AI makes build cheap, partners unlock distribution).
+- CTAs: Primary “Talk to us” (scroll to Interest Form). Secondary “See the proof” (scroll to Traction/Portfolio).
+
+PAGE STRUCTURE (MUST INCLUDE ALL SECTIONS)
+1) Hero (short headline + subheadline + CTAs)
+2) Proof Strip (Portfolio traction)
+- Three metric cards: Miniplay, nanoPay, MaxFlow with time windows.
+- One-line credibility statement: “Shipped and used, not just imagined.”
+
+3) What LabyRhythm Is (Plain-English)
+- A tight paragraph + 4 bullets:
+  - Venture studio (builds internal ventures)
+  - Co-builds with partners (retainer + upside options)
+  - Runs fast traction experiments via partner rails
+  - Scales/spins out what proves itself
+
+4) The “Engine” (BUT REFRAME IT AS A PARTNER-POWERED EXPERIMENT LOOP)
+This section should NOT imply portfolio apps feed each other.
+Instead, present a loop diagram like:
+Partners (distribution rails) → Rapid build → Field test → Learn/iterate → Scale or kill → Repeat
+Include:
+- A simple icon-based step diagram (no heavy ASCII).
+- 3 bullets explaining why this loop compounds:
+  - faster learning cycles,
+  - lower build cost via AI,
+  - higher-quality distribution via trust and local partners.
+
+5) Ecosystem Rails (Partners + Why They Matter)
+- A section titled “Distribution Rails” or “Ecosystem Rails.”
+- Explain that partners unlock reach, trust, and real-world testing environments in emerging markets.
+- Include a “Partner Types” layout with 4 tiles:
+  - Platform partners (e.g., MiniPay)
+  - Protocol/ecosystem partners (e.g., Celo)
+  - Community networks (e.g., Funding the Commons)
+  - Local orgs (vulnerable community support)
+For each tile: “What they unlock” (1–2 bullets).
+
+6) What We Do (Two Columns)
+A) Internal Portfolio
+- We ship and operate products to explore primitives and prove loops.
+- Emphasize speed, iteration, real usage.
+B) Partner Co-Builds
+- We help teams ship and validate quickly through our process + partner rails.
+
+7) Why Us (Moat, grounded)
+4–6 bullets, no hype:
+- Demonstrated shipping velocity (multiple live products)
+- Early traction across consumer usage + onchain activity + coordination primitives
+- Operator-first execution (design, engineering, growth discipline)
+- Ability to run trust-anchored experiments through partners and local orgs
+- Simple alignment structures (no complex deal theatre)
+
+8) How We Work (Engagement Models)
+3 cards (“deal menu”):
+- Retainer + Upside (equity/tokens case-by-case)
+- Milestone + Success Fee / Revenue Share
+- Selective Pure Upside (high-fit only)
+Add note: “We keep terms simple and optimize for long-term alignment.”
+
+9) Portfolio (Selected)
+Grid of 6–10 tiles including:
+Miniplay.studio, nanoPay.live, MaxFlow.one, tempos.bet, inspector.markets, x4pp.xyz, prosperon.market, timecapsule.social, plus “More experiments”
+Each tile: name + 6–10 word non-specific description (safe, generic).
+
+10) Who It’s For (3 Personas)
+Investor
+- What you get (2–3 bullets): exposure to diversified studio output + partner rails + disciplined selection
+Partner
+- What you get: rapid shipping + experimentation loop + aligned incentives
+Collaborator
+- What you get: ownership, autonomy, shipping cadence, portfolio impact
+Each has a CTA that jumps to the Interest form with the role pre-selected.
+
+11) Interest Form Section (CONVERSION SECTION, REQUIRED)
+Title: “Interested in LabyRhythm?”
+Copy: “We’re sharing this to get feedback and find high-fit partners, investors, and collaborators.”
+Form fields:
+- I’m interested as (required dropdown): Investor / Partner / Collaborator
+- Name
+- Email
+- Organization (optional)
+- What are you exploring? (textarea)
+- Links (optional): website, deck, github, twitter, etc.
+- Checkbox: “I’m okay receiving a follow-up message.”
+Submit button: “Request intro”
+After submit: friendly confirmation message + what happens next (no time estimates).
+
+12) Footer
+- Manifesto line: “Experiment with consistency, even when the destination is unknown.”
+- Contact link
+- Minimal disclaimer: “For feedback purposes. Not investment advice.”
+
+UX / UI REQUIREMENTS
+- Single-page with anchored nav: Proof, Loop, Rails, Work, Portfolio, Interest.
+- Mobile-first, high readability.
+- Use subtle labyrinth + pulse motif; lots of whitespace; crisp icons.
+- Keep copy scannable: short paragraphs, bold key phrases, bullets.
+
+DELIVERABLES
+Provide:
+A) Full landing page copy (all headings, body, CTAs, form labels, confirmation microcopy).
+B) Section-by-section wireframe description (layout guidance).
+C) SEO title + meta description + OpenGraph headline.
+D) FAQ (4–6) with tight answers, including:
+  - “Do you take equity or tokens?”
+  - “What stage do you work with?”
+  - “Do you invest directly?”
+  - “How do you decide what to build?”
+  - “How do partners fit into distribution rails?”
+  - “Which ecosystems do you work with?” (Answer: partner-driven, flexible; do not invent specifics.)
+
+CONSTRAINTS
+- Do not invent metrics beyond what’s provided.
+- Do not imply portfolio apps are a single integrated engine.
+- Do not mention other AI models or “Gemini.”
+- Avoid compliance/regulatory claims and overpromising.
+- End with the Interest section + clear CTA.
+
+Now generate the complete landing page content + wireframe.
