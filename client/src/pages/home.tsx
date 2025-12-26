@@ -292,7 +292,8 @@ const WhyUs = () => (
           "Early traction across consumer usage + onchain activity",
           "Operator-first execution (design, engineering, growth)",
           "Access to trust-anchored experiments via partners",
-          "Simple alignment structures (no complex deal theatre)"
+          "Simple alignment structures (no complex deal theatre)",
+          "Diversified exposure to a dynamic basket of experiments, assets and solutions"
         ].map((item, i) => (
           <div key={i} className="flex gap-4 p-4 rounded-lg hover:bg-secondary/30 transition-colors">
             <div className="mt-1 text-primary">✓</div>
