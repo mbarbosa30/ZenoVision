@@ -403,7 +403,7 @@ const Personas = () => {
       benefits: [
         "Build, own, and scale specific product lines", 
         "Access to studio resources and network", 
-        "Focus on product, not admin/ops"
+        "Focus on product & traction, not admin/ops"
       ],
       cta: "Join the studio",
       formValue: "Collaborator"
