@@ -355,9 +355,39 @@ const PortfolioGrid = () => (
 
 const Personas = () => {
   const personas = [
-    { title: "Investor", benefits: ["Diversified studio output", "Partner distribution rails", "Disciplined selection"] },
-    { title: "Partner", benefits: ["Rapid shipping engine", "Experimentation loops", "Aligned incentives"] },
-    { title: "Collaborator", benefits: ["Ownership & Autonomy", "High shipping cadence", "Portfolio impact"] },
+    { 
+      role: "Investor", 
+      subtitle: "Capital Partner",
+      benefits: [
+        "Diversified exposure to a compounding studio engine", 
+        "Access to deal flow before public markets", 
+        "Capital efficiency via shared infrastructure"
+      ],
+      cta: "Request Deck",
+      formValue: "Investor"
+    },
+    { 
+      role: "Partner", 
+      subtitle: "Founder / Protocol",
+      benefits: [
+        "Ship fast using our battle-tested rails", 
+        "Plug into existing distribution & liquidity", 
+        "Align upside with long-term incentives"
+      ],
+      cta: "Partner with us",
+      formValue: "Partner"
+    },
+    { 
+      role: "Collaborator", 
+      subtitle: "Builder / Operator",
+      benefits: [
+        "Build, own, and scale specific product lines", 
+        "Access to studio resources and network", 
+        "Focus on product, not admin/ops"
+      ],
+      cta: "Join the studio",
+      formValue: "Collaborator"
+    },
   ];
 
   return (
@@ -366,17 +396,21 @@ const Personas = () => {
         <h2 className="text-3xl font-bold font-heading mb-12 text-center">Who It's For</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {personas.map((p, i) => (
-            <div key={i} className="bg-background border border-border p-8 rounded-xl flex flex-col h-full">
-              <h3 className="text-2xl font-bold mb-6 text-primary">{p.title}</h3>
+            <div key={i} className="bg-background border border-border p-8 rounded-xl flex flex-col h-full hover:border-primary/30 transition-colors group">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-primary mb-1">{p.role}</h3>
+                <p className="text-sm font-mono text-muted-foreground uppercase tracking-wider">{p.subtitle}</p>
+              </div>
               <ul className="space-y-3 mb-8 flex-grow">
                 {p.benefits.map((b, j) => (
-                  <li key={j} className="text-sm text-muted-foreground flex gap-2">
-                    <span className="text-primary/50">•</span> {b}
+                  <li key={j} className="text-sm text-foreground/90 flex gap-3">
+                    <span className="text-primary/50 mt-0.5">•</span> 
+                    <span>{b}</span>
                   </li>
                 ))}
               </ul>
-              <Button asChild variant="outline" className="w-full">
-                <a href="#interest">I'm a {p.title}</a>
+              <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300">
+                <a href="#interest">{p.cta}</a>
               </Button>
             </div>
           ))}
