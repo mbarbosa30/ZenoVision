@@ -53,7 +53,7 @@ const Navbar = () => (
     <div className="container mx-auto px-6 h-16 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <Activity className="w-5 h-5 text-primary animate-pulse" />
-        <span className="font-heading font-bold text-xl tracking-tight">LabyRhythm</span>
+        <span className="font-heading font-bold text-xl tracking-tight">Zeno Vision</span>
       </div>
       <div className="flex items-center gap-4">
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
@@ -89,8 +89,8 @@ const Hero = () => {
             AI-Native Venture Studio
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold font-heading leading-tight mb-6 tracking-tight">
-            Ship in rhythm. <br />
-            <span className="text-muted-foreground">Destination unknown.</span>
+            Measure what matters. <br />
+            <span className="text-muted-foreground">Ship what moves.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             We build internal ventures and co-build with partners.
@@ -146,7 +146,7 @@ const ProofStrip = () => {
 const Introduction = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-3xl">
-      <h2 className="text-3xl font-bold mb-6 font-heading">What is LabyRhythm?</h2>
+      <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno Vision?</h2>
       <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
         We are a venture studio that ships internal products and co-builds with ecosystem partners.
         By leveraging partner rails, we run rapid traction experiments to validate ideas before scaling.
@@ -285,7 +285,7 @@ const WhatWeDo = () => (
 const WhyUs = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-4xl">
-      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why LabyRhythm?</h2>
+      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why Zeno Vision?</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
           "Demonstrated shipping velocity (multiple live products)",
@@ -444,7 +444,7 @@ const InterestForm = () => {
       
       <div className="container mx-auto px-6 max-w-2xl">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in LabyRhythm?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in Zeno Vision?</h2>
           <p className="text-muted-foreground">
             We’re sharing this to get feedback and find high-fit partners, investors, and collaborators.
           </p>
@@ -610,13 +610,13 @@ const Footer = () => (
     <div className="container mx-auto px-6">
       <div className="flex items-center justify-center gap-2 mb-6 opacity-50">
         <Activity className="w-5 h-5" />
-        <span className="font-heading font-bold">LabyRhythm</span>
+        <span className="font-heading font-bold">Zeno Vision</span>
       </div>
       <p className="font-heading text-lg mb-8 max-w-xl mx-auto text-foreground/80">
         “Experiment with consistency, even when the destination is unknown.”
       </p>
       <div className="text-sm text-muted-foreground space-y-2 font-mono">
-        <a href="mailto:hello@labyrhythm.xyz" className="hover:text-primary transition-colors">Contact Us</a>
+        <a href="mailto:hello@zenovision.xyz" className="hover:text-primary transition-colors">Contact Us</a>
         <p className="text-xs opacity-50 mt-4">For feedback purposes. Not investment advice.</p>
       </div>
     </div>
