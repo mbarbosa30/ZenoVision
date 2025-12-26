@@ -31,7 +31,7 @@ const PORTFOLIO_ITEMS = [
 const PARTNER_TYPES = [
   { title: "Platform Partners", example: "MiniPay", icon: <Globe className="w-5 h-5" />, desc: "Unlock massive mobile reach" },
   { title: "Protocol Ecosystems", example: "Celo", icon: <Network className="w-5 h-5" />, desc: "Provide liquidity & tooling" },
-  { title: "Community Networks", example: "Funding the Commons", icon: <Users className="w-5 h-5" />, desc: "Access builder talent" },
+  { title: "Community Networks", example: "Talent Protocol", icon: <Users className="w-5 h-5" />, desc: "Access builder talent" },
   { title: "Local Organizations", example: "Emerging Markets", icon: <Boxes className="w-5 h-5" />, desc: "Real-world testing grounds" },
 ];
 
