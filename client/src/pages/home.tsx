@@ -88,9 +88,9 @@ const Hero = () => {
           <Badge variant="outline" className="mb-6 font-mono text-xs border-primary/30 text-primary uppercase tracking-wider bg-primary/5">
             AI-Native Venture Studio
           </Badge>
-          <h1 className="font-bold font-heading leading-tight mb-6 tracking-tight">
-            <span className="text-4xl md:text-6xl block mb-2">Measure what matters.</span>
-            <span className="text-5xl md:text-7xl text-muted-foreground">Ship what moves.</span>
+          <h1 className="text-5xl md:text-7xl font-bold font-heading leading-tight mb-6 tracking-tight">
+            Measure what matters. <br />
+            <span className="text-muted-foreground">Ship what moves.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             We build internal ventures and co-build with partners.
