@@ -25,7 +25,7 @@ const PORTFOLIO_ITEMS = [
   { name: "inspector.markets", description: "Tor network analysis", highlight: "Live", url: "https://inspector.markets" },
   { name: "x4pp.xyz", description: "Attention-driven inbox", highlight: "Prototype", url: "https://x4pp.xyz" },
   { name: "prosperon.market", description: "Tokenomics utility OS", highlight: "Beta", url: "https://prosperon.market" },
-  { name: "timecapsule.social", description: "Time-bound content", highlight: "Live", url: "https://timecapsule.social" },
+  { name: "timecapsule.news", description: "Time-bound content", highlight: "Live", url: "https://timecapsule.news" },
 ];
 
 const PARTNER_TYPES = [
