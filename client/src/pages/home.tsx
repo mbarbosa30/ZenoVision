@@ -620,6 +620,18 @@ const FAQ = () => (
             <p className="text-sm text-muted-foreground">{item.a}</p>
           </div>
         ))}
+        <div className="space-y-2">
+          <h4 className="font-bold text-foreground/90">Why the name “Zeno Vision”?</h4>
+          <div className="text-sm text-muted-foreground space-y-4">
+            <p>“Zeno” is a name with layered meanings, and we chose it because each layer maps to how we build.</p>
+            <p>First, Zeno of Elea is famous for paradoxes about motion and progress: when you slice movement into infinite steps, progress can start to look impossible. In startups, the modern version is analysis paralysis, endless planning, and measuring everything until momentum evaporates. Zeno is our reminder that you can’t think your way into traction. You have to move.</p>
+            <p>Second, in quantum physics there’s the Quantum Zeno effect: observation can change a system, and measuring in the wrong way too frequently can inhibit change. Startups have a version of that too: dashboards, vanity metrics, and constant KPI thrash can “freeze” teams into optimization theater. So “Zeno” also reminds us to measure carefully, not compulsively.</p>
+            <p>Third, many people associate “Zeno” with Stoic discipline (from Zeno of Citium, founder of Stoicism). That layer matters to us as a studio: calm execution, long-horizon thinking, and steady cadence under uncertainty. Not hype spikes. Not panic pivots.</p>
+            <p>Finally, “Zeno” also evokes asymptotic progress: you rarely reach certainty in one jump, you approach it through iterations that compound. That’s venture building in practice, especially in an AI-native world where experimentation is cheap and speed is high.</p>
+            <p>Vision is what makes all of those meanings actionable. Vision sets direction when the destination isn’t fully known, and it tells us which signals are worth steering by. Together, the name encodes our operating principle: disciplined measurement, steady shipping, and compounding progress.</p>
+            <p className="font-semibold italic text-primary">That’s why we say: Measure what matters. Ship what moves.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
