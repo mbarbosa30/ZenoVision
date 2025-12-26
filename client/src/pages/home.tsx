@@ -54,7 +54,7 @@ const Navbar = () => (
     <div className="container mx-auto px-6 h-16 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <Activity className="w-5 h-5 text-primary animate-pulse" />
-        <span className="font-heading font-bold text-xl tracking-tight">Zeno Vision</span>
+        <span className="font-heading font-bold text-xl tracking-tight">Zeno <span className="font-normal opacity-60">Vision</span></span>
       </div>
       <div className="flex items-center gap-4">
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
@@ -663,7 +663,7 @@ const Footer = () => (
     <div className="container mx-auto px-6">
       <div className="flex items-center justify-center gap-2 mb-6 opacity-50">
         <Activity className="w-5 h-5" />
-        <span className="font-heading font-bold">Zeno Vision</span>
+        <span className="font-heading font-bold">Zeno <span className="font-normal opacity-60">Vision</span></span>
       </div>
       <p className="font-heading text-lg mb-8 max-w-xl mx-auto text-foreground/80">
         “Experiment with consistency, even when the destination is unknown.”
