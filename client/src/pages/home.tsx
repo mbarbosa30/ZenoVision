@@ -151,7 +151,7 @@ const Introduction = () => (
         We are a venture studio that ships internal products and co-builds with ecosystem partners.
         By leveraging partner rails, we run rapid traction experiments to validate ideas before scaling.
       </p>
-      <ul className="space-y-4 font-medium text-foreground/90">
+      <ul className="space-y-4 font-medium text-foreground/90 mb-12">
         {[
           "Venture studio building internal ventures",
           "Co-builds with partners (Retainer + Upside)",
@@ -164,6 +164,17 @@ const Introduction = () => (
           </li>
         ))}
       </ul>
+
+      <div className="p-6 rounded-lg bg-secondary/30 border border-primary/20">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
+          <Activity className="w-4 h-4" /> Why "Zeno Vision"?
+        </h3>
+        <p className="text-muted-foreground text-sm leading-relaxed italic">
+          "There’s a phenomenon called the Zeno effect: observe the wrong way and you can freeze progress. 
+          So our rule is simple: measure what matters, then get out of the way and ship what moves. 
+          We use measurement to accelerate momentum, not to create dashboards that feel productive."
+        </p>
+      </div>
     </div>
   </section>
 );
