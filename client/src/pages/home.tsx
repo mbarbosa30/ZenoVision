@@ -21,11 +21,11 @@ const PORTFOLIO_ITEMS = [
   { name: "Miniplay.studio", description: "Cognition gaming platform", highlight: "100K users / 1 week", url: "https://miniplay.studio" },
   { name: "nanoPay.live", description: "Digital financial utility", highlight: "10K txns / 2 weeks", url: "https://nanopay.live" },
   { name: "MaxFlow.one", description: "Signal computation engine", highlight: "1,250+ signals", url: "https://maxflow.one" },
-  { name: "tempos.bet", description: "Conviction markets primitive", highlight: "Experiment", url: "https://tempos.bet" },
+  { name: "tempos.bet", description: "Conviction market primitive", highlight: "Experiment", url: "https://tempos.bet" },
   { name: "inspector.markets", description: "Tor network analysis", highlight: "Live", url: "https://inspector.markets" },
-  { name: "x4pp.xyz", description: "Attention-driven messaging", highlight: "Prototype", url: "https://x4pp.xyz" },
-  { name: "prosperon.market", description: "Economic simulation", highlight: "Beta", url: "https://prosperon.market" },
-  { name: "timecapsule.social", description: "Long-term data storage", highlight: "Live", url: "https://timecapsule.social" },
+  { name: "x4pp.xyz", description: "Attention-driven inbox", highlight: "Prototype", url: "https://x4pp.xyz" },
+  { name: "prosperon.market", description: "Tokenomics utility OS", highlight: "Beta", url: "https://prosperon.market" },
+  { name: "timecapsule.social", description: "Time-bound content", highlight: "Live", url: "https://timecapsule.social" },
 ];
 
 const PARTNER_TYPES = [
