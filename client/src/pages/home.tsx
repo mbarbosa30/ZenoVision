@@ -145,7 +145,7 @@ const ProofStrip = () => {
           ))}
         </div>
         <div className="text-center mt-8 text-sm font-mono text-muted-foreground opacity-70">
-          // Shipped and used, not just imagined.
+          // Shipped and growing, not just imagined.
         </div>
       </div>
     </section>
