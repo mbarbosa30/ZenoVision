@@ -46,6 +46,8 @@ const formSchema = z.object({
 
 // --- Components ---
 
+import { ModeToggle } from "@/components/ui/mode-toggle";
+
 const Navbar = () => (
   <nav className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
     <div className="container mx-auto px-6 h-16 flex items-center justify-between">
@@ -53,14 +55,19 @@ const Navbar = () => (
         <Activity className="w-5 h-5 text-primary animate-pulse" />
         <span className="font-heading font-bold text-xl tracking-tight">LabyRhythm</span>
       </div>
-      <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-        <a href="#proof" className="hover:text-foreground transition-colors">Proof</a>
-        <a href="#loop" className="hover:text-foreground transition-colors">Loop</a>
-        <a href="#rails" className="hover:text-foreground transition-colors">Rails</a>
-        <a href="#portfolio" className="hover:text-foreground transition-colors">Portfolio</a>
-        <Button asChild size="sm" variant="outline" className="ml-2 border-primary/20 hover:border-primary/50 text-foreground">
-          <a href="#interest">Talk to us</a>
-        </Button>
+      <div className="flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+          <a href="#proof" className="hover:text-foreground transition-colors">Proof</a>
+          <a href="#loop" className="hover:text-foreground transition-colors">Loop</a>
+          <a href="#rails" className="hover:text-foreground transition-colors">Rails</a>
+          <a href="#portfolio" className="hover:text-foreground transition-colors">Portfolio</a>
+        </div>
+        <div className="flex items-center gap-2">
+          <ModeToggle />
+          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex border-primary/20 hover:border-primary/50 text-foreground">
+            <a href="#interest">Talk to us</a>
+          </Button>
+        </div>
       </div>
     </div>
   </nav>
