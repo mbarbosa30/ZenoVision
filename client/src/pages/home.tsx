@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
+import quantumBg from "@assets/generated_images/abstract_quantum_physics_background_pattern.png";
 
 // --- Types & Data ---
 
@@ -77,7 +78,15 @@ const Hero = () => {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
+      <div 
+        className="absolute inset-0 opacity-30 pointer-events-none mix-blend-screen dark:mix-blend-lighten z-0"
+        style={{
+          backgroundImage: `url(${quantumBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }} 
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none z-0" />
       
       <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
         <motion.div
