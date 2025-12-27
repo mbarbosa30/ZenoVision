@@ -123,14 +123,14 @@ const Hero = () => {
 const ProofStrip = () => {
   const metrics = [
     { label: "MiniPlay.studio", value: "81K+ users", sub: "in its 1st week", icon: Users, url: "https://miniplay.studio" },
-    { label: "nanoPay.live", value: "10K+ txs", sub: "onchain, after 2 weeks", icon: Activity, url: "https://nanopay.live" },
+    { label: "nanoPay.live", value: "~10K txs", sub: "onchain, after 2 weeks", icon: Activity, url: "https://nanopay.live" },
     { label: "MaxFlow.one", value: "3,500+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
   ];
 
   return (
     <section id="proof" className="py-12 border-y border-border/40 bg-card/30">
       <div className="container mx-auto px-6">
-        <p className="text-center text-muted-foreground mb-8 font-mono text-sm">Latest products launched with real traction.</p>
+        <p className="text-center text-muted-foreground mb-8 font-mono text-sm">Initial products launched & its traction.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {metrics.map((m, i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
