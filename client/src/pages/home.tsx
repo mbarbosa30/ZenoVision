@@ -172,6 +172,7 @@ const Introduction = () => (
             "Venture studio building internal ventures",
             "Co-builds with partners (Retainer + Upside)",
             "Rapid traction experiments via partner rails",
+            "Incentives mechanisms optimized for retention",
             "Scales or spins out what proves itself"
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-3">
