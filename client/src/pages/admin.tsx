@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
-import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X } from "lucide-react";
+import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,12 +34,83 @@ interface Project {
   sortOrder: number;
 }
 
+function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    
+    try {
+      const res = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      
+      if (res.ok) {
+        sessionStorage.setItem("adminAuth", "true");
+        onSuccess();
+      } else {
+        setError("Invalid password");
+      }
+    } catch {
+      setError("Failed to verify password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <Card className="w-full max-w-md mx-4">
+        <CardHeader className="text-center">
+          <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
+            <Lock className="w-6 h-6 text-primary" />
+          </div>
+          <CardTitle className="text-2xl font-heading">Admin Access</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter admin password"
+                data-testid="input-admin-password"
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading} data-testid="button-admin-login">
+              {loading ? "Verifying..." : "Access Admin"}
+            </Button>
+            <Link href="/" className="block text-center text-sm text-muted-foreground hover:text-primary transition-colors">
+              Back to home
+            </Link>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("adminAuth") === "true");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0 });
+
+  if (!isAuthenticated) {
+    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+  }
 
   const { data: inquiriesData, isLoading: inquiriesLoading } = useQuery<{ success: boolean; inquiries: Inquiry[] }>({
     queryKey: ["/api/inquiries"],

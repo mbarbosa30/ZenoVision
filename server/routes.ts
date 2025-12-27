@@ -51,6 +51,22 @@ export async function registerRoutes(
     }
   });
 
+  // Verify admin password
+  app.post("/api/admin/verify", async (req, res) => {
+    const { password } = req.body;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
+    if (!adminPassword) {
+      return res.status(500).json({ success: false, error: "Admin password not configured" });
+    }
+    
+    if (password === adminPassword) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, error: "Invalid password" });
+    }
+  });
+
   // Get all inquiries (for internal review)
   app.get("/api/inquiries", async (req, res) => {
     try {
