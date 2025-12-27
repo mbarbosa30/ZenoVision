@@ -112,8 +112,7 @@ const Hero = () => {
             <span className="text-[1.1em]">Ship what moves.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            We build internal ventures and co-build with partners.
-            AI maximizes efficiency and reduces the cost of building, while our partners' ecosystems unlock distribution and traction.
+            We build internal ventures and co-build with partners, by leveraging AI to maximize efficiency and reduce execution cost/time, while our partners' ecosystems unlock distribution and traction.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
