@@ -182,7 +182,7 @@ const Introduction = () => (
 
       <div className="p-6 rounded-lg bg-secondary/30 border border-primary/20">
         <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
-          <Activity className="w-4 h-4" /> Why "Zeno <span className="font-normal opacity-60">Vision</span>"?
+          <Activity className="w-4 h-4" /> Why "Zeno"?
         </h3>
         <p className="text-muted-foreground text-sm leading-relaxed italic">
           "There’s a phenomenon called the Zeno effect: observe the wrong way and you can freeze progress. 
