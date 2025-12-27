@@ -166,10 +166,6 @@ const Introduction = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-3xl">
       <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
-      <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-        We are a venture studio that ships internal products and co-builds with ecosystem partners.
-        By leveraging partner rails, we run rapid traction experiments to validate ideas before scaling.
-      </p>
       <ul className="space-y-4 font-medium text-foreground/90 mb-12">
         {[
           "Venture studio building internal ventures",
