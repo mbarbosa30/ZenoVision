@@ -122,8 +122,8 @@ const Hero = () => {
 
 const ProofStrip = () => {
   const metrics = [
-    { label: "MiniPlay.studio", value: "100K Users", sub: "in its 1st week", icon: Users, url: "https://miniplay.studio" },
-    { label: "nanoPay.live", value: "10K Txns", sub: "onchain, after 2 weeks", icon: Activity, url: "https://nanopay.live" },
+    { label: "MiniPlay.studio", value: "100K+ users", sub: "in its 1st week", icon: Users, url: "https://miniplay.studio" },
+    { label: "nanoPay.live", value: "10K+ txs", sub: "onchain, after 2 weeks", icon: Activity, url: "https://nanopay.live" },
     { label: "MaxFlow.one", value: "3,500+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
   ];
 
