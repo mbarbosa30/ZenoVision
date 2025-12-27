@@ -143,7 +143,7 @@ const ProofStrip = () => {
         <p className="text-center text-muted-foreground mb-8 font-mono text-sm">Initial products launched & its traction.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {metrics.map((m, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
+            <div key={i} className="flex items-center justify-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
               <div className="p-3 bg-primary/10 rounded-full text-primary">
                 <m.icon className="w-5 h-5" />
               </div>
