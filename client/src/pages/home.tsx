@@ -121,7 +121,7 @@ const Hero = () => {
               <a href="#interest">Talk to us <ArrowRight className="ml-2 w-4 h-4" /></a>
             </Button>
             <Button size="lg" variant="secondary" className="h-12 px-8 text-base font-medium rounded-full" asChild>
-              <a href="#proof">See the proof</a>
+              <a href="#loop">The Methodology</a>
             </Button>
           </div>
         </motion.div>
