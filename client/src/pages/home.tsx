@@ -164,23 +164,24 @@ const ProofStrip = () => {
 
 const Introduction = () => (
   <section className="py-24">
-    <div className="container mx-auto px-6 max-w-3xl">
-      <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
-      <ul className="space-y-4 font-medium text-foreground/90 mb-12">
-        {[
-          "Venture studio building internal ventures",
-          "Co-builds with partners (Retainer + Upside)",
-          "Rapid traction experiments via partner rails",
-          "Scales or spins out what proves itself"
-        ].map((item, i) => (
-          <li key={i} className="flex items-start gap-3">
-            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-            {item}
-          </li>
-        ))}
-      </ul>
+    <div className="container mx-auto px-6 max-w-5xl">
+      <h2 className="text-3xl font-bold mb-8 font-heading">What is Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <ul className="space-y-4 font-medium text-foreground/90">
+          {[
+            "Venture studio building internal ventures",
+            "Co-builds with partners (Retainer + Upside)",
+            "Rapid traction experiments via partner rails",
+            "Scales or spins out what proves itself"
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+              {item}
+            </li>
+          ))}
+        </ul>
 
-      <div className="p-6 rounded-lg bg-secondary/30 border border-primary/20">
+        <div className="p-6 rounded-lg bg-secondary/30 border border-primary/20">
         <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
           <Activity className="w-4 h-4" /> Why "Zeno"?
         </h3>
@@ -189,6 +190,7 @@ const Introduction = () => (
           So our rule is simple: measure what matters, then get out of the way and ship what moves. 
           We use measurement to accelerate momentum, not to create dashboards that feel productive."
         </p>
+        </div>
       </div>
     </div>
   </section>
