@@ -13,11 +13,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import quantumBg from "@assets/generated_images/abstract_quantum_physics_background_pattern.png";
 
 // --- Types & Data ---
 
-const PORTFOLIO_ITEMS = [
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  highlight: string;
+  url: string;
+  sortOrder: number;
+}
+
+const FALLBACK_PROJECTS = [
   { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "500K plays / 1 week", url: "https://miniplay.studio" },
   { name: "nanoPay.live", description: "Digital financial utility", highlight: "3K+ wallets / 2 weeks", url: "https://nanopay.live" },
   { name: "MaxFlow.one", description: "Signal computation engine", highlight: "91% avg retention", url: "https://maxflow.one" },
@@ -349,30 +359,43 @@ const EngagementModels = () => (
   </section>
 );
 
-const PortfolioGrid = () => (
-  <section id="portfolio" className="py-24">
-    <div className="container mx-auto px-6">
-      <h2 className="text-3xl font-bold font-heading mb-12">Selected Works</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {PORTFOLIO_ITEMS.map((item, i) => (
-          <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="group relative p-6 bg-secondary/10 border border-border rounded-lg overflow-hidden hover:bg-secondary/20 transition-all block cursor-pointer">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="font-bold text-lg font-heading group-hover:text-primary transition-colors">{item.name}</h3>
-              <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
-            <div className="text-xs font-mono text-primary/80 py-1 px-2 bg-primary/5 rounded inline-block">
-              {item.highlight}
-            </div>
-          </a>
-        ))}
-        <div className="flex items-center justify-center p-6 border border-dashed border-border rounded-lg text-muted-foreground text-sm font-mono">
-          + Our experiments
+const PortfolioGrid = () => {
+  const { data } = useQuery<{ success: boolean; projects: Project[] }>({
+    queryKey: ["/api/projects"],
+    queryFn: async () => {
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error("Failed to fetch projects");
+      return res.json();
+    },
+  });
+
+  const projects = data?.projects || FALLBACK_PROJECTS;
+
+  return (
+    <section id="portfolio" className="py-24">
+      <div className="container mx-auto px-6">
+        <h2 className="text-3xl font-bold font-heading mb-12">Selected Works</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {projects.map((item, i) => (
+            <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="group relative p-6 bg-secondary/10 border border-border rounded-lg overflow-hidden hover:bg-secondary/20 transition-all block cursor-pointer" data-testid={`card-portfolio-${i}`}>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="font-bold text-lg font-heading group-hover:text-primary transition-colors">{item.name}</h3>
+                <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity" />
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
+              <div className="text-xs font-mono text-primary/80 py-1 px-2 bg-primary/5 rounded inline-block">
+                {item.highlight}
+              </div>
+            </a>
+          ))}
+          <div className="flex items-center justify-center p-6 border border-dashed border-border rounded-lg text-muted-foreground text-sm font-mono">
+            + Our experiments
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const Personas = () => {
   const personas = [
