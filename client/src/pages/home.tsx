@@ -18,9 +18,9 @@ import quantumBg from "@assets/generated_images/abstract_quantum_physics_backgro
 // --- Types & Data ---
 
 const PORTFOLIO_ITEMS = [
-  { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "100K users / 1 week", url: "https://miniplay.studio" },
-  { name: "nanoPay.live", description: "Digital financial utility", highlight: "10K txns / 2 weeks", url: "https://nanopay.live" },
-  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "1,250+ signals", url: "https://maxflow.one" },
+  { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "500K plays / 1 week", url: "https://miniplay.studio" },
+  { name: "nanoPay.live", description: "Digital financial utility", highlight: "3K+ wallets / 2 weeks", url: "https://nanopay.live" },
+  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "91% avg retention", url: "https://maxflow.one" },
   { name: "Tempos.bet", description: "Conviction markets", highlight: "Experiment", url: "https://tempos.bet" },
   { name: "inspecTor.markets", description: "Tor network analysis", highlight: "Live", url: "https://inspector.markets" },
   { name: "x4pp.xyz", description: "Attention-driven inbox", highlight: "Prototype", url: "https://x4pp.xyz" },
@@ -122,7 +122,7 @@ const Hero = () => {
 
 const ProofStrip = () => {
   const metrics = [
-    { label: "MiniPlay.studio", value: "100K+ users", sub: "in its 1st week", icon: Users, url: "https://miniplay.studio" },
+    { label: "MiniPlay.studio", value: "81K+ users", sub: "in its 1st week", icon: Users, url: "https://miniplay.studio" },
     { label: "nanoPay.live", value: "10K+ txs", sub: "onchain, after 2 weeks", icon: Activity, url: "https://nanopay.live" },
     { label: "MaxFlow.one", value: "3,500+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
   ];
