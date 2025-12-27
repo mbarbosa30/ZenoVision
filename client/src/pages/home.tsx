@@ -18,7 +18,7 @@ import quantumBg from "@assets/generated_images/abstract_quantum_physics_backgro
 // --- Types & Data ---
 
 const PORTFOLIO_ITEMS = [
-  { name: "Miniplay.studio", description: "Cognition gaming platform", highlight: "100K users / 1 week", url: "https://miniplay.studio" },
+  { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "100K users / 1 week", url: "https://miniplay.studio" },
   { name: "nanoPay.live", description: "Digital financial utility", highlight: "10K txns / 2 weeks", url: "https://nanopay.live" },
   { name: "MaxFlow.one", description: "Signal computation engine", highlight: "1,250+ signals", url: "https://maxflow.one" },
   { name: "Tempos.bet", description: "Conviction markets", highlight: "Experiment", url: "https://tempos.bet" },
@@ -122,14 +122,15 @@ const Hero = () => {
 
 const ProofStrip = () => {
   const metrics = [
-    { label: "Miniplay.studio", value: "100K Users", sub: "in 1 week", icon: Users },
-    { label: "nanoPay.live", value: "10K Txns", sub: "in 2 weeks", icon: Activity },
-    { label: "MaxFlow.one", value: "1,250+", sub: "signals computed", icon: Terminal },
+    { label: "MiniPlay.studio", value: "100K Users", sub: "in its 1st week", icon: Users, url: "https://miniplay.studio" },
+    { label: "nanoPay.live", value: "10K Txns", sub: "onchain, after 2 weeks", icon: Activity, url: "https://nanopay.live" },
+    { label: "MaxFlow.one", value: "3,500+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
   ];
 
   return (
     <section id="proof" className="py-12 border-y border-border/40 bg-card/30">
       <div className="container mx-auto px-6">
+        <p className="text-center text-muted-foreground mb-8 font-mono text-sm">Latest products launched with real traction.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {metrics.map((m, i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
@@ -137,7 +138,7 @@ const ProofStrip = () => {
                 <m.icon className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-sm text-muted-foreground font-mono mb-1">{m.label}</div>
+                <a href={m.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground font-mono mb-1 hover:text-primary transition-colors" data-testid={`link-metric-${m.label.toLowerCase().replace('.', '-')}`}>{m.label}</a>
                 <div className="text-2xl font-bold font-heading">{m.value}</div>
                 <div className="text-xs text-primary/80 font-medium">{m.sub}</div>
               </div>
