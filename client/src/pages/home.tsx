@@ -236,81 +236,58 @@ const Thesis = () => (
   </section>
 );
 
-const WhyNow = () => (
+const WhyZenoNow = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-5xl">
       <div className="text-center mb-12">
-        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">Timing</Badge>
-        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Why Now?</h2>
+        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Why Zeno, Now</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Several forces are converging in 2025 that make this studio model uniquely viable.
+          2025 creates a unique window: AI collapses build costs, crypto infrastructure is finally ready, 
+          and partner ecosystems offer distribution. We're built to exploit all three.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
         {[
           {
-            title: "AI Cost Curves",
-            description: "Building costs have collapsed 10x. A small team with AI can now ship what used to require entire departments.",
+            focus: "Consumer Onchain",
+            timing: "Wallets embedded, users ready",
+            description: "Gaming, social, commerce—bringing everyday users onchain.",
+            icon: Globe
+          },
+          {
+            focus: "AI-Native Fintech",
+            timing: "Build costs collapsed 10x",
+            description: "Financial tools with AI + onchain rails for speed and access.",
             icon: Terminal
           },
           {
-            title: "Crypto Infrastructure Matured",
-            description: "L2s, account abstraction, and mobile wallets have made onchain UX finally viable for mainstream users.",
-            icon: Code2
-          },
-          {
-            title: "Distribution via Ecosystems",
-            description: "Partner ecosystems like MiniPay, Celo, and Talent Protocol provide ready-made distribution rails with engaged users.",
-            icon: Network
+            focus: "Incentive Primitives",
+            timing: "Programmable economics mature",
+            description: "Retention, growth, and value sharing mechanisms that work.",
+            icon: Activity
           }
         ].map((item, i) => (
-          <div key={i} className="p-6 rounded-xl bg-card border border-border/50">
+          <div key={i} className="p-6 rounded-xl bg-card border border-border/50 group hover:border-primary/50 transition-colors">
             <div className="mb-4 p-2 rounded-lg bg-primary/10 text-primary w-fit">
               <item.icon className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+            <h3 className="font-bold text-lg mb-1">{item.focus}</h3>
+            <p className="text-xs font-mono text-primary/80 mb-3">{item.timing}</p>
             <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
           </div>
         ))}
       </div>
-    </div>
-  </section>
-);
 
-const FocusAreas = () => (
-  <section className="py-24 bg-secondary/10">
-    <div className="container mx-auto px-6 max-w-5xl">
-      <div className="text-center mb-12">
-        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">Focus Areas</Badge>
-        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Where We Build</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          We focus on intersections where new primitives meet distribution opportunities.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-border/50 pt-12">
         {[
-          {
-            title: "Consumer Onchain",
-            description: "Products that bring everyday users onchain through intuitive experiences—gaming, social, and commerce.",
-            examples: "MiniPlay, nanoPay"
-          },
-          {
-            title: "AI-Native Fintech",
-            description: "Financial tools powered by AI that leverage onchain rails for transparency, speed, and global access.",
-            examples: "Signals, analytics, automation"
-          },
-          {
-            title: "Incentive Primitives",
-            description: "New economic mechanisms that align user and platform incentives—retention, growth, and value sharing.",
-            examples: "Rewards, staking, reputation"
-          }
+          { pillar: "Partner Rails", desc: "Day-one distribution via MiniPay, Celo, Talent Protocol" },
+          { pillar: "AI Velocity", desc: "Ship in weeks what used to take months" },
+          { pillar: "Scale or Kill", desc: "No zombie projects—we move on what works" }
         ].map((item, i) => (
-          <div key={i} className="p-6 rounded-xl bg-card border border-border/50 group hover:border-primary/50 transition-colors">
-            <h3 className="font-bold text-lg mb-3">{item.title}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-4">{item.description}</p>
-            <p className="text-xs font-mono text-primary/80">{item.examples}</p>
+          <div key={i} className="text-center p-6">
+            <div className="text-primary font-bold text-lg mb-2">{item.pillar}</div>
+            <p className="text-muted-foreground text-sm">{item.desc}</p>
           </div>
         ))}
       </div>
@@ -397,63 +374,6 @@ const EcosystemRails = () => (
               <p className="text-sm text-muted-foreground">{p.desc}</p>
             </CardContent>
           </Card>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-const WhatWeDo = () => (
-  <section className="py-24 bg-secondary/10 border-y border-border/50">
-    <div className="container mx-auto px-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="space-y-6">
-          <h3 className="text-2xl font-bold font-heading flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-mono text-primary">A</span>
-            Internal Portfolio
-          </h3>
-          <p className="text-muted-foreground leading-relaxed">
-            We ship and operate our own products to explore primitives and prove interaction loops.
-            We prioritize speed, iteration, and real usage over theoretical perfection.
-          </p>
-        </div>
-        <div className="space-y-6">
-          <h3 className="text-2xl font-bold font-heading flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-mono text-primary">B</span>
-            Partner Co-Builds
-          </h3>
-          <p className="text-muted-foreground leading-relaxed">
-            We help teams ship and validate quickly through our established process and partner rails.
-            We bring the execution muscle while partners provide the distribution context.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-const WhyUs = () => (
-  <section className="py-24">
-    <div className="container mx-auto px-6 max-w-4xl">
-      <h2 className="text-3xl font-bold font-heading mb-4 text-center">Why Zeno?</h2>
-      <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
-        Partner rails for distribution + AI for speed + willingness to kill what doesn't work.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          "Demonstrated shipping velocity (multiple live products)",
-          "Early traction across consumer usage + onchain activity",
-          "AI-native workflows that compress build cycles 10x",
-          "Partner ecosystems that provide day-one distribution",
-          "Operator-first execution (design, engineering, growth)",
-          "Ruthless prioritization: we scale or kill, no zombie projects",
-          "Simple alignment structures (no complex deal theatre)",
-          "Diversified exposure to experiments, assets and solutions"
-        ].map((item, i) => (
-          <div key={i} className="flex gap-4 p-4 rounded-lg hover:bg-secondary/30 transition-colors">
-            <div className="mt-1 text-primary">✓</div>
-            <p className="text-foreground/90">{item}</p>
-          </div>
         ))}
       </div>
     </div>
@@ -832,12 +752,9 @@ export default function Home() {
       <ProofStrip />
       <Introduction />
       <Thesis />
-      <WhyNow />
-      <FocusAreas />
+      <WhyZenoNow />
       <EngineLoop />
       <EcosystemRails />
-      <WhatWeDo />
-      <WhyUs />
       <EngagementModels />
       <PortfolioGrid />
       <Personas />
