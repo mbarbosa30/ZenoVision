@@ -197,6 +197,138 @@ const Introduction = () => (
   </section>
 );
 
+const Thesis = () => (
+  <section id="thesis" className="py-24 bg-gradient-to-b from-background to-secondary/10">
+    <div className="container mx-auto px-6 max-w-5xl">
+      <div className="text-center mb-12">
+        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">Our Thesis</Badge>
+        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">AI + Web3: The Convergence</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          We believe AI and Web3 are not separate trends—they are converging forces that will reshape how products are built, owned, and distributed.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div className="p-6 rounded-xl bg-card border border-border/50">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <Terminal className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-lg">AI Enables Speed</h3>
+          </div>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            AI collapses the cost and time of building. What took teams months now takes weeks. 
+            This means more experiments, faster learning, and ruthless iteration cycles.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-xl bg-card border border-border/50">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <Network className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-lg">Web3 Enables Ownership</h3>
+          </div>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Web3 unlocks new ownership and incentive models. Programmable economics, onchain distribution, 
+            and composable primitives create products that couldn't exist before.
+          </p>
+        </div>
+      </div>
+
+      <div className="p-6 rounded-xl bg-primary/5 border border-primary/20 text-center">
+        <p className="text-lg font-medium mb-2">Together, they enable:</p>
+        <p className="text-muted-foreground">
+          AI-native products with onchain incentives, distributed through partner ecosystems, 
+          iterated at unprecedented speed, and owned by their communities.
+        </p>
+      </div>
+    </div>
+  </section>
+);
+
+const WhyNow = () => (
+  <section className="py-24">
+    <div className="container mx-auto px-6 max-w-5xl">
+      <div className="text-center mb-12">
+        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">Timing</Badge>
+        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Why Now?</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Several forces are converging in 2025 that make this studio model uniquely viable.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          {
+            title: "AI Cost Curves",
+            description: "Building costs have collapsed 10x. A small team with AI can now ship what used to require entire departments.",
+            icon: Terminal
+          },
+          {
+            title: "Crypto Infrastructure Matured",
+            description: "L2s, account abstraction, and mobile wallets have made onchain UX finally viable for mainstream users.",
+            icon: Code2
+          },
+          {
+            title: "Distribution via Ecosystems",
+            description: "Partner ecosystems like MiniPay, Celo, and Talent Protocol provide ready-made distribution rails with engaged users.",
+            icon: Network
+          }
+        ].map((item, i) => (
+          <div key={i} className="p-6 rounded-xl bg-card border border-border/50">
+            <div className="mb-4 p-2 rounded-lg bg-primary/10 text-primary w-fit">
+              <item.icon className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const FocusAreas = () => (
+  <section className="py-24 bg-secondary/10">
+    <div className="container mx-auto px-6 max-w-5xl">
+      <div className="text-center mb-12">
+        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">Focus Areas</Badge>
+        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Where We Build</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          We focus on intersections where new primitives meet distribution opportunities.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          {
+            title: "Consumer Onchain",
+            description: "Products that bring everyday users onchain through intuitive experiences—gaming, social, and commerce.",
+            examples: "MiniPlay, nanoPay"
+          },
+          {
+            title: "AI-Native Fintech",
+            description: "Financial tools powered by AI that leverage onchain rails for transparency, speed, and global access.",
+            examples: "Signals, analytics, automation"
+          },
+          {
+            title: "Incentive Primitives",
+            description: "New economic mechanisms that align user and platform incentives—retention, growth, and value sharing.",
+            examples: "Rewards, staking, reputation"
+          }
+        ].map((item, i) => (
+          <div key={i} className="p-6 rounded-xl bg-card border border-border/50 group hover:border-primary/50 transition-colors">
+            <h3 className="font-bold text-lg mb-3">{item.title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-4">{item.description}</p>
+            <p className="text-xs font-mono text-primary/80">{item.examples}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 const EngineLoop = () => (
   <section id="loop" className="py-24 bg-secondary/20">
     <div className="container mx-auto px-6">
@@ -314,15 +446,20 @@ const WhatWeDo = () => (
 const WhyUs = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-4xl">
-      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why Zeno?</h2>
+      <h2 className="text-3xl font-bold font-heading mb-4 text-center">Why Zeno?</h2>
+      <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
+        Partner rails for distribution + AI for speed + willingness to kill what doesn't work.
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
           "Demonstrated shipping velocity (multiple live products)",
           "Early traction across consumer usage + onchain activity",
+          "AI-native workflows that compress build cycles 10x",
+          "Partner ecosystems that provide day-one distribution",
           "Operator-first execution (design, engineering, growth)",
-          "Access to trust-anchored experiments via partners",
+          "Ruthless prioritization: we scale or kill, no zombie projects",
           "Simple alignment structures (no complex deal theatre)",
-          "Diversified exposure to a dynamic basket of experiments, assets and solutions"
+          "Diversified exposure to experiments, assets and solutions"
         ].map((item, i) => (
           <div key={i} className="flex gap-4 p-4 rounded-lg hover:bg-secondary/30 transition-colors">
             <div className="mt-1 text-primary">✓</div>
@@ -705,6 +842,9 @@ export default function Home() {
       <Hero />
       <ProofStrip />
       <Introduction />
+      <Thesis />
+      <WhyNow />
+      <FocusAreas />
       <EngineLoop />
       <EcosystemRails />
       <WhatWeDo />
