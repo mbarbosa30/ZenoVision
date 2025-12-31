@@ -164,35 +164,24 @@ const ProofStrip = () => {
 
 const Introduction = () => (
   <section className="py-24">
-    <div className="container mx-auto px-6 max-w-5xl">
-      <h2 className="text-3xl font-bold mb-8 font-heading">What is Zeno?</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <ul className="space-y-4 font-medium text-foreground/90">
-          {[
-            "Venture studio building internal ventures",
-            "Co-builds with partners (Retainer + Upside)",
-            "Rapid traction experiments via partner rails",
-            "Incentives mechanisms optimized for retention",
-            "Scales or spins out what proves itself"
-          ].map((item, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-              {item}
-            </li>
-          ))}
-        </ul>
-
-        <div className="p-6 rounded-lg bg-secondary/30 border border-primary/20">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-2 flex items-center gap-2">
-          <Activity className="w-4 h-4" /> Why "Zeno"?
-        </h3>
-        <p className="text-muted-foreground text-sm leading-relaxed italic">
-          "There’s a phenomenon called the Zeno effect: observe the wrong way and you can freeze progress. 
-          So our rule is simple: measure what matters, then get out of the way and ship what moves. 
-          We use measurement to accelerate momentum, not to create dashboards that feel productive."
-        </p>
-        </div>
-      </div>
+    <div className="container mx-auto px-6 max-w-3xl">
+      <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno?</h2>
+      <p className="text-muted-foreground mb-8">
+        An AI-native Web3 venture studio. We build and operate our own products, and co-build with partners who bring distribution.
+      </p>
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-medium text-foreground/90">
+        {[
+          "Internal ventures + partner co-builds",
+          "AI-powered rapid experimentation",
+          "Partner rails for distribution",
+          "Scales or kills based on traction"
+        ].map((item, i) => (
+          <li key={i} className="flex items-start gap-3">
+            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+            {item}
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 );
