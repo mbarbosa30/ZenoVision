@@ -112,7 +112,7 @@ const Hero = () => {
             <span className="text-[1.1em]">Ship what moves.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            An AI-powered Web3 venture studio that builds and co-builds products, unlocking onchain distribution through partner ecosystems like MiniPay, Celo, and Talent Protocol.
+            AI-native Web3 venture studio. Partner ecosystems for distribution. Ship fast, scale what works.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -154,96 +154,22 @@ const ProofStrip = () => {
             </div>
           ))}
         </div>
-        <div className="text-center mt-8 text-sm font-mono text-muted-foreground opacity-70">
-          // Shipped and growing, not just imagined.
-        </div>
       </div>
     </section>
   );
 };
 
-const Introduction = () => (
-  <section className="py-24">
-    <div className="container mx-auto px-6 max-w-3xl">
-      <h2 className="text-3xl font-bold mb-6 font-heading">What is Zeno?</h2>
-      <p className="text-muted-foreground mb-8">
-        An AI-native Web3 venture studio. We build and operate our own products, and co-build with partners who bring distribution.
-      </p>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-medium text-foreground/90">
-        {[
-          "Internal ventures + partner co-builds",
-          "AI-powered rapid experimentation",
-          "Partner rails for distribution",
-          "Scales or kills based on traction"
-        ].map((item, i) => (
-          <li key={i} className="flex items-start gap-3">
-            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-);
-
-const Thesis = () => (
-  <section id="thesis" className="py-24 bg-gradient-to-b from-background to-secondary/10">
-    <div className="container mx-auto px-6 max-w-5xl">
-      <div className="text-center mb-12">
-        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">Our Thesis</Badge>
-        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">AI + Web3: The Convergence</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          We believe AI and Web3 are not separate trends—they are converging forces that will reshape how products are built, owned, and distributed.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <div className="p-6 rounded-xl bg-card border border-border/50">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Terminal className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-lg">AI Enables Speed</h3>
-          </div>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            AI collapses the cost and time of building. What took teams months now takes weeks. 
-            This means more experiments, faster learning, and ruthless iteration cycles.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-xl bg-card border border-border/50">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Network className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-lg">Web3 Enables Ownership</h3>
-          </div>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Web3 unlocks new ownership and incentive models. Programmable economics, onchain distribution, 
-            and composable primitives create products that couldn't exist before.
-          </p>
-        </div>
-      </div>
-
-      <div className="p-6 rounded-xl bg-primary/5 border border-primary/20 text-center">
-        <p className="text-lg font-medium mb-2">Together, they enable:</p>
-        <p className="text-muted-foreground">
-          AI-native products with onchain incentives, distributed through partner ecosystems, 
-          iterated at unprecedented speed, and owned by their communities.
-        </p>
-      </div>
-    </div>
-  </section>
-);
-
 const WhyZenoNow = () => (
-  <section className="py-24">
+  <section id="thesis" className="py-24">
     <div className="container mx-auto px-6 max-w-5xl">
-      <div className="text-center mb-12">
+      <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Why Zeno, Now</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          2025 creates a unique window: AI collapses build costs, crypto infrastructure is finally ready, 
-          and partner ecosystems offer distribution. We're built to exploit all three.
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+          AI-native Web3 venture studio. We build internal products and co-build with partners who bring distribution.
+        </p>
+        <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
+          AI collapses build costs. Crypto infrastructure is ready. Partner ecosystems offer distribution. 
+          We're built to exploit all three.
         </p>
       </div>
 
@@ -331,17 +257,6 @@ const EngineLoop = () => (
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-4xl mx-auto text-center">
-        {[
-          "Faster learning cycles via real-world feedback",
-          "Lower build costs using AI-native workflows",
-          "Higher quality distribution via trusted local partners"
-        ].map((item, i) => (
-          <div key={i} className="p-4 rounded-lg bg-background/30 border border-border/30 backdrop-blur-sm">
-            <p className="font-medium text-sm">{item}</p>
-          </div>
-        ))}
-      </div>
     </div>
   </section>
 );
@@ -396,9 +311,6 @@ const EngagementModels = () => (
           </div>
         ))}
       </div>
-      <p className="text-center mt-8 text-sm text-muted-foreground font-mono">
-        We keep terms simple and optimize for long-term alignment.
-      </p>
     </div>
   </section>
 );
@@ -447,9 +359,8 @@ const Personas = () => {
       role: "Investor", 
       subtitle: "Capital Allocator",
       benefits: [
-        "Diversified compounding exposure", 
-        "Access to deal flow before public markets", 
-        "Capital efficiency via shared infrastructure"
+        "Diversified exposure to a basket of experiments", 
+        "Early access before public markets"
       ],
       cta: "Request Deck",
       formValue: "Investor"
@@ -458,9 +369,8 @@ const Personas = () => {
       role: "Partner", 
       subtitle: "Founder / Protocol",
       benefits: [
-        "Ship fast using our battle-tested rails", 
-        "Plug into existing distribution & liquidity", 
-        "Align upside with long-term incentives"
+        "Ship fast on battle-tested rails", 
+        "Plug into existing distribution"
       ],
       cta: "Partner with us",
       formValue: "Partner"
@@ -469,9 +379,8 @@ const Personas = () => {
       role: "Collaborator", 
       subtitle: "Builder / Operator",
       benefits: [
-        "Build, own, and scale specific product lines", 
-        "Access to studio resources and network", 
-        "Focus on product & traction, not admin/ops"
+        "Build and scale product lines with us", 
+        "Focus on traction, not admin"
       ],
       cta: "Join the studio",
       formValue: "Collaborator"
@@ -712,13 +621,9 @@ const FAQ = () => (
         <div className="space-y-2">
           <h4 className="font-bold text-foreground/90">Why the name “Zeno <span className="font-normal opacity-60">Vision</span>”?</h4>
           <div className="text-sm text-muted-foreground space-y-4">
-            <p>“Zeno” is a name with layered meanings, and we chose it because each layer maps to how we build.</p>
-            <p>First, Zeno of Elea is famous for paradoxes about motion and progress: when you slice movement into infinite steps, progress can start to look impossible. In startups, the modern version is analysis paralysis, endless planning, and measuring everything until momentum evaporates. Zeno is our reminder that you can’t think your way into traction. You have to move.</p>
-            <p>Second, in quantum physics there’s the Quantum Zeno effect: observation can change a system, and measuring in the wrong way too frequently can inhibit change. Startups have a version of that too: dashboards, vanity metrics, and constant KPI thrash can “freeze” teams into optimization theater. So “Zeno” also reminds us to measure carefully, not compulsively.</p>
-            <p>Third, many people associate “Zeno” with Stoic discipline (from Zeno of Citium, founder of Stoicism). That layer matters to us as a studio: calm execution, long-horizon thinking, and steady cadence under uncertainty. Not hype spikes. Not panic pivots.</p>
-            <p>Finally, “Zeno” also evokes asymptotic progress: you rarely reach certainty in one jump, you approach it through iterations that compound. That’s venture building in practice, especially in an AI-native world where experimentation is cheap and speed is high.</p>
-            <p>Vision is what makes all of those meanings actionable. Vision sets direction when the destination isn’t fully known, and it tells us which signals are worth steering by. Together, the name encodes our operating principle: disciplined measurement, steady shipping, and compounding progress.</p>
-            <p className="font-semibold italic text-primary">That’s why we say: Measure what matters. Ship what moves.</p>
+            <p>Two references shape the name. Zeno's paradoxes remind us that analysis paralysis can freeze progress—you can't think your way into traction, you have to move. The Quantum Zeno effect warns that measuring the wrong way too frequently can inhibit change—so we measure carefully, not compulsively.</p>
+            <p>Vision sets direction when the destination isn't fully known. Together, the name encodes our operating principle: disciplined measurement, steady shipping, and compounding progress.</p>
+            <p className="font-semibold italic text-primary">That's why we say: Measure what matters. Ship what moves.</p>
           </div>
         </div>
       </div>
@@ -750,8 +655,6 @@ export default function Home() {
       <Navbar />
       <Hero />
       <ProofStrip />
-      <Introduction />
-      <Thesis />
       <WhyZenoNow />
       <EngineLoop />
       <EcosystemRails />
