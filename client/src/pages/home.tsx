@@ -105,14 +105,14 @@ const Hero = () => {
           transition={{ duration: 0.6 }}
         >
           <Badge variant="outline" className="mb-6 font-mono text-xs border-primary/30 text-primary uppercase tracking-wider bg-primary/5">
-            AI-Native Venture Studio
+            AI-Native Web3 Venture Studio
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold font-heading leading-tight mb-6 tracking-tight">
             <span className="text-muted-foreground">Measure what matters.</span> <br />
             <span className="text-[1.1em]">Ship what moves.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            We leverage AI to maximize building efficiency and performace, while unlocking distribution through connected ecosystems.
+            An AI-powered Web3 venture studio that builds and co-builds products, unlocking onchain distribution through partner ecosystems like MiniPay, Celo, and Talent Protocol.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -165,7 +165,7 @@ const ProofStrip = () => {
 const Introduction = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-5xl">
-      <h2 className="text-3xl font-bold mb-8 font-heading">What is Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
+      <h2 className="text-3xl font-bold mb-8 font-heading">What is Zeno?</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
         <ul className="space-y-4 font-medium text-foreground/90">
           {[
@@ -314,7 +314,7 @@ const WhatWeDo = () => (
 const WhyUs = () => (
   <section className="py-24">
     <div className="container mx-auto px-6 max-w-4xl">
-      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
+      <h2 className="text-3xl font-bold font-heading mb-10 text-center">Why Zeno?</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
           "Demonstrated shipping velocity (multiple live products)",
@@ -507,7 +507,7 @@ const InterestForm = () => {
       
       <div className="container mx-auto px-6 max-w-2xl">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in Zeno <span className="font-normal opacity-60">Vision</span>?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in Zeno?</h2>
           <p className="text-muted-foreground">
             We’re sharing this to get feedback and find high-fit partners, investors, and collaborators.
           </p>
