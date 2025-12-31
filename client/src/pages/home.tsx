@@ -621,7 +621,9 @@ const FAQ = () => (
         <div className="space-y-2">
           <h4 className="font-bold text-foreground/90">Why the name “Zeno <span className="font-normal opacity-60">Vision</span>”?</h4>
           <div className="text-sm text-muted-foreground space-y-4">
-            <p>Two references shape the name. Zeno's paradoxes remind us that analysis paralysis can freeze progress—you can't think your way into traction, you have to move. The Quantum Zeno effect warns that measuring the wrong way too frequently can inhibit change—so we measure carefully, not compulsively.</p>
+            <p>Two philosophical references shape the name. Zeno's paradoxes remind us that analysis paralysis can freeze progress—you can't think your way into traction, you have to move. The Quantum Zeno effect warns that measuring the wrong way too frequently can inhibit change—so we measure carefully, not compulsively.</p>
+            <p>The name also evokes Stoic discipline (from Zeno of Citium): calm execution, long-horizon thinking, and steady cadence under uncertainty. Not hype spikes. Not panic pivots.</p>
+            <p>Finally, "Zeno" suggests asymptotic progress—you rarely reach certainty in one jump, you approach it through iterations that compound. That's venture building in practice, especially when AI makes experimentation cheap and speed high.</p>
             <p>Vision sets direction when the destination isn't fully known. Together, the name encodes our operating principle: disciplined measurement, steady shipping, and compounding progress.</p>
             <p className="font-semibold italic text-primary">That's why we say: Measure what matters. Ship what moves.</p>
           </div>
