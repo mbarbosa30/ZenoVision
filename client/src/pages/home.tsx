@@ -169,7 +169,7 @@ const WhyZenoNow = () => (
         </p>
         <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
           AI collapses build costs. Crypto infrastructure is ready. Partner ecosystems offer distribution. 
-          We're built to exploit all three.
+          We're built to harness all three.
         </p>
       </div>
 
