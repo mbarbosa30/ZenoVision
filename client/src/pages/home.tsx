@@ -359,7 +359,7 @@ const Personas = () => {
       role: "Investor", 
       subtitle: "Capital Allocator",
       benefits: [
-        "Diversified exposure to a basket of experiments", 
+        "Diversified compounded exposure", 
         "Early access before public markets"
       ],
       cta: "Request Deck",
