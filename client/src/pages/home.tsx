@@ -644,7 +644,11 @@ const Footer = () => (
         “Experiment with consistency, even when the destination is unknown.”
       </p>
       <div className="text-sm text-muted-foreground space-y-2 font-mono">
-        <a href="mailto:hello@zenovision.xyz" className="hover:text-primary transition-colors">Contact Us</a>
+        <div className="flex items-center justify-center gap-4">
+          <a href="mailto:thwayf@gmail.com" className="hover:text-primary transition-colors">Contact Us</a>
+          <span className="opacity-30">|</span>
+          <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">@zenoVision_</a>
+        </div>
         <p className="text-xs opacity-50 mt-4">For feedback purposes. Not investment advice.</p>
       </div>
     </div>
