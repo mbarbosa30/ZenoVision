@@ -86,72 +86,211 @@ const Navbar = () => (
 
 const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
-      <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      {/* Layered background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.08] pointer-events-none" />
       <div 
-        className="absolute inset-0 opacity-30 pointer-events-none mix-blend-screen dark:mix-blend-lighten z-0"
+        className="absolute inset-0 opacity-20 dark:opacity-40 pointer-events-none"
         style={{
           backgroundImage: `url(${quantumBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          maskImage: 'radial-gradient(ellipse 80% 60% at 70% 40%, black 20%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 70% 40%, black 20%, transparent 70%)',
         }} 
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none z-0" />
+      {/* Accent glow */}
+      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       
-      <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Badge variant="outline" className="mb-6 font-mono text-xs border-primary/30 text-primary uppercase tracking-wider bg-primary/5">
-            AI-Native Web3 Venture Studio
-          </Badge>
-          <h1 className="text-5xl md:text-7xl font-bold font-heading leading-tight mb-6 tracking-tight">
-            <span className="text-muted-foreground">Measure what matters.</span> <br />
-            <span className="text-[1.1em]">Ship what moves.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            AI-native Web3 venture studio. Partner ecosystems for distribution. Ship fast, scale what works.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="h-12 px-8 text-base font-medium rounded-full" asChild>
-              <a href="#interest">Talk to us <ArrowRight className="ml-2 w-4 h-4" /></a>
-            </Button>
-            <Button size="lg" variant="secondary" className="h-12 px-8 text-base font-medium rounded-full" asChild>
-              <a href="#loop">The Methodology</a>
-            </Button>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[80vh]">
+          {/* Left: Main content */}
+          <div className="lg:col-span-7 xl:col-span-6">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-8">
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="font-mono text-xs text-primary uppercase tracking-wider">AI-Native Web3 Venture Studio</span>
+              </div>
+              
+              <h1 className="font-heading font-bold tracking-tight mb-8">
+                <span className="block text-3xl md:text-4xl lg:text-5xl text-muted-foreground/70 mb-2">
+                  Measure what matters.
+                </span>
+                <span className="block text-5xl md:text-6xl lg:text-7xl xl:text-8xl bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
+                  Ship what moves.
+                </span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-muted-foreground max-w-lg mb-10 leading-relaxed">
+                We build AI-native products with onchain rails, distributed through partner ecosystems. Ship fast, scale what works.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button size="lg" className="h-14 px-8 text-base font-semibold group" asChild>
+                  <a href="#interest">
+                    Talk to us 
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </Button>
+                <Button size="lg" variant="ghost" className="h-14 px-8 text-base font-medium text-muted-foreground hover:text-foreground" asChild>
+                  <a href="#loop">Explore the Method</a>
+                </Button>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+          
+          {/* Right: Visual element */}
+          <div className="lg:col-span-5 xl:col-span-6 hidden lg:flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative"
+            >
+              {/* Abstract visual representation */}
+              <div className="relative w-80 h-80 xl:w-96 xl:h-96">
+                {/* Orbiting rings */}
+                <div className="absolute inset-0 rounded-full border border-primary/20 animate-[spin_20s_linear_infinite]" />
+                <div className="absolute inset-4 rounded-full border border-primary/30 animate-[spin_15s_linear_infinite_reverse]" />
+                <div className="absolute inset-8 rounded-full border border-primary/40" />
+                
+                {/* Center pulse */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full bg-primary/20 animate-ping absolute inset-0" />
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center relative">
+                      <Activity className="w-10 h-10 text-primary-foreground" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Data points */}
+                {[0, 72, 144, 216, 288].map((deg, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-3 h-3 rounded-full bg-primary"
+                    style={{
+                      top: '50%',
+                      left: '50%',
+                      transform: `rotate(${deg}deg) translateX(140px) translateY(-50%)`,
+                    }}
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 2, delay: i * 0.4, repeat: Infinity }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
+      
+      {/* Scroll indicator */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex justify-center pt-2">
+          <div className="w-1.5 h-3 rounded-full bg-muted-foreground/50" />
+        </div>
+      </motion.div>
     </section>
   );
 };
 
+const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
+  const [count, setCount] = React.useState(0);
+  const [isVisible, setIsVisible] = React.useState(false);
+  const ref = React.useRef<HTMLSpanElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (!isVisible) return;
+    const duration = 2000;
+    const steps = 60;
+    const increment = value / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        setCount(value);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [isVisible, value]);
+
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+};
+
 const ProofStrip = () => {
   const metrics = [
-    { label: "MiniPlay.studio", value: "125K+ users", sub: "since Dec 18, 2025", icon: Users, url: "https://miniplay.studio" },
-    { label: "nanoPay.live", value: "10K+ txs", sub: "every week", icon: Activity, url: "https://nanopay.live" },
-    { label: "MaxFlow.one", value: "5,000+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
+    { label: "MiniPlay.studio", value: 125, suffix: "K+ users", sub: "since Dec 2024", icon: Users, url: "https://miniplay.studio" },
+    { label: "nanoPay.live", value: 10, suffix: "K+ txs", sub: "every week", icon: Activity, url: "https://nanopay.live" },
+    { label: "MaxFlow.one", value: 5000, suffix: "+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
   ];
 
   return (
-    <section id="proof" className="py-12 border-y border-border/40 bg-card/30">
-      <div className="container mx-auto px-6">
-        <p className="text-center text-muted-foreground mb-8 font-mono text-sm">Initial products launched & its traction.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <section id="proof" className="py-16 relative overflow-hidden">
+      {/* Background accent */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+      
+      <div className="container mx-auto px-6 relative">
+        <motion.p 
+          className="text-center text-muted-foreground mb-10 font-mono text-sm uppercase tracking-widest"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          Shipped Products & Live Traction
+        </motion.p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 max-w-4xl mx-auto">
           {metrics.map((m, i) => (
-            <div key={i} className="flex items-center justify-center gap-4 p-4 rounded-lg bg-background/50 border border-border/50">
-              <div className="p-3 bg-primary/10 rounded-full text-primary">
-                <m.icon className="w-5 h-5" />
-              </div>
-              <div>
-                <a href={m.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground font-mono mb-1 hover:text-primary transition-colors" data-testid={`link-metric-${m.label.toLowerCase().replace('.', '-')}`}>{m.label}</a>
-                <div className="text-2xl font-bold font-heading">{m.value}</div>
-                <div className="text-xs text-primary/80 font-medium">{m.sub}</div>
-              </div>
-            </div>
+            <motion.div 
+              key={i} 
+              className="relative p-8 text-center group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15 }}
+            >
+              {/* Divider */}
+              {i < metrics.length - 1 && (
+                <div className="hidden md:block absolute right-0 top-1/4 bottom-1/4 w-px bg-gradient-to-b from-transparent via-border to-transparent" />
+              )}
+              
+              <a 
+                href={m.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="block hover:scale-105 transition-transform duration-300"
+                data-testid={`link-metric-${m.label.toLowerCase().replace('.', '-')}`}
+              >
+                <div className="text-4xl md:text-5xl font-bold font-heading text-foreground mb-2 tabular-nums">
+                  <AnimatedCounter value={m.value} suffix={m.suffix} />
+                </div>
+                <div className="text-sm font-mono text-primary mb-1">{m.label}</div>
+                <div className="text-xs text-muted-foreground">{m.sub}</div>
+              </a>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -160,106 +299,203 @@ const ProofStrip = () => {
 };
 
 const WhyZenoNow = () => (
-  <section id="thesis" className="py-24">
-    <div className="container mx-auto px-6 max-w-5xl">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Why Zeno, Now</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          AI-native Web3 venture studio. We build internal products and co-build with partners who bring distribution.
-        </p>
-        <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
+  <section id="thesis" className="py-32 relative overflow-hidden">
+    {/* Background */}
+    <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background pointer-events-none" />
+    
+    <div className="container mx-auto px-6 relative">
+      {/* Header */}
+      <motion.div 
+        className="max-w-3xl mb-20"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">The Opportunity</span>
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading mb-6 leading-tight">
+          Why Zeno, <span className="text-primary">Now</span>
+        </h2>
+        <p className="text-xl text-muted-foreground leading-relaxed">
           AI collapses build costs. Crypto infrastructure is ready. Partner ecosystems offer distribution. 
           We're built to harness all three.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      {/* Focus Areas - Staggered layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
         {[
           {
             focus: "Consumer Onchain",
             timing: "Wallets embedded, users ready",
-            description: "Gaming, social, commerce—bringing everyday users onchain.",
-            icon: Globe
+            description: "Gaming, social, commerce—bringing everyday users onchain through familiar experiences.",
+            icon: Globe,
+            accent: "from-emerald-500/20 to-transparent"
           },
           {
             focus: "AI-Native Fintech",
             timing: "Build costs collapsed 10x",
-            description: "Financial tools with AI + onchain rails for speed and access.",
-            icon: Terminal
+            description: "Financial tools with AI + onchain rails for unprecedented speed and global access.",
+            icon: Terminal,
+            accent: "from-cyan-500/20 to-transparent"
           },
           {
             focus: "Incentive Primitives",
             timing: "Programmable economics mature",
-            description: "Retention, growth, and value sharing mechanisms that work.",
-            icon: Activity
+            description: "Retention, growth, and value sharing mechanisms that compound network effects.",
+            icon: Activity,
+            accent: "from-violet-500/20 to-transparent"
           }
         ].map((item, i) => (
-          <div key={i} className="p-6 rounded-xl bg-card border border-border/50 group hover:border-primary/50 transition-colors">
-            <div className="mb-4 p-2 rounded-lg bg-primary/10 text-primary w-fit">
-              <item.icon className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-lg mb-1">{item.focus}</h3>
-            <p className="text-xs font-mono text-primary/80 mb-3">{item.timing}</p>
-            <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-border/50 pt-12">
-        {[
-          { pillar: "Partner Rails", desc: "Day-one distribution via MiniPay, Celo, Talent Protocol" },
-          { pillar: "AI Velocity", desc: "Ship in weeks what used to take months" },
-          { pillar: "Scale or Kill", desc: "No zombie projects—we move on what works" }
-        ].map((item, i) => (
-          <div key={i} className="text-center p-6">
-            <div className="text-primary font-bold text-lg mb-2">{item.pillar}</div>
-            <p className="text-muted-foreground text-sm">{item.desc}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-const EngineLoop = () => (
-  <section id="loop" className="py-24 bg-secondary/20">
-    <div className="container mx-auto px-6">
-      <div className="text-center mb-16">
-        <Badge variant="outline" className="mb-4 border-primary/20 text-primary">The Method</Badge>
-        <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Partner-Powered Experiment Loop</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          We don't just build apps. We leverage distribution rails to test hypotheses in the wild.
-        </p>
-      </div>
-
-      <div className="relative max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative z-10">
-          {[
-            { step: "Partners", sub: "Distribution Rails", icon: Network },
-            { step: "Rapid Build", sub: "AI-Accelerated", icon: Code2 },
-            { step: "Field Test", sub: "Real Markets", icon: Globe },
-            { step: "Learn", sub: "Iterate / Pivot", icon: Terminal },
-            { step: "Scale", sub: "Or Kill", icon: Activity },
-          ].map((s, i) => (
-            <div key={i} className="flex flex-col items-center text-center p-6 bg-card border border-border rounded-xl">
-              <div className="mb-4 p-3 rounded-full bg-secondary text-primary">
-                <s.icon className="w-6 h-6" />
-              </div>
-              <div className="font-bold text-lg mb-1">{s.step}</div>
-              <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">{s.sub}</div>
-              {i < 4 && (
-                <div className="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 text-muted-foreground/30 z-0">
-                  <ArrowRight className="w-6 h-6" />
+          <motion.div 
+            key={i} 
+            className={`relative p-8 rounded-2xl bg-card/50 backdrop-blur border border-border/50 group hover:border-primary/30 transition-all duration-500 ${i === 2 ? 'lg:col-span-2 lg:max-w-2xl' : ''}`}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+          >
+            {/* Gradient accent */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${item.accent} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+            
+            <div className="relative">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                  <item.icon className="w-6 h-6" />
                 </div>
-              )}
+                <div>
+                  <h3 className="font-bold text-xl mb-1">{item.focus}</h3>
+                  <p className="text-xs font-mono text-primary uppercase tracking-wider">{item.timing}</p>
+                </div>
+              </div>
+              <p className="text-muted-foreground leading-relaxed pl-16">{item.description}</p>
             </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Pillars */}
+      <motion.div 
+        className="relative"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+      >
+        <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { pillar: "Partner Rails", desc: "Day-one distribution via MiniPay, Celo, Talent Protocol", num: "01" },
+            { pillar: "AI Velocity", desc: "Ship in weeks what used to take months", num: "02" },
+            { pillar: "Scale or Kill", desc: "No zombie projects—we move on what works", num: "03" }
+          ].map((item, i) => (
+            <motion.div 
+              key={i} 
+              className="relative bg-background p-8 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-mono text-primary/50 bg-background px-2">{item.num}</span>
+              <div className="text-xl font-bold mb-3">{item.pillar}</div>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </motion.div>
           ))}
         </div>
-      </div>
-
+      </motion.div>
     </div>
   </section>
 );
+
+const EngineLoop = () => {
+  const steps = [
+    { step: "Partners", sub: "Distribution Rails", icon: Network, color: "from-emerald-500" },
+    { step: "Rapid Build", sub: "AI-Accelerated", icon: Code2, color: "from-cyan-500" },
+    { step: "Field Test", sub: "Real Markets", icon: Globe, color: "from-blue-500" },
+    { step: "Learn", sub: "Iterate / Pivot", icon: Terminal, color: "from-violet-500" },
+    { step: "Scale", sub: "Or Kill", icon: Activity, color: "from-primary" },
+  ];
+
+  return (
+    <section id="loop" className="py-32 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 via-secondary/10 to-background pointer-events-none" />
+      
+      <div className="container mx-auto px-6 relative">
+        <motion.div 
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">The Method</span>
+          <h2 className="text-4xl md:text-5xl font-bold font-heading mb-6">
+            Partner-Powered <span className="text-primary">Experiment Loop</span>
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            We don't just build apps. We leverage distribution rails to test hypotheses in the wild.
+          </p>
+        </motion.div>
+
+        {/* Loop visualization */}
+        <div className="relative max-w-5xl mx-auto">
+          {/* Connection line */}
+          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 -translate-y-1/2" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
+            {steps.map((s, i) => (
+              <motion.div 
+                key={i} 
+                className="relative"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className="flex flex-col items-center text-center p-6 bg-card border border-border/50 rounded-2xl hover:border-primary/30 transition-all duration-300 group">
+                  {/* Step number */}
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-mono text-muted-foreground bg-card px-2 border border-border/50 rounded-full">
+                    0{i + 1}
+                  </span>
+                  
+                  {/* Icon with gradient */}
+                  <div className={`relative mb-5 p-4 rounded-2xl bg-gradient-to-br ${s.color} to-transparent`}>
+                    <div className="absolute inset-0 rounded-2xl bg-card/80" />
+                    <s.icon className="w-7 h-7 text-primary relative z-10" />
+                  </div>
+                  
+                  <div className="font-bold text-lg mb-1">{s.step}</div>
+                  <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">{s.sub}</div>
+                </div>
+                
+                {/* Arrow connector */}
+                {i < steps.length - 1 && (
+                  <div className="hidden md:flex absolute top-1/2 -right-3 w-6 h-6 items-center justify-center z-20 -translate-y-1/2">
+                    <ArrowRight className="w-4 h-4 text-primary/50" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* Loop back arrow */}
+          <motion.div 
+            className="hidden md:block absolute -bottom-12 left-1/2 -translate-x-1/2"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+              <div className="w-8 h-px bg-border" />
+              <span>repeat</span>
+              <div className="w-8 h-px bg-border" />
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const EcosystemRails = () => (
   <section id="rails" className="py-24">
@@ -326,28 +562,88 @@ const PortfolioGrid = () => {
   });
 
   const projects = data?.projects || FALLBACK_PROJECTS;
+  const featured = projects.slice(0, 3);
+  const others = projects.slice(3);
 
   return (
-    <section id="portfolio" className="py-24">
+    <section id="portfolio" className="py-32 relative">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold font-heading mb-12">Selected Works</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {projects.map((item, i) => (
-            <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="group relative p-6 bg-secondary/10 border border-border rounded-lg overflow-hidden hover:bg-secondary/20 transition-all block cursor-pointer" data-testid={`card-portfolio-${i}`}>
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-lg font-heading group-hover:text-primary transition-colors">{item.name}</h3>
-                <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity" />
+        <motion.div 
+          className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <div>
+            <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">Portfolio</span>
+            <h2 className="text-4xl md:text-5xl font-bold font-heading">Selected Works</h2>
+          </div>
+          <p className="text-muted-foreground max-w-md">
+            Products we've built and shipped. Real traction, real users, real learnings.
+          </p>
+        </motion.div>
+        
+        {/* Featured projects - larger cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {featured.map((item, i) => (
+            <motion.a 
+              key={i} 
+              href={item.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group relative p-8 bg-card border border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 block"
+              data-testid={`card-portfolio-${i}`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              {/* Hover gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="text-xs font-mono text-primary/60 uppercase tracking-wider">0{i + 1}</div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                
+                <h3 className="font-bold text-2xl font-heading mb-2 group-hover:text-primary transition-colors">{item.name}</h3>
+                <p className="text-muted-foreground mb-6">{item.description}</p>
+                
+                <div className="inline-flex items-center gap-2 text-sm font-mono text-primary py-2 px-4 bg-primary/10 rounded-full">
+                  <Activity className="w-3 h-3" />
+                  {item.highlight}
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
-              <div className="text-xs font-mono text-primary/80 py-1 px-2 bg-primary/5 rounded inline-block">
-                {item.highlight}
-              </div>
+            </motion.a>
+          ))}
+        </div>
+        
+        {/* Other projects - compact list */}
+        <motion.div 
+          className="grid grid-cols-2 md:grid-cols-5 gap-4"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+        >
+          {others.map((item, i) => (
+            <a 
+              key={i} 
+              href={item.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group p-4 bg-secondary/20 border border-border/30 rounded-xl hover:border-primary/30 hover:bg-secondary/30 transition-all duration-300"
+              data-testid={`card-portfolio-${i + 3}`}
+            >
+              <h4 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors truncate">{item.name}</h4>
+              <p className="text-xs text-muted-foreground truncate">{item.highlight}</p>
             </a>
           ))}
-          <div className="flex items-center justify-center p-6 border border-dashed border-border rounded-lg text-muted-foreground text-sm font-mono">
-            + Our experiments
+          <div className="flex items-center justify-center p-4 border border-dashed border-border/50 rounded-xl text-muted-foreground text-xs font-mono">
+            + more coming
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -363,7 +659,8 @@ const Personas = () => {
         "Early access before public markets"
       ],
       cta: "Request Deck",
-      formValue: "Investor"
+      formValue: "Investor",
+      icon: "📊"
     },
     { 
       role: "Partner", 
@@ -373,7 +670,8 @@ const Personas = () => {
         "Plug into existing distribution"
       ],
       cta: "Partner with us",
-      formValue: "Partner"
+      formValue: "Partner",
+      icon: "🤝"
     },
     { 
       role: "Collaborator", 
@@ -383,20 +681,44 @@ const Personas = () => {
         "Focus on traction, not admin"
       ],
       cta: "Join the studio",
-      formValue: "Collaborator"
+      formValue: "Collaborator",
+      icon: "🛠️"
     },
   ];
 
   return (
-    <section className="py-24 bg-secondary/10">
-      <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold font-heading mb-12 text-center">Who It's For</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <section className="py-32 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-secondary/10 to-background pointer-events-none" />
+      
+      <div className="container mx-auto px-6 relative">
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">Work With Us</span>
+          <h2 className="text-4xl md:text-5xl font-bold font-heading">Who It's For</h2>
+        </motion.div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {personas.map((p, i) => (
-            <div key={i} className="bg-background border border-border p-8 rounded-xl flex flex-col h-full hover:border-primary/30 transition-colors group">
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-primary mb-1">{p.role}</h3>
-                <p className="text-sm font-mono text-muted-foreground uppercase tracking-wider">{p.subtitle}</p>
+            <motion.div 
+              key={i} 
+              className="relative bg-card border border-border/50 p-8 rounded-2xl flex flex-col h-full hover:border-primary/30 transition-all duration-300 group"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              {/* Hover gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative">
+                <div className="text-4xl mb-4">{p.icon}</div>
+                <h3 className="text-2xl font-bold mb-1 group-hover:text-primary transition-colors">{p.role}</h3>
+                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-6">{p.subtitle}</p>
               </div>
               <ul className="space-y-3 mb-8 flex-grow">
                 {p.benefits.map((b, j) => (
@@ -406,10 +728,10 @@ const Personas = () => {
                   </li>
                 ))}
               </ul>
-              <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300">
+              <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300 relative">
                 <a href="#interest">{p.cta}</a>
               </Button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
