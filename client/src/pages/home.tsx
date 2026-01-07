@@ -36,58 +36,42 @@ const formSchema = z.object({
 });
 
 const COLORS = {
-  sky: "#5BC0EB",
-  coral: "#F25F5C",
-  sunflower: "#FFE066",
-  lilac: "#C89BFC",
-  mint: "#8CE2B8",
-  navy: "#0B1F3A",
-  dark: "#1C1C1C",
-  light: "#F7F7F7",
+  charcoal: "#1a1a1a",
+  slate: "#2d2d2d",
+  steel: "#4a5568",
+  silver: "#a0aec0",
+  white: "#ffffff",
+  accent: "#3b82f6",
+  accentDark: "#1d4ed8",
 };
 
 interface BlockProps {
-  color: keyof typeof COLORS;
+  variant?: "dark" | "light" | "accent";
   children: React.ReactNode;
   className?: string;
   delay?: number;
-  hover?: boolean;
 }
 
-const Block = ({ color, children, className = "", delay = 0, hover = true }: BlockProps) => {
+const Block = ({ variant = "dark", children, className = "", delay = 0 }: BlockProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const bg = COLORS[color];
-  const isDark = color === "navy" || color === "dark";
+  
+  const styles = {
+    dark: "bg-[#1a1a1a] text-white border-[#2d2d2d]",
+    light: "bg-white text-[#1a1a1a] border-[#e5e5e5]",
+    accent: "bg-[#3b82f6] text-white border-[#2563eb]",
+  };
   
   return (
     <motion.div
       ref={ref}
-      className={`rounded-2xl p-6 md:p-8 relative ${isDark ? "text-white" : "text-[#1C1C1C]"} ${hover ? "hover:-translate-y-2 hover:shadow-2xl" : ""} transition-all duration-300 ${className}`}
-      style={{ 
-        backgroundColor: bg,
-        boxShadow: `0 8px 0 0 ${bg}88, 0 12px 40px -10px ${bg}66`,
-      }}
-      initial={{ opacity: 0, y: 40 }}
+      className={`border p-6 md:p-8 ${styles[variant]} ${className}`}
+      initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay }}
+      transition={{ duration: 0.4, delay }}
     >
       {children}
     </motion.div>
-  );
-};
-
-const SmallBlock = ({ color, children, className = "" }: { color: keyof typeof COLORS; children: React.ReactNode; className?: string }) => {
-  const bg = COLORS[color];
-  const isDark = color === "navy" || color === "dark";
-  
-  return (
-    <div 
-      className={`rounded-xl p-3 md:p-4 ${isDark ? "text-white" : "text-[#1C1C1C]"} ${className}`}
-      style={{ backgroundColor: bg }}
-    >
-      {children}
-    </div>
   );
 };
 
@@ -117,7 +101,7 @@ export default function Home() {
         body: JSON.stringify(values),
       });
       if (!res.ok) throw new Error("Failed");
-      toast({ title: "Message sent!", description: "We'll be in touch soon." });
+      toast({ title: "Message sent", description: "We'll be in touch soon." });
       form.reset();
     } catch {
       toast({ title: "Error", description: "Please try again.", variant: "destructive" });
@@ -125,201 +109,199 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] overflow-x-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Outfit', sans-serif; }
-      `}</style>
-
+    <div className="min-h-screen bg-[#0f0f0f] text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#2d2d2d] bg-[#0f0f0f]/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex gap-1">
-              <div className="w-4 h-4 rounded bg-[#5BC0EB]" />
-              <div className="w-4 h-4 rounded bg-[#F25F5C]" />
-              <div className="w-4 h-4 rounded bg-[#FFE066]" />
-            </div>
-            <span className="font-bold text-lg text-[#0B1F3A]">Zeno Vision</span>
+            <div className="w-8 h-8 bg-[#3b82f6]" />
+            <span className="font-semibold text-lg tracking-tight">Zeno Vision</span>
           </div>
-          <Button asChild className="bg-[#0B1F3A] hover:bg-[#0B1F3A]/90 rounded-full">
-            <a href="#contact" data-testid="nav-cta">Talk to us</a>
+          <Button asChild className="bg-white text-black hover:bg-white/90 rounded-none h-10 px-6">
+            <a href="#contact" data-testid="nav-cta">Contact</a>
           </Button>
         </div>
       </header>
 
-      <main className="pt-20 pb-12 px-4">
-        <div className="max-w-7xl mx-auto space-y-6">
-          
-          {/* Hero Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
-            {/* Main Hero Block */}
-            <Block color="navy" className="md:col-span-8 md:row-span-2" delay={0}>
-              <div className="flex flex-col h-full justify-between min-h-[300px] md:min-h-[400px]">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/80 text-sm mb-6">
-                    <Zap className="w-4 h-4" />
-                    <span>AI-Native Web3 Studio</span>
+      <main className="pt-16">
+        {/* Hero */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12">
+              <div className="lg:col-span-8 p-8 md:p-16 lg:p-24 border-r border-[#2d2d2d]">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <div className="text-sm text-[#a0aec0] uppercase tracking-widest mb-8">
+                    AI-Native Web3 Venture Studio
                   </div>
-                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[0.95]">
-                    We build
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight mb-8">
+                    We build products
                     <br />
-                    <span className="text-[#5BC0EB]">products</span>
-                    <br />
-                    that move.
+                    <span className="text-[#3b82f6]">that move.</span>
                   </h1>
-                </div>
-                <p className="text-white/60 text-lg max-w-md mt-6">
-                  Fast iteration. Partner distribution. Real traction.
-                </p>
+                  <p className="text-lg text-[#a0aec0] max-w-xl mb-10">
+                    Fast iteration with AI. Distribution through partner ecosystems. Compounding traction across a portfolio of live products.
+                  </p>
+                  <div className="flex items-center gap-6">
+                    <Button asChild className="bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-none h-12 px-8" data-testid="hero-cta">
+                      <a href="#contact">
+                        Get in touch <ArrowRight className="ml-2 w-4 h-4" />
+                      </a>
+                    </Button>
+                  </div>
+                </motion.div>
               </div>
-            </Block>
+              <div className="lg:col-span-4 grid grid-rows-3">
+                <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.1}>
+                  <div>
+                    <div className="text-4xl font-semibold mb-1">125K+</div>
+                    <div className="text-sm text-[#a0aec0]">Total users</div>
+                  </div>
+                </Block>
+                <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.2}>
+                  <div>
+                    <div className="text-4xl font-semibold mb-1">8</div>
+                    <div className="text-sm text-[#a0aec0]">Products shipped</div>
+                  </div>
+                </Block>
+                <Block variant="accent" className="flex items-center" delay={0.3}>
+                  <div>
+                    <div className="text-4xl font-semibold mb-1">&lt;4 wks</div>
+                    <div className="text-sm text-white/80">Average time to ship</div>
+                  </div>
+                </Block>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            {/* Stats Blocks */}
-            <Block color="sky" className="md:col-span-4" delay={0.1}>
-              <div className="flex items-center gap-4">
-                <Users className="w-8 h-8 opacity-60" />
-                <div>
-                  <div className="text-4xl md:text-5xl font-extrabold">125K+</div>
-                  <div className="text-sm opacity-70">Total users</div>
-                </div>
-              </div>
+        {/* Thesis */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2">
+            <Block variant="dark" className="border-r border-[#2d2d2d] min-h-[200px]" delay={0.1}>
+              <h2 className="text-2xl font-semibold mb-4">Most studios wait. We ship.</h2>
+              <p className="text-[#a0aec0]">
+                No pitch decks. No vapor. Real products generating real data. We validate through deployment, not speculation.
+              </p>
             </Block>
-
-            <Block color="coral" className="md:col-span-4" delay={0.2}>
-              <div className="flex items-center gap-4">
-                <Rocket className="w-8 h-8 opacity-60" />
-                <div>
-                  <div className="text-4xl md:text-5xl font-extrabold">8</div>
-                  <div className="text-sm opacity-70">Products shipped</div>
-                </div>
-              </div>
-            </Block>
-
-            {/* CTA Block */}
-            <Block color="sunflower" className="md:col-span-4" delay={0.15}>
-              <div className="flex flex-col h-full justify-between">
-                <div className="text-lg font-semibold mb-4">Ready to build together?</div>
-                <Button asChild className="bg-[#0B1F3A] hover:bg-[#0B1F3A]/90 rounded-full w-fit" data-testid="hero-cta">
-                  <a href="#contact">
-                    Let's talk <ArrowRight className="ml-2 w-4 h-4" />
-                  </a>
-                </Button>
-              </div>
-            </Block>
-
-            {/* Speed Block */}
-            <Block color="lilac" className="md:col-span-4" delay={0.25}>
-              <div className="flex items-center gap-4">
-                <Zap className="w-8 h-8 opacity-60" />
-                <div>
-                  <div className="text-4xl md:text-5xl font-extrabold">&lt;4</div>
-                  <div className="text-sm opacity-70">Weeks to ship</div>
-                </div>
-              </div>
+            <Block variant="dark" className="min-h-[200px]" delay={0.2}>
+              <h2 className="text-2xl font-semibold mb-4">AI for speed. Partners for reach.</h2>
+              <p className="text-[#a0aec0]">
+                MiniPay. Celo. Talent Protocol. We build on rails that already have users. Distribution from day one.
+              </p>
             </Block>
           </div>
+        </section>
 
-          {/* Manifesto Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <Block color="mint" delay={0.3}>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">Most studios wait.</h2>
-              <p className="text-lg opacity-80">We ship. No decks. No vapor. Real products, real users, real data.</p>
-            </Block>
-            <Block color="sky" delay={0.35}>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">AI for speed.</h2>
-              <p className="text-lg opacity-80">Partners for distribution. MiniPay. Celo. Talent Protocol. Existing users, day one.</p>
-            </Block>
-          </div>
-
-          {/* Process Blocks */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Process */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4">
             {[
-              { num: "01", title: "Observe", color: "coral" as const },
-              { num: "02", title: "Build", color: "sunflower" as const },
-              { num: "03", title: "Measure", color: "lilac" as const },
-              { num: "04", title: "Iterate", color: "mint" as const },
+              { num: "01", title: "Observe", desc: "Find gaps in partner ecosystems" },
+              { num: "02", title: "Build", desc: "Ship in 2-4 weeks with AI" },
+              { num: "03", title: "Measure", desc: "Real users, real metrics" },
+              { num: "04", title: "Iterate", desc: "Compound or kill" },
             ].map((step, i) => (
-              <Block key={i} color={step.color} delay={0.4 + i * 0.1}>
-                <div className="text-sm opacity-50 mb-2">{step.num}</div>
-                <div className="text-xl md:text-2xl font-bold">{step.title}</div>
+              <Block 
+                key={i} 
+                variant="dark" 
+                className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""} min-h-[180px]`} 
+                delay={0.1 + i * 0.1}
+              >
+                <div className="text-sm text-[#3b82f6] mb-3">{step.num}</div>
+                <div className="text-xl font-semibold mb-2">{step.title}</div>
+                <div className="text-sm text-[#a0aec0]">{step.desc}</div>
               </Block>
             ))}
           </div>
+        </section>
 
-          {/* Portfolio Section */}
-          <Block color="navy" delay={0.5} hover={false}>
-            <div className="mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Shipped products</h2>
-              <p className="text-white/60">Live experiments with real traction.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Portfolio */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto">
+            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+              <h2 className="text-3xl font-semibold mb-2">Portfolio</h2>
+              <p className="text-[#a0aec0]">Live products with real traction</p>
+            </Block>
+            <div className="grid grid-cols-1 md:grid-cols-3">
               {projects.map((project, i) => (
                 <a
                   key={i}
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group p-5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  className={`group p-6 md:p-8 ${i < 2 ? "border-r border-[#2d2d2d]" : ""} hover:bg-[#1a1a1a] transition-colors`}
                   data-testid={`project-${i}`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-xl font-bold group-hover:text-[#5BC0EB] transition-colors">{project.name}</h3>
-                    <ExternalLink className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-xl font-semibold group-hover:text-[#3b82f6] transition-colors">{project.name}</h3>
+                    <ExternalLink className="w-4 h-4 text-[#4a5568] group-hover:text-[#3b82f6] transition-colors" />
                   </div>
-                  <p className="text-white/50 text-sm mb-4">{project.description}</p>
-                  <SmallBlock color="sky" className="inline-block text-sm font-medium">
+                  <p className="text-sm text-[#a0aec0] mb-4">{project.description}</p>
+                  <div className="inline-block text-sm bg-[#3b82f6]/10 text-[#3b82f6] px-3 py-1">
                     {project.highlight}
-                  </SmallBlock>
+                  </div>
                 </a>
               ))}
             </div>
-          </Block>
+          </div>
+        </section>
 
-          {/* Partners */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Partners */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3">
             {[
-              { name: "MiniPay", desc: "Mobile distribution", color: "coral" as const },
-              { name: "Celo", desc: "Protocol ecosystem", color: "sunflower" as const },
-              { name: "Talent Protocol", desc: "Builder network", color: "lilac" as const },
+              { name: "MiniPay", desc: "Mobile distribution at scale" },
+              { name: "Celo", desc: "Protocol-level infrastructure" },
+              { name: "Talent Protocol", desc: "Builder network access" },
             ].map((partner, i) => (
-              <Block key={i} color={partner.color} delay={0.6 + i * 0.1}>
-                <div className="text-xl font-bold mb-1">{partner.name}</div>
-                <div className="text-sm opacity-70">{partner.desc}</div>
+              <Block 
+                key={i} 
+                variant="dark" 
+                className={`${i < 2 ? "border-r border-[#2d2d2d]" : ""}`} 
+                delay={0.1 + i * 0.1}
+              >
+                <div className="text-xl font-semibold mb-2">{partner.name}</div>
+                <div className="text-sm text-[#a0aec0]">{partner.desc}</div>
               </Block>
             ))}
           </div>
+        </section>
 
-          {/* Contact Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6" id="contact">
-            <Block color="mint" className="lg:col-span-2" delay={0.7}>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Let's connect</h2>
-              <p className="text-lg opacity-80 mb-6">
-                Whether you're an investor, partner, or builder — we'd love to hear from you.
+        {/* Contact */}
+        <section id="contact">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12">
+            <Block variant="accent" className="lg:col-span-4 border-r border-[#2563eb]" delay={0.1}>
+              <h2 className="text-3xl font-semibold mb-6">Let's connect</h2>
+              <p className="text-white/80 mb-8">
+                Investors, distribution partners, and builders welcome.
               </p>
-              <div className="space-y-3">
-                <a href="mailto:thwayf@gmail.com" className="flex items-center gap-2 hover:opacity-70 transition-opacity" data-testid="link-email">
+              <div className="space-y-4 text-sm">
+                <a href="mailto:thwayf@gmail.com" className="flex items-center gap-3 text-white/80 hover:text-white transition-colors" data-testid="link-email">
                   <Mail className="w-4 h-4" />
-                  <span>thwayf@gmail.com</span>
+                  thwayf@gmail.com
                 </a>
-                <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:opacity-70 transition-opacity" data-testid="link-twitter">
-                  <span>@zenoVision_</span>
+                <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/80 hover:text-white transition-colors" data-testid="link-twitter">
+                  @zenoVision_
                 </a>
               </div>
             </Block>
 
-            <Block color="light" className="lg:col-span-3" delay={0.8} hover={false}>
+            <Block variant="light" className="lg:col-span-8" delay={0.2}>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
                     name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#0B1F3A]/60">I am a</FormLabel>
+                        <FormLabel className="text-[#4a5568] text-sm">I am a</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-white border-[#0B1F3A]/10 rounded-xl h-12" data-testid="select-role">
+                            <SelectTrigger className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none h-12" data-testid="select-role">
                               <SelectValue placeholder="Select your role" />
                             </SelectTrigger>
                           </FormControl>
@@ -334,15 +316,15 @@ export default function Home() {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[#0B1F3A]/60">Name</FormLabel>
+                          <FormLabel className="text-[#4a5568] text-sm">Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your name" className="bg-white border-[#0B1F3A]/10 rounded-xl h-12" data-testid="input-name" {...field} />
+                            <Input placeholder="Your name" className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none h-12" data-testid="input-name" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -353,9 +335,9 @@ export default function Home() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[#0B1F3A]/60">Email</FormLabel>
+                          <FormLabel className="text-[#4a5568] text-sm">Email</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="you@company.com" className="bg-white border-[#0B1F3A]/10 rounded-xl h-12" data-testid="input-email" {...field} />
+                            <Input type="email" placeholder="you@company.com" className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none h-12" data-testid="input-email" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -368,9 +350,9 @@ export default function Home() {
                     name="exploring"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#0B1F3A]/60">What brings you here?</FormLabel>
+                        <FormLabel className="text-[#4a5568] text-sm">What brings you here?</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Tell us what you're looking for..." className="bg-white border-[#0B1F3A]/10 rounded-xl min-h-[100px] resize-none" data-testid="input-message" {...field} />
+                          <Textarea placeholder="Tell us what you're looking for..." className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none min-h-[120px] resize-none" data-testid="input-message" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -383,35 +365,34 @@ export default function Home() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                         <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} data-testid="checkbox-consent" />
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} className="rounded-none" data-testid="checkbox-consent" />
                         </FormControl>
-                        <FormLabel className="text-[#0B1F3A]/50 text-sm font-normal">
+                        <FormLabel className="text-[#4a5568] text-sm font-normal">
                           I agree to receive communications
                         </FormLabel>
                       </FormItem>
                     )}
                   />
 
-                  <Button type="submit" size="lg" className="w-full bg-[#0B1F3A] hover:bg-[#0B1F3A]/90 rounded-xl h-14 text-lg" data-testid="submit-btn">
-                    Send message <ArrowRight className="ml-2 w-5 h-5" />
+                  <Button type="submit" className="bg-[#1a1a1a] hover:bg-[#2d2d2d] text-white rounded-none h-12 px-8" data-testid="submit-btn">
+                    Send message <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </form>
               </Form>
             </Block>
           </div>
+        </section>
 
-          {/* Footer */}
-          <div className="text-center pt-8 text-[#0B1F3A]/40 text-sm">
-            <div className="flex justify-center gap-2 mb-4">
-              <div className="w-3 h-3 rounded bg-[#5BC0EB]" />
-              <div className="w-3 h-3 rounded bg-[#F25F5C]" />
-              <div className="w-3 h-3 rounded bg-[#FFE066]" />
-              <div className="w-3 h-3 rounded bg-[#C89BFC]" />
-              <div className="w-3 h-3 rounded bg-[#8CE2B8]" />
+        {/* Footer */}
+        <footer className="border-t border-[#2d2d2d] py-8">
+          <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-sm text-[#4a5568]">
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-[#3b82f6]" />
+              <span>Zeno Vision</span>
             </div>
-            © 2025 Zeno Vision
+            <span>© 2025</span>
           </div>
-        </div>
+        </footer>
       </main>
     </div>
   );
