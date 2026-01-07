@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { ArrowDown, Activity, Zap, Target, Rocket, ExternalLink, Eye, Radio, Waves } from "lucide-react";
+import { ArrowRight, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { ModeToggle } from "@/components/ui/mode-toggle";
 
 interface Project {
   id: string;
@@ -24,12 +23,9 @@ interface Project {
 }
 
 const FALLBACK_PROJECTS = [
-  { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "125K+ users", url: "https://miniplay.studio" },
-  { name: "nanoPay.live", description: "Digital financial utility", highlight: "10K+ weekly txs", url: "https://nanopay.live" },
-  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "5K+ signals", url: "https://maxflow.one" },
-  { name: "Tempos.bet", description: "Conviction markets", highlight: "Experiment", url: "https://tempos.bet" },
-  { name: "inspecTor.markets", description: "Tor network analysis", highlight: "Live", url: "https://inspector.markets" },
-  { name: "x4pp.xyz", description: "Attention-driven inbox", highlight: "Prototype", url: "https://x4pp.xyz" },
+  { name: "MiniPlay.studio", description: "Cognition gaming", highlight: "125K+ users", url: "https://miniplay.studio" },
+  { name: "nanoPay.live", description: "Financial utility", highlight: "10K+ weekly txs", url: "https://nanopay.live" },
+  { name: "MaxFlow.one", description: "Signal engine", highlight: "5K+ signals", url: "https://maxflow.one" },
 ];
 
 const formSchema = z.object({
@@ -38,318 +34,159 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   organization: z.string().optional(),
   exploring: z.string().min(10, "Please tell us a bit more"),
-  links: z.string().optional(),
   consent: z.boolean().default(true),
 });
 
-const GridBackground = () => (
-  <div className="fixed inset-0 pointer-events-none overflow-hidden">
-    <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_70%)]" />
-  </div>
-);
-
-const Navbar = () => (
-  <nav className="fixed top-0 w-full z-50 mix-blend-difference">
-    <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-        <span className="font-mono text-sm text-white uppercase tracking-[0.2em]">Zeno Vision</span>
-      </div>
-      <div className="flex items-center gap-6">
-        <a href="#signal" className="font-mono text-xs text-white/60 hover:text-white transition-colors uppercase tracking-wider" data-testid="link-nav-signal">Enter</a>
-      </div>
+const StickyNav = () => (
+  <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFEF5]/90 backdrop-blur-sm border-b border-black/5">
+    <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+      <span className="text-sm font-medium tracking-tight text-black">Zeno Vision</span>
+      <Button asChild size="sm" className="bg-black text-white hover:bg-black/80 rounded-full px-6">
+        <a href="#contact" data-testid="nav-cta">Talk to us</a>
+      </Button>
     </div>
   </nav>
 );
 
-const Chapter = ({ id, children, className = "" }: { id: string; children: React.ReactNode; className?: string }) => (
-  <section id={id} className={`min-h-screen relative snap-start snap-always ${className}`}>
-    {children}
-  </section>
+const FloatingCTA = () => (
+  <motion.div 
+    className="fixed bottom-8 right-8 z-50"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ delay: 2 }}
+  >
+    <Button asChild size="lg" className="bg-black text-white hover:bg-black/80 rounded-full shadow-2xl px-8">
+      <a href="#contact" data-testid="floating-cta">
+        Let's talk <ArrowRight className="ml-2 w-4 h-4" />
+      </a>
+    </Button>
+  </motion.div>
 );
 
-const QuantumHero = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const HeroManifesto = () => {
+  const ref = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: ref,
     offset: ["start start", "end start"]
   });
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
-  const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
 
   return (
-    <Chapter id="hero" className="flex items-center justify-center bg-background">
+    <section ref={ref} className="min-h-[100svh] flex items-center justify-center relative bg-[#FFFEF5] pt-14">
       <motion.div 
-        ref={containerRef}
-        className="relative w-full h-full flex items-center"
-        style={{ opacity, scale, y }}
+        className="max-w-6xl mx-auto px-6 py-20"
+        style={{ opacity }}
       >
-        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-          <motion.div 
-            className="w-[800px] h-[800px] rounded-full border border-primary/10"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div 
-            className="absolute w-[600px] h-[600px] rounded-full border border-primary/5"
-            animate={{ rotate: -360 }}
-            transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div 
-            className="absolute w-[400px] h-[400px] rounded-full border border-primary/20"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          />
-          <div className="absolute w-4 h-4 rounded-full bg-primary shadow-[0_0_60px_20px_rgba(16,185,129,0.3)]" />
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-8"
+        >
+          <p className="text-lg md:text-xl text-black/50 max-w-xl">
+            AI-native Web3 venture studio
+          </p>
+          
+          <h1 className="text-[clamp(3rem,12vw,10rem)] font-serif font-normal leading-[0.85] tracking-[-0.03em] text-black">
+            We build
+            <br />
+            <em className="italic">products</em>
+            <br />
+            that move.
+          </h1>
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.5, delay: 0.5 }}
-              className="space-y-8"
+          <div className="pt-8 flex flex-col sm:flex-row gap-6 items-start">
+            <Button asChild size="lg" className="bg-black text-white hover:bg-black/80 rounded-full px-10 py-6 text-lg">
+              <a href="#contact" data-testid="hero-cta">Get in touch</a>
+            </Button>
+            <button 
+              onClick={() => document.getElementById('manifesto')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 text-black/50 hover:text-black transition-colors group"
+              data-testid="scroll-down"
             >
-              <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground uppercase tracking-[0.3em]">
-                <span className="w-12 h-px bg-primary/50" />
-                <span>AI-Native Web3 Venture Studio</span>
-              </div>
-
-              <div className="space-y-2">
-                <motion.h1 
-                  className="text-[clamp(2.5rem,8vw,7rem)] font-heading font-bold leading-[0.9] tracking-tight"
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.8 }}
-                >
-                  <span className="block text-muted-foreground/40">Measure</span>
-                  <span className="block text-muted-foreground/60">what matters.</span>
-                </motion.h1>
-                <motion.h1 
-                  className="text-[clamp(2.5rem,8vw,7rem)] font-heading font-bold leading-[0.9] tracking-tight"
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 1.1 }}
-                >
-                  <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Ship what moves.</span>
-                </motion.h1>
-              </div>
-
-              <motion.p 
-                className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 1.4 }}
-              >
-                We build AI products on partner rails. Fast iteration. Real distribution. Compounding traction.
-              </motion.p>
-
-              <motion.div 
-                className="flex items-center gap-6 pt-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.7 }}
-              >
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 group">
-                  <a href="#signal" data-testid="button-hero-cta">
-                    <span>Send Signal</span>
-                    <Zap className="ml-2 w-4 h-4 group-hover:animate-pulse" />
-                  </a>
-                </Button>
-                <a href="#evidence" className="font-mono text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2" data-testid="link-hero-scroll">
-                  See proof
-                  <ArrowDown className="w-4 h-4" />
-                </a>
-              </motion.div>
-            </motion.div>
+              <span>Read more</span>
+              <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+            </button>
           </div>
-        </div>
-
-        <motion.div 
-          className="absolute right-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-6 items-end"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 2 }}
-        >
-          <div className="text-right">
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">Status</div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="font-mono text-sm text-primary">ACTIVE</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">Products</div>
-            <div className="font-heading text-2xl font-bold">8</div>
-          </div>
-          <div className="text-right">
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Users</div>
-            <div className="font-heading text-2xl font-bold">140K+</div>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          className="absolute bottom-12 left-1/2 -translate-x-1/2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.5 }}
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <ArrowDown className="w-5 h-5 text-muted-foreground" />
-          </motion.div>
         </motion.div>
       </motion.div>
-    </Chapter>
+
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-black/10" />
+    </section>
   );
 };
 
-const EvidenceArray = () => {
-  const metrics = [
-    { value: "125K+", label: "MiniPlay", sub: "Users acquired", icon: <Activity className="w-5 h-5" /> },
-    { value: "10K+", label: "nanoPay", sub: "Weekly transactions", icon: <Zap className="w-5 h-5" /> },
-    { value: "5K+", label: "MaxFlow", sub: "Signals processed", icon: <Radio className="w-5 h-5" /> },
-  ];
-
+const ManifestoSection = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-20%" });
 
   return (
-    <Chapter id="evidence" className="flex items-center justify-center bg-background">
-      <div className="container mx-auto px-6" ref={ref}>
-        <div className="max-w-5xl mx-auto">
-          <motion.div 
-            className="mb-20"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
-              <Eye className="w-4 h-4" />
-              <span>Evidence Array</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
-              Observed traction.
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              Products in market generating measurable signal. No vapor. No promises. Real users, real transactions.
-            </p>
-          </motion.div>
+    <section id="manifesto" className="bg-black text-white py-32 md:py-48" ref={ref}>
+      <div className="max-w-4xl mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1 }}
+          className="space-y-16"
+        >
+          <h2 className="text-[clamp(2rem,6vw,4.5rem)] font-serif font-normal leading-[1.1] tracking-[-0.02em]">
+            Most studios wait.
+            <br />
+            <span className="text-white/40">We ship.</span>
+          </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-            {metrics.map((m, i) => (
-              <motion.div
-                key={i}
-                className="group relative p-10 bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-500"
-                initial={{ opacity: 0, y: 40 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                data-testid={`metric-${m.label.toLowerCase()}`}
-              >
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="flex items-start justify-between mb-6">
-                  <div className="p-3 bg-primary/10 text-primary rounded-lg">
-                    {m.icon}
-                  </div>
-                  <div className="font-mono text-xs text-muted-foreground uppercase">0{i + 1}</div>
-                </div>
-                
-                <div className="font-heading text-5xl md:text-6xl font-bold mb-2 tabular-nums">{m.value}</div>
-                <div className="font-mono text-sm text-primary uppercase tracking-wider mb-1">{m.label}</div>
-                <div className="text-sm text-muted-foreground">{m.sub}</div>
-              </motion.div>
-            ))}
+          <div className="space-y-8 text-xl md:text-2xl text-white/70 leading-relaxed max-w-2xl">
+            <p>
+              We don't pitch ideas. We build products. Fast iteration with AI. Real distribution through partner ecosystems.
+            </p>
+            <p>
+              MiniPay. Celo. Talent Protocol. We plug into networks that already have users. Then we measure what matters.
+            </p>
+            <p className="text-white">
+              <em>Compound what works. Kill what doesn't.</em>
+            </p>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </Chapter>
+    </section>
   );
 };
 
-const ExperimentSpine = () => {
-  const steps = [
-    { phase: "OBSERVE", title: "Spot the gap", desc: "We monitor ecosystems for underserved user needs and infrastructure opportunities." },
-    { phase: "HYPOTHESIZE", title: "Design the wedge", desc: "Minimal product, maximum learning surface. Built to test one core assumption." },
-    { phase: "BUILD", title: "Ship in weeks", desc: "AI-accelerated development. From concept to deployed product in 2-4 weeks." },
-    { phase: "MEASURE", title: "Collect signal", desc: "Real users, real behavior. Metrics that matter for the next decision." },
-    { phase: "ITERATE", title: "Compound or kill", desc: "Double down on traction. Sunset what doesn't move. No attachment." },
+const NumbersStrip = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-10%" });
+
+  const numbers = [
+    { value: "125K+", label: "Users" },
+    { value: "8", label: "Products shipped" },
+    { value: "< 4", label: "Weeks to ship" },
   ];
 
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
-    <Chapter id="loop" className="flex items-center justify-center bg-background py-32">
-      <div className="container mx-auto px-6" ref={ref}>
-        <div className="max-w-5xl mx-auto">
-          <motion.div 
-            className="mb-20"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
-              <Target className="w-4 h-4" />
-              <span>Experiment Spine</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
-              The engine loop.
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              Systematic experimentation. Fast failure. Compounding success.
-            </p>
-          </motion.div>
-
-          <div className="relative">
-            <div className="absolute left-[23px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/50 via-primary/20 to-transparent hidden md:block" />
-            
-            <div className="space-y-1">
-              {steps.map((step, i) => (
-                <motion.div
-                  key={i}
-                  className="group relative flex gap-8 p-6 hover:bg-card/50 transition-all duration-300"
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <div className="hidden md:flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-background border-2 border-primary/30 group-hover:border-primary flex items-center justify-center font-mono text-sm text-primary transition-colors">
-                      {String(i + 1).padStart(2, '0')}
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1">
-                    <div className="font-mono text-xs text-primary/60 uppercase tracking-[0.2em] mb-2">{step.phase}</div>
-                    <h3 className="text-xl md:text-2xl font-heading font-bold mb-2 group-hover:text-primary transition-colors">{step.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-            
-            <motion.div 
-              className="flex items-center gap-4 mt-8 pl-6 md:pl-20"
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.8 }}
+    <section className="bg-[#FFFEF5] py-24 border-y border-black/10" ref={ref}>
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0">
+          {numbers.map((n, i) => (
+            <motion.div
+              key={i}
+              className="text-center md:border-r md:last:border-r-0 border-black/10"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.15 }}
             >
-              <Waves className="w-5 h-5 text-primary animate-pulse" />
-              <span className="font-mono text-sm text-muted-foreground">↺ Repeat</span>
+              <div className="text-6xl md:text-7xl lg:text-8xl font-serif font-normal text-black tracking-tight">
+                {n.value}
+              </div>
+              <div className="text-black/40 text-lg mt-2">{n.label}</div>
             </motion.div>
-          </div>
+          ))}
         </div>
       </div>
-    </Chapter>
+    </section>
   );
 };
 
-const ExperimentArchive = () => {
+const WorkSection = () => {
   const { data } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
     queryFn: async () => {
@@ -359,70 +196,108 @@ const ExperimentArchive = () => {
     },
   });
 
-  const projects = data?.projects || FALLBACK_PROJECTS;
+  const projects = data?.projects?.slice(0, 3) || FALLBACK_PROJECTS;
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-10%" });
 
   return (
-    <Chapter id="portfolio" className="flex items-center justify-center bg-background py-32">
-      <div className="container mx-auto px-6" ref={ref}>
-        <div className="max-w-6xl mx-auto">
-          <motion.div 
-            className="mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
-              <Rocket className="w-4 h-4" />
-              <span>Experiment Archive</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
-              Shipped products.
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              Live experiments generating real-world data. Each product is a probe into an opportunity space.
-            </p>
-          </motion.div>
+    <section className="bg-[#FFFEF5] py-32" ref={ref}>
+      <div className="max-w-6xl mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-normal text-black tracking-tight mb-6">
+            Selected work
+          </h2>
+          <p className="text-xl text-black/50 max-w-xl">
+            Products in market. Real users. Real traction.
+          </p>
+        </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-            {projects.map((project, i) => (
-              <motion.a
-                key={i}
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative p-8 bg-card/30 border border-border/30 hover:border-primary/50 hover:bg-card/60 transition-all duration-500"
-                initial={{ opacity: 0, y: 30 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                data-testid={`card-project-${i}`}
-              >
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-primary/50 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute top-0 left-0 h-full w-px bg-gradient-to-b from-primary/50 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="flex items-start justify-between mb-6">
-                  <div className="font-mono text-xs text-muted-foreground/60 uppercase">EXP-{String(i + 1).padStart(3, '0')}</div>
-                  <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="space-y-1">
+          {projects.map((project, i) => (
+            <motion.a
+              key={i}
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block py-8 border-b border-black/10 hover:bg-black/[0.02] transition-colors -mx-6 px-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+              data-testid={`project-${i}`}
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-2xl md:text-3xl font-serif text-black group-hover:underline decoration-1 underline-offset-4">
+                    {project.name}
+                  </h3>
+                  <p className="text-black/40 mt-1">{project.description}</p>
                 </div>
-                
-                <h3 className="text-xl font-heading font-bold mb-2 group-hover:text-primary transition-colors">{project.name}</h3>
-                <p className="text-sm text-muted-foreground mb-6">{project.description}</p>
-                
-                <div className="inline-flex items-center gap-2 font-mono text-xs text-primary py-1.5 px-3 bg-primary/10 rounded">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  {project.highlight}
+                <div className="flex items-center gap-6">
+                  <span className="text-lg text-black/60">{project.highlight}</span>
+                  <ArrowRight className="w-5 h-5 text-black/30 group-hover:text-black group-hover:translate-x-1 transition-all" />
                 </div>
-              </motion.a>
-            ))}
-          </div>
+              </div>
+            </motion.a>
+          ))}
         </div>
       </div>
-    </Chapter>
+    </section>
   );
 };
 
-const SignalCapture = () => {
+const ApproachSection = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-10%" });
+
+  return (
+    <section className="bg-[#1a1a1a] text-white py-32 md:py-48" ref={ref}>
+      <div className="max-w-4xl mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1 }}
+          className="space-y-20"
+        >
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-normal tracking-tight">
+            How we work
+          </h2>
+
+          <div className="space-y-16">
+            {[
+              { num: "01", title: "Observe", text: "We find gaps in partner ecosystems. Underserved users. Infrastructure opportunities." },
+              { num: "02", title: "Build", text: "AI-accelerated development. Concept to deployed product in 2-4 weeks. No vapor." },
+              { num: "03", title: "Measure", text: "Real users, real behavior. We track what matters for the next decision." },
+              { num: "04", title: "Iterate", text: "Double down on traction. Kill what doesn't move. No attachment." },
+            ].map((step, i) => (
+              <motion.div
+                key={i}
+                className="grid grid-cols-12 gap-4 md:gap-8"
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.3 + i * 0.1 }}
+              >
+                <div className="col-span-2 md:col-span-1">
+                  <span className="text-white/30 font-mono text-sm">{step.num}</span>
+                </div>
+                <div className="col-span-10 md:col-span-11">
+                  <h3 className="text-2xl md:text-3xl font-serif mb-3">{step.title}</h3>
+                  <p className="text-white/50 text-lg leading-relaxed">{step.text}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+const ContactSection = () => {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -430,7 +305,7 @@ const SignalCapture = () => {
   });
 
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-10%" });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -441,7 +316,7 @@ const SignalCapture = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to submit");
-      toast({ title: "Signal received", description: "We'll be in touch." });
+      toast({ title: "Message sent", description: "We'll be in touch soon." });
       form.reset();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -449,186 +324,168 @@ const SignalCapture = () => {
   }
 
   return (
-    <Chapter id="signal" className="flex items-center justify-center bg-background py-32">
-      <div className="container mx-auto px-6" ref={ref}>
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
-                <Radio className="w-4 h-4 animate-pulse" />
-                <span>Signal Capture</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-6">
-                Send a signal.
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                We're looking for aligned investors, distribution partners, and exceptional builders. 
-                If you see something here, reach out.
-              </p>
-              
-              <div className="space-y-6 p-6 bg-card/30 border border-border/50 rounded-lg">
-                <div>
-                  <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">For Investors</div>
-                  <p className="text-sm text-foreground/80">Early access to portfolio, thesis deep-dives, and co-investment opportunities.</p>
-                </div>
-                <div>
-                  <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">For Partners</div>
-                  <p className="text-sm text-foreground/80">Distribution integration, white-label products, and revenue share models.</p>
-                </div>
-                <div>
-                  <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">For Builders</div>
-                  <p className="text-sm text-foreground/80">Studio residency, product leadership roles, and equity participation.</p>
-                </div>
-              </div>
-            </motion.div>
+    <section id="contact" className="bg-[#FFFEF5] py-32" ref={ref}>
+      <div className="max-w-4xl mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-normal text-black tracking-tight mb-6">
+            Let's talk
+          </h2>
+          <p className="text-xl text-black/50 max-w-xl mb-16">
+            Whether you're an investor, distribution partner, or builder — we'd love to hear from you.
+          </p>
 
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-2xl blur-xl" />
-              
-              <div className="relative p-8 bg-card border border-border/50 rounded-xl">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-xs uppercase tracking-wider">I am a</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="bg-background/50" data-testid="select-role">
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Investor">Investor</SelectItem>
-                              <SelectItem value="Partner">Partner</SelectItem>
-                              <SelectItem value="Collaborator">Builder / Collaborator</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-xl">
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black/60 text-base">I am a</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border-black/20 bg-transparent rounded-none border-0 border-b text-lg h-14 focus:ring-0" data-testid="select-role">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Investor">Investor</SelectItem>
+                        <SelectItem value="Partner">Distribution Partner</SelectItem>
+                        <SelectItem value="Collaborator">Builder / Collaborator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-xs uppercase tracking-wider">Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Your name" className="bg-background/50" data-testid="input-name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-black/60 text-base">Name</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Your name" 
+                          className="border-black/20 bg-transparent rounded-none border-0 border-b text-lg h-14 focus-visible:ring-0 placeholder:text-black/30" 
+                          data-testid="input-name"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-black/60 text-base">Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="you@company.com" 
+                          className="border-black/20 bg-transparent rounded-none border-0 border-b text-lg h-14 focus-visible:ring-0 placeholder:text-black/30" 
+                          data-testid="input-email"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black/60 text-base">Organization</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Company or fund" 
+                        className="border-black/20 bg-transparent rounded-none border-0 border-b text-lg h-14 focus-visible:ring-0 placeholder:text-black/30" 
+                        data-testid="input-org"
+                        {...field} 
                       />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-mono text-xs uppercase tracking-wider">Email</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="you@company.com" className="bg-background/50" data-testid="input-email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="exploring"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-black/60 text-base">What brings you here?</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Tell us what you're looking for..." 
+                        className="border-black/20 bg-transparent rounded-none border-0 border-b text-lg min-h-[120px] resize-none focus-visible:ring-0 placeholder:text-black/30" 
+                        data-testid="input-message"
+                        {...field} 
                       />
-                    </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                    <FormField
-                      control={form.control}
-                      name="organization"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-xs uppercase tracking-wider">Organization</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Company or fund" className="bg-background/50" data-testid="input-org" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+              <FormField
+                control={form.control}
+                name="consent"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value} 
+                        onCheckedChange={field.onChange} 
+                        className="border-black/30"
+                        data-testid="checkbox-consent" 
+                      />
+                    </FormControl>
+                    <FormLabel className="text-black/40 text-sm font-normal">
+                      I agree to receive communications from Zeno Vision
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
 
-                    <FormField
-                      control={form.control}
-                      name="exploring"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-xs uppercase tracking-wider">What are you exploring?</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="What caught your attention?" className="bg-background/50 min-h-[100px] resize-none" data-testid="input-exploring" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="consent"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} data-testid="checkbox-consent" />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-xs text-muted-foreground">
-                              I consent to receiving communications from Zeno Vision.
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" size="lg" data-testid="button-submit">
-                      <Radio className="mr-2 w-4 h-4" />
-                      Send Signal
-                    </Button>
-                  </form>
-                </Form>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="bg-black text-white hover:bg-black/80 rounded-full px-12 py-6 text-lg mt-4"
+                data-testid="submit-btn"
+              >
+                Send message <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </form>
+          </Form>
+        </motion.div>
       </div>
-    </Chapter>
+    </section>
   );
 };
 
 const Footer = () => (
-  <footer className="py-16 border-t border-border/30">
-    <div className="container mx-auto px-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="font-mono text-sm uppercase tracking-[0.2em]">Zeno Vision</span>
+  <footer className="bg-[#FFFEF5] border-t border-black/10 py-12">
+    <div className="max-w-6xl mx-auto px-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <span className="text-black/40">© 2025 Zeno Vision</span>
+        <div className="flex items-center gap-8 text-black/40">
+          <a href="mailto:thwayf@gmail.com" className="hover:text-black transition-colors" data-testid="link-email">thwayf@gmail.com</a>
+          <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" data-testid="link-twitter">@zenoVision_</a>
         </div>
-        
-        <div className="flex items-center gap-8 font-mono text-xs text-muted-foreground">
-          <a href="mailto:thwayf@gmail.com" className="hover:text-foreground transition-colors" data-testid="link-email">thwayf@gmail.com</a>
-          <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" data-testid="link-twitter">@zenoVision_</a>
-          <ModeToggle />
-        </div>
-      </div>
-      
-      <div className="mt-12 pt-8 border-t border-border/20 text-center">
-        <p className="font-mono text-xs text-muted-foreground/60">
-          "If you cannot measure it, you cannot improve it." — Kelvin
-        </p>
       </div>
     </div>
   </footer>
@@ -636,16 +493,22 @@ const Footer = () => (
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased">
-      <GridBackground />
-      <Navbar />
+    <div className="min-h-screen bg-[#FFFEF5] text-black antialiased selection:bg-black selection:text-white">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+        .font-serif { font-family: 'Instrument Serif', serif; }
+      `}</style>
       
-      <main className="snap-y snap-mandatory">
-        <QuantumHero />
-        <EvidenceArray />
-        <ExperimentSpine />
-        <ExperimentArchive />
-        <SignalCapture />
+      <StickyNav />
+      <FloatingCTA />
+      
+      <main>
+        <HeroManifesto />
+        <ManifestoSection />
+        <NumbersStrip />
+        <WorkSection />
+        <ApproachSection />
+        <ContactSection />
       </main>
       
       <Footer />
