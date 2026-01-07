@@ -1,9 +1,7 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Activity, Terminal, Code2, Users, ExternalLink, Network, Boxes, Globe } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { ArrowDown, Activity, Zap, Target, Rocket, ExternalLink, Eye, Radio, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,9 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import quantumBg from "@assets/generated_images/abstract_quantum_physics_background_pattern.png";
-
-// --- Types & Data ---
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 interface Project {
   id: string;
@@ -28,21 +24,12 @@ interface Project {
 }
 
 const FALLBACK_PROJECTS = [
-  { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "500K plays / 1 week", url: "https://miniplay.studio" },
-  { name: "nanoPay.live", description: "Digital financial utility", highlight: "3K+ wallets / 2 weeks", url: "https://nanopay.live" },
-  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "91% avg retention", url: "https://maxflow.one" },
+  { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "125K+ users", url: "https://miniplay.studio" },
+  { name: "nanoPay.live", description: "Digital financial utility", highlight: "10K+ weekly txs", url: "https://nanopay.live" },
+  { name: "MaxFlow.one", description: "Signal computation engine", highlight: "5K+ signals", url: "https://maxflow.one" },
   { name: "Tempos.bet", description: "Conviction markets", highlight: "Experiment", url: "https://tempos.bet" },
   { name: "inspecTor.markets", description: "Tor network analysis", highlight: "Live", url: "https://inspector.markets" },
   { name: "x4pp.xyz", description: "Attention-driven inbox", highlight: "Prototype", url: "https://x4pp.xyz" },
-  { name: "ProsperON.market", description: "Tokenomics utility OS", highlight: "Beta", url: "https://prosperon.market" },
-  { name: "TimeCapsule.news", description: "Time-bound content", highlight: "Live", url: "https://timecapsule.news" },
-];
-
-const PARTNER_TYPES = [
-  { title: "Platform Partners", example: "MiniPay", icon: <Globe className="w-5 h-5" />, desc: "Unlock massive mobile reach" },
-  { title: "Protocol Ecosystems", example: "Celo", icon: <Network className="w-5 h-5" />, desc: "Provide liquidity & tooling" },
-  { title: "Community Networks", example: "Talent Protocol", icon: <Users className="w-5 h-5" />, desc: "Access builder talent" },
-  { title: "Local Organizations", example: "Emerging Markets", icon: <Boxes className="w-5 h-5" />, desc: "Real-world testing grounds" },
 ];
 
 const formSchema = z.object({
@@ -55,503 +42,314 @@ const formSchema = z.object({
   consent: z.boolean().default(true),
 });
 
-// --- Components ---
-
-import { ModeToggle } from "@/components/ui/mode-toggle";
+const GridBackground = () => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_70%)]" />
+  </div>
+);
 
 const Navbar = () => (
-  <nav className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
-    <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Activity className="w-5 h-5 text-primary animate-pulse" />
-        <span className="font-heading font-bold text-xl tracking-tight">Zeno <span className="font-normal opacity-60">Vision</span></span>
+  <nav className="fixed top-0 w-full z-50 mix-blend-difference">
+    <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+        <span className="font-mono text-sm text-white uppercase tracking-[0.2em]">Zeno Vision</span>
       </div>
-      <div className="flex items-center gap-4">
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <a href="#proof" className="hover:text-foreground transition-colors">Proof</a>
-          <a href="#loop" className="hover:text-foreground transition-colors">Loop</a>
-          <a href="#rails" className="hover:text-foreground transition-colors">Rails</a>
-          <a href="#portfolio" className="hover:text-foreground transition-colors">Portfolio</a>
-        </div>
-        <div className="flex items-center gap-2">
-          <ModeToggle />
-          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex border-primary/20 hover:border-primary/50 text-foreground">
-            <a href="#interest">Talk to us</a>
-          </Button>
-        </div>
+      <div className="flex items-center gap-6">
+        <a href="#signal" className="font-mono text-xs text-white/60 hover:text-white transition-colors uppercase tracking-wider" data-testid="link-nav-signal">Enter</a>
       </div>
     </div>
   </nav>
 );
 
-const Hero = () => {
-  return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      {/* Layered background effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 pointer-events-none" />
-      <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] dark:opacity-[0.08] pointer-events-none" />
-      <div 
-        className="absolute inset-0 opacity-20 dark:opacity-40 pointer-events-none"
-        style={{
-          backgroundImage: `url(${quantumBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          maskImage: 'radial-gradient(ellipse 80% 60% at 70% 40%, black 20%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 70% 40%, black 20%, transparent 70%)',
-        }} 
-      />
-      {/* Accent glow */}
-      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[80vh]">
-          {/* Left: Main content */}
-          <div className="lg:col-span-7 xl:col-span-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-8">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="font-mono text-xs text-primary uppercase tracking-wider">AI-Native Web3 Venture Studio</span>
-              </div>
-              
-              <h1 className="font-heading font-bold tracking-tight mb-8">
-                <span className="block text-3xl md:text-4xl lg:text-5xl text-muted-foreground/70 mb-2">
-                  Measure what matters.
-                </span>
-                <span className="block text-5xl md:text-6xl lg:text-7xl xl:text-8xl bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
-                  Ship what moves.
-                </span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground max-w-lg mb-10 leading-relaxed">
-                We build AI-native products with onchain rails, distributed through partner ecosystems. Ship fast, scale what works.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-start gap-4">
-                <Button size="lg" className="h-14 px-8 text-base font-semibold group" asChild>
-                  <a href="#interest">
-                    Talk to us 
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </a>
-                </Button>
-                <Button size="lg" variant="ghost" className="h-14 px-8 text-base font-medium text-muted-foreground hover:text-foreground" asChild>
-                  <a href="#loop">Explore the Method</a>
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-          
-          {/* Right: Visual element */}
-          <div className="lg:col-span-5 xl:col-span-6 hidden lg:flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative"
-            >
-              {/* Abstract visual representation */}
-              <div className="relative w-80 h-80 xl:w-96 xl:h-96">
-                {/* Orbiting rings */}
-                <div className="absolute inset-0 rounded-full border border-primary/20 animate-[spin_20s_linear_infinite]" />
-                <div className="absolute inset-4 rounded-full border border-primary/30 animate-[spin_15s_linear_infinite_reverse]" />
-                <div className="absolute inset-8 rounded-full border border-primary/40" />
-                
-                {/* Center pulse */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-primary/20 animate-ping absolute inset-0" />
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center relative">
-                      <Activity className="w-10 h-10 text-primary-foreground" />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Data points */}
-                {[0, 72, 144, 216, 288].map((deg, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-3 h-3 rounded-full bg-primary"
-                    style={{
-                      top: '50%',
-                      left: '50%',
-                      transform: `rotate(${deg}deg) translateX(140px) translateY(-50%)`,
-                    }}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 2, delay: i * 0.4, repeat: Infinity }}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Scroll indicator */}
-      <motion.div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex justify-center pt-2">
-          <div className="w-1.5 h-3 rounded-full bg-muted-foreground/50" />
-        </div>
-      </motion.div>
-    </section>
-  );
-};
-
-const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
-  const [count, setCount] = React.useState(0);
-  const [isVisible, setIsVisible] = React.useState(false);
-  const ref = React.useRef<HTMLSpanElement>(null);
-
-  React.useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  React.useEffect(() => {
-    if (!isVisible) return;
-    const duration = 2000;
-    const steps = 60;
-    const increment = value / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setCount(value);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [isVisible, value]);
-
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
-};
-
-const ProofStrip = () => {
-  const metrics = [
-    { label: "MiniPlay.studio", value: 125, suffix: "K+ users", sub: "since Dec 2024", icon: Users, url: "https://miniplay.studio" },
-    { label: "nanoPay.live", value: 10, suffix: "K+ txs", sub: "every week", icon: Activity, url: "https://nanopay.live" },
-    { label: "MaxFlow.one", value: 5000, suffix: "+", sub: "signals computed", icon: Terminal, url: "https://maxflow.one" },
-  ];
-
-  return (
-    <section id="proof" className="py-16 relative overflow-hidden">
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      
-      <div className="container mx-auto px-6 relative">
-        <motion.p 
-          className="text-center text-muted-foreground mb-10 font-mono text-sm uppercase tracking-widest"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          Shipped Products & Live Traction
-        </motion.p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 max-w-4xl mx-auto">
-          {metrics.map((m, i) => (
-            <motion.div 
-              key={i} 
-              className="relative p-8 text-center group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-            >
-              {/* Divider */}
-              {i < metrics.length - 1 && (
-                <div className="hidden md:block absolute right-0 top-1/4 bottom-1/4 w-px bg-gradient-to-b from-transparent via-border to-transparent" />
-              )}
-              
-              <a 
-                href={m.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="block hover:scale-105 transition-transform duration-300"
-                data-testid={`link-metric-${m.label.toLowerCase().replace('.', '-')}`}
-              >
-                <div className="text-4xl md:text-5xl font-bold font-heading text-foreground mb-2 tabular-nums">
-                  <AnimatedCounter value={m.value} suffix={m.suffix} />
-                </div>
-                <div className="text-sm font-mono text-primary mb-1">{m.label}</div>
-                <div className="text-xs text-muted-foreground">{m.sub}</div>
-              </a>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const WhyZenoNow = () => (
-  <section id="thesis" className="py-32 relative overflow-hidden">
-    {/* Background */}
-    <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background pointer-events-none" />
-    
-    <div className="container mx-auto px-6 relative">
-      {/* Header */}
-      <motion.div 
-        className="max-w-3xl mb-20"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-      >
-        <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">The Opportunity</span>
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading mb-6 leading-tight">
-          Why Zeno, <span className="text-primary">Now</span>
-        </h2>
-        <p className="text-xl text-muted-foreground leading-relaxed">
-          AI collapses build costs. Crypto infrastructure is ready. Partner ecosystems offer distribution. 
-          We're built to harness all three.
-        </p>
-      </motion.div>
-
-      {/* Focus Areas - Staggered layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
-        {[
-          {
-            focus: "Consumer Onchain",
-            timing: "Wallets embedded, users ready",
-            description: "Gaming, social, commerce—bringing everyday users onchain through familiar experiences.",
-            icon: Globe,
-            accent: "from-emerald-500/20 to-transparent"
-          },
-          {
-            focus: "AI-Native Fintech",
-            timing: "Build costs collapsed 10x",
-            description: "Financial tools with AI + onchain rails for unprecedented speed and global access.",
-            icon: Terminal,
-            accent: "from-cyan-500/20 to-transparent"
-          },
-          {
-            focus: "Incentive Primitives",
-            timing: "Programmable economics mature",
-            description: "Retention, growth, and value sharing mechanisms that compound network effects.",
-            icon: Activity,
-            accent: "from-violet-500/20 to-transparent"
-          }
-        ].map((item, i) => (
-          <motion.div 
-            key={i} 
-            className={`relative p-8 rounded-2xl bg-card/50 backdrop-blur border border-border/50 group hover:border-primary/30 transition-all duration-500 ${i === 2 ? 'lg:col-span-2 lg:max-w-2xl' : ''}`}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-          >
-            {/* Gradient accent */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${item.accent} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-            
-            <div className="relative">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                  <item.icon className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl mb-1">{item.focus}</h3>
-                  <p className="text-xs font-mono text-primary uppercase tracking-wider">{item.timing}</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground leading-relaxed pl-16">{item.description}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Pillars */}
-      <motion.div 
-        className="relative"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-      >
-        <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { pillar: "Partner Rails", desc: "Day-one distribution via MiniPay, Celo, Talent Protocol", num: "01" },
-            { pillar: "AI Velocity", desc: "Ship in weeks what used to take months", num: "02" },
-            { pillar: "Scale or Kill", desc: "No zombie projects—we move on what works", num: "03" }
-          ].map((item, i) => (
-            <motion.div 
-              key={i} 
-              className="relative bg-background p-8 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-            >
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-mono text-primary/50 bg-background px-2">{item.num}</span>
-              <div className="text-xl font-bold mb-3">{item.pillar}</div>
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-    </div>
+const Chapter = ({ id, children, className = "" }: { id: string; children: React.ReactNode; className?: string }) => (
+  <section id={id} className={`min-h-screen relative snap-start snap-always ${className}`}>
+    {children}
   </section>
 );
 
-const EngineLoop = () => {
-  const steps = [
-    { step: "Partners", sub: "Distribution Rails", icon: Network, color: "from-emerald-500" },
-    { step: "Rapid Build", sub: "AI-Accelerated", icon: Code2, color: "from-cyan-500" },
-    { step: "Field Test", sub: "Real Markets", icon: Globe, color: "from-blue-500" },
-    { step: "Learn", sub: "Iterate / Pivot", icon: Terminal, color: "from-violet-500" },
-    { step: "Scale", sub: "Or Kill", icon: Activity, color: "from-primary" },
-  ];
+const QuantumHero = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+  const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
 
   return (
-    <section id="loop" className="py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 via-secondary/10 to-background pointer-events-none" />
-      
-      <div className="container mx-auto px-6 relative">
+    <Chapter id="hero" className="flex items-center justify-center bg-background">
+      <motion.div 
+        ref={containerRef}
+        className="relative w-full h-full flex items-center"
+        style={{ opacity, scale, y }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+          <motion.div 
+            className="w-[800px] h-[800px] rounded-full border border-primary/10"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div 
+            className="absolute w-[600px] h-[600px] rounded-full border border-primary/5"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div 
+            className="absolute w-[400px] h-[400px] rounded-full border border-primary/20"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+          />
+          <div className="absolute w-4 h-4 rounded-full bg-primary shadow-[0_0_60px_20px_rgba(16,185,129,0.3)]" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.5, delay: 0.5 }}
+              className="space-y-8"
+            >
+              <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground uppercase tracking-[0.3em]">
+                <span className="w-12 h-px bg-primary/50" />
+                <span>AI-Native Web3 Venture Studio</span>
+              </div>
+
+              <div className="space-y-2">
+                <motion.h1 
+                  className="text-[clamp(2.5rem,8vw,7rem)] font-heading font-bold leading-[0.9] tracking-tight"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.8 }}
+                >
+                  <span className="block text-muted-foreground/40">Measure</span>
+                  <span className="block text-muted-foreground/60">what matters.</span>
+                </motion.h1>
+                <motion.h1 
+                  className="text-[clamp(2.5rem,8vw,7rem)] font-heading font-bold leading-[0.9] tracking-tight"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 1.1 }}
+                >
+                  <span className="block bg-gradient-to-r from-primary via-emerald-400 to-cyan-400 bg-clip-text text-transparent">Ship what moves.</span>
+                </motion.h1>
+              </div>
+
+              <motion.p 
+                className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 1.4 }}
+              >
+                We build AI products on partner rails. Fast iteration. Real distribution. Compounding traction.
+              </motion.p>
+
+              <motion.div 
+                className="flex items-center gap-6 pt-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.7 }}
+              >
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 group">
+                  <a href="#signal" data-testid="button-hero-cta">
+                    <span>Send Signal</span>
+                    <Zap className="ml-2 w-4 h-4 group-hover:animate-pulse" />
+                  </a>
+                </Button>
+                <a href="#evidence" className="font-mono text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2" data-testid="link-hero-scroll">
+                  See proof
+                  <ArrowDown className="w-4 h-4" />
+                </a>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+
         <motion.div 
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          className="absolute right-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-6 items-end"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, delay: 2 }}
         >
-          <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">The Method</span>
-          <h2 className="text-4xl md:text-5xl font-bold font-heading mb-6">
-            Partner-Powered <span className="text-primary">Experiment Loop</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            We don't just build apps. We leverage distribution rails to test hypotheses in the wild.
-          </p>
+          <div className="text-right">
+            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">Status</div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="font-mono text-sm text-primary">ACTIVE</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">Products</div>
+            <div className="font-heading text-2xl font-bold">8</div>
+          </div>
+          <div className="text-right">
+            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Users</div>
+            <div className="font-heading text-2xl font-bold">140K+</div>
+          </div>
         </motion.div>
 
-        {/* Loop visualization */}
-        <div className="relative max-w-5xl mx-auto">
-          {/* Connection line */}
-          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 -translate-y-1/2" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
-            {steps.map((s, i) => (
-              <motion.div 
-                key={i} 
-                className="relative"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+        <motion.div 
+          className="absolute bottom-12 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.5 }}
+        >
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <ArrowDown className="w-5 h-5 text-muted-foreground" />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </Chapter>
+  );
+};
+
+const EvidenceArray = () => {
+  const metrics = [
+    { value: "125K+", label: "MiniPlay", sub: "Users acquired", icon: <Activity className="w-5 h-5" /> },
+    { value: "10K+", label: "nanoPay", sub: "Weekly transactions", icon: <Zap className="w-5 h-5" /> },
+    { value: "5K+", label: "MaxFlow", sub: "Signals processed", icon: <Radio className="w-5 h-5" /> },
+  ];
+
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <Chapter id="evidence" className="flex items-center justify-center bg-background">
+      <div className="container mx-auto px-6" ref={ref}>
+        <div className="max-w-5xl mx-auto">
+          <motion.div 
+            className="mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
+              <Eye className="w-4 h-4" />
+              <span>Evidence Array</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
+              Observed traction.
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl">
+              Products in market generating measurable signal. No vapor. No promises. Real users, real transactions.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+            {metrics.map((m, i) => (
+              <motion.div
+                key={i}
+                className="group relative p-10 bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-500"
+                initial={{ opacity: 0, y: 40 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                data-testid={`metric-${m.label.toLowerCase()}`}
               >
-                <div className="flex flex-col items-center text-center p-6 bg-card border border-border/50 rounded-2xl hover:border-primary/30 transition-all duration-300 group">
-                  {/* Step number */}
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-mono text-muted-foreground bg-card px-2 border border-border/50 rounded-full">
-                    0{i + 1}
-                  </span>
-                  
-                  {/* Icon with gradient */}
-                  <div className={`relative mb-5 p-4 rounded-2xl bg-gradient-to-br ${s.color} to-transparent`}>
-                    <div className="absolute inset-0 rounded-2xl bg-card/80" />
-                    <s.icon className="w-7 h-7 text-primary relative z-10" />
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3 bg-primary/10 text-primary rounded-lg">
+                    {m.icon}
                   </div>
-                  
-                  <div className="font-bold text-lg mb-1">{s.step}</div>
-                  <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">{s.sub}</div>
+                  <div className="font-mono text-xs text-muted-foreground uppercase">0{i + 1}</div>
                 </div>
                 
-                {/* Arrow connector */}
-                {i < steps.length - 1 && (
-                  <div className="hidden md:flex absolute top-1/2 -right-3 w-6 h-6 items-center justify-center z-20 -translate-y-1/2">
-                    <ArrowRight className="w-4 h-4 text-primary/50" />
-                  </div>
-                )}
+                <div className="font-heading text-5xl md:text-6xl font-bold mb-2 tabular-nums">{m.value}</div>
+                <div className="font-mono text-sm text-primary uppercase tracking-wider mb-1">{m.label}</div>
+                <div className="text-sm text-muted-foreground">{m.sub}</div>
               </motion.div>
             ))}
           </div>
-          
-          {/* Loop back arrow */}
-          <motion.div 
-            className="hidden md:block absolute -bottom-12 left-1/2 -translate-x-1/2"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-              <div className="w-8 h-px bg-border" />
-              <span>repeat</span>
-              <div className="w-8 h-px bg-border" />
-            </div>
-          </motion.div>
         </div>
       </div>
-    </section>
+    </Chapter>
   );
 };
 
-const EcosystemRails = () => (
-  <section id="rails" className="py-24">
-    <div className="container mx-auto px-6">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Ecosystem Rails</h2>
-          <p className="text-muted-foreground max-w-xl">
-            Partners are not just logos. They are the infrastructure that unlocks reach, trust, and testing environments.
-          </p>
+const ExperimentSpine = () => {
+  const steps = [
+    { phase: "OBSERVE", title: "Spot the gap", desc: "We monitor ecosystems for underserved user needs and infrastructure opportunities." },
+    { phase: "HYPOTHESIZE", title: "Design the wedge", desc: "Minimal product, maximum learning surface. Built to test one core assumption." },
+    { phase: "BUILD", title: "Ship in weeks", desc: "AI-accelerated development. From concept to deployed product in 2-4 weeks." },
+    { phase: "MEASURE", title: "Collect signal", desc: "Real users, real behavior. Metrics that matter for the next decision." },
+    { phase: "ITERATE", title: "Compound or kill", desc: "Double down on traction. Sunset what doesn't move. No attachment." },
+  ];
+
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <Chapter id="loop" className="flex items-center justify-center bg-background py-32">
+      <div className="container mx-auto px-6" ref={ref}>
+        <div className="max-w-5xl mx-auto">
+          <motion.div 
+            className="mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
+              <Target className="w-4 h-4" />
+              <span>Experiment Spine</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
+              The engine loop.
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl">
+              Systematic experimentation. Fast failure. Compounding success.
+            </p>
+          </motion.div>
+
+          <div className="relative">
+            <div className="absolute left-[23px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/50 via-primary/20 to-transparent hidden md:block" />
+            
+            <div className="space-y-1">
+              {steps.map((step, i) => (
+                <motion.div
+                  key={i}
+                  className="group relative flex gap-8 p-6 hover:bg-card/50 transition-all duration-300"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <div className="hidden md:flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full bg-background border-2 border-primary/30 group-hover:border-primary flex items-center justify-center font-mono text-sm text-primary transition-colors">
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="font-mono text-xs text-primary/60 uppercase tracking-[0.2em] mb-2">{step.phase}</div>
+                    <h3 className="text-xl md:text-2xl font-heading font-bold mb-2 group-hover:text-primary transition-colors">{step.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            
+            <motion.div 
+              className="flex items-center gap-4 mt-8 pl-6 md:pl-20"
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+              transition={{ delay: 0.8 }}
+            >
+              <Waves className="w-5 h-5 text-primary animate-pulse" />
+              <span className="font-mono text-sm text-muted-foreground">↺ Repeat</span>
+            </motion.div>
+          </div>
         </div>
       </div>
+    </Chapter>
+  );
+};
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {PARTNER_TYPES.map((p, i) => (
-          <Card key={i} className="bg-card border-border/50 hover:border-primary/50 transition-colors">
-            <CardHeader>
-              <div className="mb-3 w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-primary">
-                {p.icon}
-              </div>
-              <CardTitle className="text-lg">{p.title}</CardTitle>
-              <CardDescription className="font-mono text-xs mt-1 text-primary/80">
-                e.g. {p.example}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{p.desc}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-const EngagementModels = () => (
-  <section className="py-24 bg-card">
-    <div className="container mx-auto px-6">
-      <h2 className="text-3xl font-bold font-heading mb-12 text-center">How We Work</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        {[
-          { title: "Retainer + Upside", subtitle: "Equity/tokens case-by-case" },
-          { title: "Milestone + Success", subtitle: "Fee / Revenue Share" },
-          { title: "Pure Upside", subtitle: "Selective (High-fit only)" },
-        ].map((model, i) => (
-          <div key={i} className="p-8 border border-border/60 rounded-xl bg-background/50 text-center flex flex-col justify-center h-48 hover:border-primary/50 transition-colors cursor-default">
-            <h3 className="text-xl font-bold mb-2">{model.title}</h3>
-            <p className="text-sm text-muted-foreground">{model.subtitle}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-const PortfolioGrid = () => {
+const ExperimentArchive = () => {
   const { data } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
     queryFn: async () => {
@@ -562,416 +360,275 @@ const PortfolioGrid = () => {
   });
 
   const projects = data?.projects || FALLBACK_PROJECTS;
-  const featured = projects.slice(0, 3);
-  const others = projects.slice(3);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="portfolio" className="py-32 relative">
-      <div className="container mx-auto px-6">
-        <motion.div 
-          className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <div>
-            <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">Portfolio</span>
-            <h2 className="text-4xl md:text-5xl font-bold font-heading">Selected Works</h2>
-          </div>
-          <p className="text-muted-foreground max-w-md">
-            Products we've built and shipped. Real traction, real users, real learnings.
-          </p>
-        </motion.div>
-        
-        {/* Featured projects - larger cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {featured.map((item, i) => (
-            <motion.a 
-              key={i} 
-              href={item.url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="group relative p-8 bg-card border border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 block"
-              data-testid={`card-portfolio-${i}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-            >
-              {/* Hover gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              <div className="relative">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="text-xs font-mono text-primary/60 uppercase tracking-wider">0{i + 1}</div>
+    <Chapter id="portfolio" className="flex items-center justify-center bg-background py-32">
+      <div className="container mx-auto px-6" ref={ref}>
+        <div className="max-w-6xl mx-auto">
+          <motion.div 
+            className="mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
+              <Rocket className="w-4 h-4" />
+              <span>Experiment Archive</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6">
+              Shipped products.
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl">
+              Live experiments generating real-world data. Each product is a probe into an opportunity space.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+            {projects.map((project, i) => (
+              <motion.a
+                key={i}
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative p-8 bg-card/30 border border-border/30 hover:border-primary/50 hover:bg-card/60 transition-all duration-500"
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                data-testid={`card-project-${i}`}
+              >
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-primary/50 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 left-0 h-full w-px bg-gradient-to-b from-primary/50 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className="flex items-start justify-between mb-6">
+                  <div className="font-mono text-xs text-muted-foreground/60 uppercase">EXP-{String(i + 1).padStart(3, '0')}</div>
                   <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 
-                <h3 className="font-bold text-2xl font-heading mb-2 group-hover:text-primary transition-colors">{item.name}</h3>
-                <p className="text-muted-foreground mb-6">{item.description}</p>
+                <h3 className="text-xl font-heading font-bold mb-2 group-hover:text-primary transition-colors">{project.name}</h3>
+                <p className="text-sm text-muted-foreground mb-6">{project.description}</p>
                 
-                <div className="inline-flex items-center gap-2 text-sm font-mono text-primary py-2 px-4 bg-primary/10 rounded-full">
-                  <Activity className="w-3 h-3" />
-                  {item.highlight}
+                <div className="inline-flex items-center gap-2 font-mono text-xs text-primary py-1.5 px-3 bg-primary/10 rounded">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  {project.highlight}
                 </div>
-              </div>
-            </motion.a>
-          ))}
-        </div>
-        
-        {/* Other projects - compact list */}
-        <motion.div 
-          className="grid grid-cols-2 md:grid-cols-5 gap-4"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-        >
-          {others.map((item, i) => (
-            <a 
-              key={i} 
-              href={item.url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="group p-4 bg-secondary/20 border border-border/30 rounded-xl hover:border-primary/30 hover:bg-secondary/30 transition-all duration-300"
-              data-testid={`card-portfolio-${i + 3}`}
-            >
-              <h4 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors truncate">{item.name}</h4>
-              <p className="text-xs text-muted-foreground truncate">{item.highlight}</p>
-            </a>
-          ))}
-          <div className="flex items-center justify-center p-4 border border-dashed border-border/50 rounded-xl text-muted-foreground text-xs font-mono">
-            + more coming
+              </motion.a>
+            ))}
           </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-};
-
-const Personas = () => {
-  const personas = [
-    { 
-      role: "Investor", 
-      subtitle: "Capital Allocator",
-      benefits: [
-        "Diversified compounded exposure", 
-        "Early access before public markets"
-      ],
-      cta: "Request Deck",
-      formValue: "Investor",
-      icon: "📊"
-    },
-    { 
-      role: "Partner", 
-      subtitle: "Founder / Protocol",
-      benefits: [
-        "Ship fast on battle-tested rails", 
-        "Plug into existing distribution"
-      ],
-      cta: "Partner with us",
-      formValue: "Partner",
-      icon: "🤝"
-    },
-    { 
-      role: "Collaborator", 
-      subtitle: "Builder / Operator",
-      benefits: [
-        "Build and scale product lines with us", 
-        "Focus on traction, not admin"
-      ],
-      cta: "Join the studio",
-      formValue: "Collaborator",
-      icon: "🛠️"
-    },
-  ];
-
-  return (
-    <section className="py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/20 via-secondary/10 to-background pointer-events-none" />
-      
-      <div className="container mx-auto px-6 relative">
-        <motion.div 
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <span className="inline-block font-mono text-xs text-primary uppercase tracking-widest mb-4">Work With Us</span>
-          <h2 className="text-4xl md:text-5xl font-bold font-heading">Who It's For</h2>
-        </motion.div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {personas.map((p, i) => (
-            <motion.div 
-              key={i} 
-              className="relative bg-card border border-border/50 p-8 rounded-2xl flex flex-col h-full hover:border-primary/30 transition-all duration-300 group"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-            >
-              {/* Hover gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              <div className="relative">
-                <div className="text-4xl mb-4">{p.icon}</div>
-                <h3 className="text-2xl font-bold mb-1 group-hover:text-primary transition-colors">{p.role}</h3>
-                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-6">{p.subtitle}</p>
-              </div>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {p.benefits.map((b, j) => (
-                  <li key={j} className="text-sm text-foreground/90 flex gap-3">
-                    <span className="text-primary/50 mt-0.5">•</span> 
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300 relative">
-                <a href="#interest">{p.cta}</a>
-              </Button>
-            </motion.div>
-          ))}
         </div>
       </div>
-    </section>
+    </Chapter>
   );
 };
 
-const InterestForm = () => {
+const SignalCapture = () => {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      consent: true,
-    },
+    defaultValues: { consent: true },
   });
+
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await fetch("/api/inquiries", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to submit inquiry");
-      }
-
-      toast({
-        title: "Request Sent",
-        description: "Thanks for reaching out. We'll be in touch soon.",
-      });
+      if (!response.ok) throw new Error(data.error || "Failed to submit");
+      toast({ title: "Signal received", description: "We'll be in touch." });
       form.reset();
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to submit. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   }
 
   return (
-    <section id="interest" className="py-24 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      
-      <div className="container mx-auto px-6 max-w-2xl">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">Interested in Zeno?</h2>
-          <p className="text-muted-foreground">
-            We’re sharing this to get feedback and find high-fit partners, investors, and collaborators.
-          </p>
-        </div>
-
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>I'm interested as</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Investor">Investor</SelectItem>
-                          <SelectItem value="Partner">Partner</SelectItem>
-                          <SelectItem value="Collaborator">Collaborator</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Alice Builder" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="alice@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+    <Chapter id="signal" className="flex items-center justify-center bg-background py-32">
+      <div className="container mx-auto px-6" ref={ref}>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="flex items-center gap-4 font-mono text-xs text-primary uppercase tracking-[0.3em] mb-6">
+                <Radio className="w-4 h-4 animate-pulse" />
+                <span>Signal Capture</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-6">
+                Send a signal.
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                We're looking for aligned investors, distribution partners, and exceptional builders. 
+                If you see something here, reach out.
+              </p>
+              
+              <div className="space-y-6 p-6 bg-card/30 border border-border/50 rounded-lg">
+                <div>
+                  <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">For Investors</div>
+                  <p className="text-sm text-foreground/80">Early access to portfolio, thesis deep-dives, and co-investment opportunities.</p>
                 </div>
+                <div>
+                  <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">For Partners</div>
+                  <p className="text-sm text-foreground/80">Distribution integration, white-label products, and revenue share models.</p>
+                </div>
+                <div>
+                  <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">For Builders</div>
+                  <p className="text-sm text-foreground/80">Studio residency, product leadership roles, and equity participation.</p>
+                </div>
+              </div>
+            </motion.div>
 
-                <FormField
-                  control={form.control}
-                  name="organization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Organization (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Company / DAO / Lab" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-2xl blur-xl" />
+              
+              <div className="relative p-8 bg-card border border-border/50 rounded-xl">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-mono text-xs uppercase tracking-wider">I am a</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-background/50" data-testid="select-role">
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Investor">Investor</SelectItem>
+                              <SelectItem value="Partner">Partner</SelectItem>
+                              <SelectItem value="Collaborator">Builder / Collaborator</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="exploring"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>What are you exploring?</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Tell us about your context or what you'd like to build/test..." 
-                          className="min-h-[100px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-mono text-xs uppercase tracking-wider">Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Your name" className="bg-background/50" data-testid="input-name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-mono text-xs uppercase tracking-wider">Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="you@company.com" className="bg-background/50" data-testid="input-email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                <FormField
-                  control={form.control}
-                  name="links"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Links (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Website, Twitter, Deck, Github..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="organization"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-mono text-xs uppercase tracking-wider">Organization</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Company or fund" className="bg-background/50" data-testid="input-org" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="consent"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          I'm okay receiving a follow-up message.
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="exploring"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-mono text-xs uppercase tracking-wider">What are you exploring?</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="What caught your attention?" className="bg-background/50 min-h-[100px] resize-none" data-testid="input-exploring" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <Button type="submit" className="w-full text-base py-6">Request Intro</Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                    <FormField
+                      control={form.control}
+                      name="consent"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} data-testid="checkbox-consent" />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-xs text-muted-foreground">
+                              I consent to receiving communications from Zeno Vision.
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" size="lg" data-testid="button-submit">
+                      <Radio className="mr-2 w-4 h-4" />
+                      Send Signal
+                    </Button>
+                  </form>
+                </Form>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
-    </section>
+    </Chapter>
   );
 };
 
-const FAQ = () => (
-  <section className="py-24 bg-secondary/5">
-    <div className="container mx-auto px-6 max-w-3xl">
-      <h2 className="text-2xl font-bold font-heading mb-8 text-center">Common Questions</h2>
-      <div className="space-y-6">
-        {[
-          { q: "Do you take equity or tokens?", a: "We are flexible. We optimize for long-term alignment, whether that's equity, tokens, or revenue share models depending on the venture." },
-          { q: "What stage do you work with?", a: "We primarily work at the earliest stages—from 0 to 1. We help validate primitives and get to first traction." },
-          { q: "Do you invest directly?", a: "No, we are a venture studio, not a VC fund. We invest our time, engineering, and design resources." },
-          { q: "How do you decide what to build?", a: "We look for intersections between new technical primitives and distribution opportunities within our partner networks." },
-          { q: "How do partners fit into distribution rails?", a: "Partners provide the environment (users, liquidity, community) where we can deploy and test applications rapidly." },
-          { q: "Which ecosystems do you work with?", a: "We are ecosystem-agnostic but partner-driven. We go where there is a clear path to users and validated need." },
-        ].map((item, i) => (
-          <div key={i} className="space-y-2">
-            <h4 className="font-bold text-foreground/90">{item.q}</h4>
-            <p className="text-sm text-muted-foreground">{item.a}</p>
-          </div>
-        ))}
-        <div className="space-y-2">
-          <h4 className="font-bold text-foreground/90">Why the name “Zeno <span className="font-normal opacity-60">Vision</span>”?</h4>
-          <div className="text-sm text-muted-foreground space-y-4">
-            <p>Two philosophical references shape the name. Zeno's paradoxes remind us that analysis paralysis can freeze progress—you can't think your way into traction, you have to move. The Quantum Zeno effect warns that measuring the wrong way too frequently can inhibit change—so we measure carefully, not compulsively.</p>
-            <p>The name also evokes Stoic discipline (from Zeno of Citium): calm execution, long-horizon thinking, and steady cadence under uncertainty. Not hype spikes. Not panic pivots.</p>
-            <p>Finally, "Zeno" suggests asymptotic progress—you rarely reach certainty in one jump, you approach it through iterations that compound. That's venture building in practice, especially when AI makes experimentation cheap and speed high.</p>
-            <p>Vision sets direction when the destination isn't fully known. Together, the name encodes our operating principle: disciplined measurement, steady shipping, and compounding progress.</p>
-            <p className="font-semibold italic text-primary">That's why we say: Measure what matters. Ship what moves.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
 const Footer = () => (
-  <footer className="py-12 border-t border-border/40 text-center">
+  <footer className="py-16 border-t border-border/30">
     <div className="container mx-auto px-6">
-      <div className="flex items-center justify-center gap-2 mb-6 opacity-50">
-        <Activity className="w-5 h-5" />
-        <span className="font-heading font-bold">Zeno <span className="font-normal opacity-60">Vision</span></span>
-      </div>
-      <p className="font-heading text-lg mb-8 max-w-xl mx-auto text-foreground/80">
-        “Experiment with consistency, even when the destination is unknown.”
-      </p>
-      <div className="text-sm text-muted-foreground space-y-2 font-mono">
-        <div className="flex items-center justify-center gap-4">
-          <a href="mailto:thwayf@gmail.com" className="hover:text-primary transition-colors">Contact Us</a>
-          <span className="opacity-30">|</span>
-          <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">@zenoVision_</a>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="font-mono text-sm uppercase tracking-[0.2em]">Zeno Vision</span>
         </div>
-        <p className="text-xs opacity-50 mt-4">For feedback purposes. Not investment advice.</p>
+        
+        <div className="flex items-center gap-8 font-mono text-xs text-muted-foreground">
+          <a href="mailto:thwayf@gmail.com" className="hover:text-foreground transition-colors" data-testid="link-email">thwayf@gmail.com</a>
+          <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" data-testid="link-twitter">@zenoVision_</a>
+          <ModeToggle />
+        </div>
+      </div>
+      
+      <div className="mt-12 pt-8 border-t border-border/20 text-center">
+        <p className="font-mono text-xs text-muted-foreground/60">
+          "If you cannot measure it, you cannot improve it." — Kelvin
+        </p>
       </div>
     </div>
   </footer>
@@ -979,18 +636,18 @@ const Footer = () => (
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+    <div className="min-h-screen bg-background text-foreground antialiased">
+      <GridBackground />
       <Navbar />
-      <Hero />
-      <ProofStrip />
-      <WhyZenoNow />
-      <EngineLoop />
-      <EcosystemRails />
-      <EngagementModels />
-      <PortfolioGrid />
-      <Personas />
-      <InterestForm />
-      <FAQ />
+      
+      <main className="snap-y snap-mandatory">
+        <QuantumHero />
+        <EvidenceArray />
+        <ExperimentSpine />
+        <ExperimentArchive />
+        <SignalCapture />
+      </main>
+      
       <Footer />
     </div>
   );
