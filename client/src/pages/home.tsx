@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowUpRight, Terminal, Zap, Users, Box, Mail } from "lucide-react";
+import { ArrowRight, Zap, Users, Rocket, Mail, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,9 +21,9 @@ interface Project {
 }
 
 const PROJECTS: Project[] = [
-  { name: "MiniPlay", highlight: "125K+ users", description: "Cognition gaming", url: "https://miniplay.studio" },
-  { name: "nanoPay", highlight: "10K+ txs/week", description: "Financial utility", url: "https://nanopay.live" },
-  { name: "MaxFlow", highlight: "5K+ signals", description: "Signal engine", url: "https://maxflow.one" },
+  { name: "MiniPlay", highlight: "125K+ users", description: "Gaming platform", url: "https://miniplay.studio" },
+  { name: "nanoPay", highlight: "10K+ txs", description: "Payments", url: "https://nanopay.live" },
+  { name: "MaxFlow", highlight: "5K+ signals", description: "Analytics", url: "https://maxflow.one" },
 ];
 
 const formSchema = z.object({
@@ -35,78 +35,61 @@ const formSchema = z.object({
   consent: z.boolean().default(true),
 });
 
-const GlitchText = ({ children, className = "" }: { children: string; className?: string }) => {
-  const [glitch, setGlitch] = useState(false);
+const COLORS = {
+  sky: "#5BC0EB",
+  coral: "#F25F5C",
+  sunflower: "#FFE066",
+  lilac: "#C89BFC",
+  mint: "#8CE2B8",
+  navy: "#0B1F3A",
+  dark: "#1C1C1C",
+  light: "#F7F7F7",
+};
+
+interface BlockProps {
+  color: keyof typeof COLORS;
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  hover?: boolean;
+}
+
+const Block = ({ color, children, className = "", delay = 0, hover = true }: BlockProps) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const bg = COLORS[color];
+  const isDark = color === "navy" || color === "dark";
   
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGlitch(true);
-      setTimeout(() => setGlitch(false), 100);
-    }, 3000 + Math.random() * 2000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <span className={`relative inline-block ${className}`}>
-      <span className={glitch ? "opacity-0" : ""}>{children}</span>
-      {glitch && (
-        <>
-          <span className="absolute inset-0 text-[#0f0] translate-x-[2px] translate-y-[-2px] opacity-70">{children}</span>
-          <span className="absolute inset-0 text-[#f0f] translate-x-[-2px] translate-y-[2px] opacity-70">{children}</span>
-        </>
-      )}
-    </span>
+    <motion.div
+      ref={ref}
+      className={`rounded-2xl p-6 md:p-8 relative ${isDark ? "text-white" : "text-[#1C1C1C]"} ${hover ? "hover:-translate-y-2 hover:shadow-2xl" : ""} transition-all duration-300 ${className}`}
+      style={{ 
+        backgroundColor: bg,
+        boxShadow: `0 8px 0 0 ${bg}88, 0 12px 40px -10px ${bg}66`,
+      }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay }}
+    >
+      {children}
+    </motion.div>
   );
 };
 
-const TypeWriter = ({ text, delay = 50 }: { text: string; delay?: number }) => {
-  const [displayed, setDisplayed] = useState("");
-  const [cursor, setCursor] = useState(true);
-
-  useEffect(() => {
-    let i = 0;
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        setDisplayed(text.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(timer);
-      }
-    }, delay);
-    return () => clearInterval(timer);
-  }, [text, delay]);
-
-  useEffect(() => {
-    const blink = setInterval(() => setCursor(c => !c), 500);
-    return () => clearInterval(blink);
-  }, []);
-
+const SmallBlock = ({ color, children, className = "" }: { color: keyof typeof COLORS; children: React.ReactNode; className?: string }) => {
+  const bg = COLORS[color];
+  const isDark = color === "navy" || color === "dark";
+  
   return (
-    <span>
-      {displayed}
-      <span className={cursor ? "opacity-100" : "opacity-0"}>_</span>
-    </span>
+    <div 
+      className={`rounded-xl p-3 md:p-4 ${isDark ? "text-white" : "text-[#1C1C1C]"} ${className}`}
+      style={{ backgroundColor: bg }}
+    >
+      {children}
+    </div>
   );
 };
-
-const ScanLines = () => (
-  <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03]">
-    <div className="w-full h-full" style={{
-      background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,0,0.03) 2px, rgba(0,255,0,0.03) 4px)"
-    }} />
-  </div>
-);
-
-const Noise = () => (
-  <div className="fixed inset-0 pointer-events-none z-40 opacity-[0.015]">
-    <svg className="w-full h-full">
-      <filter id="noise">
-        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/>
-      </filter>
-      <rect width="100%" height="100%" filter="url(#noise)"/>
-    </svg>
-  </div>
-);
 
 export default function Home() {
   const { toast } = useToast();
@@ -134,346 +117,300 @@ export default function Home() {
         body: JSON.stringify(values),
       });
       if (!res.ok) throw new Error("Failed");
-      toast({ title: "// SIGNAL_RECEIVED", description: "We'll respond soon." });
+      toast({ title: "Message sent!", description: "We'll be in touch soon." });
       form.reset();
     } catch {
-      toast({ title: "// ERROR", description: "Try again.", variant: "destructive" });
+      toast({ title: "Error", description: "Please try again.", variant: "destructive" });
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#0f0] font-mono selection:bg-[#0f0] selection:text-black">
-      <ScanLines />
-      <Noise />
-      
-      {/* Terminal Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#0f0]/20 bg-[#0a0a0a]/90 backdrop-blur">
-        <div className="flex items-center justify-between px-4 h-10">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#0f0]/40">zeno@vision:</span>
-            <span className="text-[#0f0]">~</span>
-            <span className="text-[#0f0]/60">$</span>
+    <div className="min-h-screen bg-[#F0F4F8] overflow-x-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Outfit', sans-serif; }
+      `}</style>
+
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 p-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1">
+              <div className="w-4 h-4 rounded bg-[#5BC0EB]" />
+              <div className="w-4 h-4 rounded bg-[#F25F5C]" />
+              <div className="w-4 h-4 rounded bg-[#FFE066]" />
+            </div>
+            <span className="font-bold text-lg text-[#0B1F3A]">Zeno Vision</span>
           </div>
-          <div className="flex items-center gap-4 text-xs text-[#0f0]/40">
-            <span>SYS.OK</span>
-            <span className="w-2 h-2 rounded-full bg-[#0f0] animate-pulse" />
-          </div>
+          <Button asChild className="bg-[#0B1F3A] hover:bg-[#0B1F3A]/90 rounded-full">
+            <a href="#contact" data-testid="nav-cta">Talk to us</a>
+          </Button>
         </div>
       </header>
 
-      {/* Bento Grid */}
-      <main className="pt-10 p-2 md:p-4 min-h-screen">
-        <div className="grid grid-cols-12 gap-2 md:gap-3 auto-rows-[minmax(120px,auto)]">
+      <main className="pt-20 pb-12 px-4">
+        <div className="max-w-7xl mx-auto space-y-6">
           
-          {/* Hero - Large */}
-          <motion.div 
-            className="col-span-12 lg:col-span-8 row-span-3 bg-[#0f0]/5 border border-[#0f0]/20 p-6 md:p-10 flex flex-col justify-between relative overflow-hidden"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="absolute top-0 right-0 p-4 text-xs text-[#0f0]/30">
-              v2.4.1
-            </div>
-            <div>
-              <div className="text-xs text-[#0f0]/40 mb-4">// INIT_SEQUENCE</div>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.9] mb-6">
-                <GlitchText>WE BUILD</GlitchText>
-                <br />
-                <span className="text-[#0f0]/40">PRODUCTS THAT</span>
-                <br />
-                <GlitchText className="text-[#0f0]">MOVE_</GlitchText>
-              </h1>
-              <p className="text-sm md:text-base text-[#0f0]/50 max-w-md leading-relaxed">
-                AI-native Web3 venture studio. Fast iteration. Partner distribution. Compounding traction.
-              </p>
-            </div>
-            <div className="flex items-center gap-4 mt-8">
-              <Button asChild className="bg-[#0f0] text-black hover:bg-[#0f0]/80 rounded-none font-mono">
-                <a href="#contact" data-testid="hero-cta">
-                  ./contact --init <ArrowUpRight className="ml-2 w-4 h-4" />
-                </a>
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* Status Box */}
-          <motion.div 
-            className="col-span-6 lg:col-span-4 row-span-1 bg-[#0f0]/5 border border-[#0f0]/20 p-4 md:p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-2">// STATUS</div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#0f0] animate-pulse" />
-              <span className="text-2xl md:text-3xl font-bold">ACTIVE</span>
-            </div>
-            <div className="text-xs text-[#0f0]/40 mt-2">all_systems_nominal</div>
-          </motion.div>
-
-          {/* Products Count */}
-          <motion.div 
-            className="col-span-6 lg:col-span-4 row-span-1 bg-[#0f0]/5 border border-[#0f0]/20 p-4 md:p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-2">// PRODUCTS_SHIPPED</div>
-            <div className="text-4xl md:text-5xl font-bold">08</div>
-            <div className="text-xs text-[#0f0]/40 mt-2">live_experiments</div>
-          </motion.div>
-
-          {/* Users Count */}
-          <motion.div 
-            className="col-span-12 lg:col-span-4 row-span-1 bg-[#0f0]/5 border border-[#0f0]/20 p-4 md:p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-2">// TOTAL_USERS</div>
-            <div className="text-4xl md:text-5xl font-bold">140K+</div>
-            <div className="text-xs text-[#0f0]/40 mt-2">across_all_products</div>
-          </motion.div>
-
-          {/* Manifesto */}
-          <motion.div 
-            className="col-span-12 md:col-span-6 row-span-2 bg-[#0f0]/5 border border-[#0f0]/20 p-6 md:p-8"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-4">// MANIFESTO.md</div>
-            <div className="space-y-4 text-sm md:text-base">
-              <p className="text-[#0f0]/70">
-                <span className="text-[#0f0]">&gt;</span> Most studios wait. <span className="text-[#0f0]">We ship.</span>
-              </p>
-              <p className="text-[#0f0]/70">
-                <span className="text-[#0f0]">&gt;</span> We don't pitch ideas. We build products.
-              </p>
-              <p className="text-[#0f0]/70">
-                <span className="text-[#0f0]">&gt;</span> AI for speed. Partners for distribution.
-              </p>
-              <p className="text-[#0f0]/70">
-                <span className="text-[#0f0]">&gt;</span> Compound what works. <span className="text-[#f0f]">Kill what doesn't.</span>
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Process */}
-          <motion.div 
-            className="col-span-12 md:col-span-6 row-span-2 bg-[#0f0]/5 border border-[#0f0]/20 p-6 md:p-8"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-4">// PROCESS.sh</div>
-            <div className="space-y-3 text-sm font-mono">
-              {["OBSERVE", "BUILD", "MEASURE", "ITERATE"].map((step, i) => (
-                <div key={step} className="flex items-center gap-3">
-                  <span className="text-[#0f0]/30 w-6">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="text-[#0f0]">{step}</span>
-                  <span className="flex-1 border-b border-dashed border-[#0f0]/10" />
-                  <span className="text-[#0f0]/30">OK</span>
+          {/* Hero Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+            {/* Main Hero Block */}
+            <Block color="navy" className="md:col-span-8 md:row-span-2" delay={0}>
+              <div className="flex flex-col h-full justify-between min-h-[300px] md:min-h-[400px]">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/80 text-sm mb-6">
+                    <Zap className="w-4 h-4" />
+                    <span>AI-Native Web3 Studio</span>
+                  </div>
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[0.95]">
+                    We build
+                    <br />
+                    <span className="text-[#5BC0EB]">products</span>
+                    <br />
+                    that move.
+                  </h1>
                 </div>
-              ))}
-              <div className="text-[#f0f] text-xs mt-4 animate-pulse">↺ LOOP_INFINITE</div>
-            </div>
-          </motion.div>
-
-          {/* Projects */}
-          {projects.map((project, i) => (
-            <motion.a
-              key={i}
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="col-span-12 md:col-span-4 row-span-1 bg-[#0f0]/5 border border-[#0f0]/20 p-4 md:p-6 hover:bg-[#0f0]/10 hover:border-[#0f0]/40 transition-all group"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 + i * 0.1 }}
-              data-testid={`project-${i}`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="text-xs text-[#0f0]/40">EXP_{String(i + 1).padStart(3, '0')}</div>
-                <ArrowUpRight className="w-4 h-4 text-[#0f0]/30 group-hover:text-[#0f0] transition-colors" />
+                <p className="text-white/60 text-lg max-w-md mt-6">
+                  Fast iteration. Partner distribution. Real traction.
+                </p>
               </div>
-              <div className="text-lg md:text-xl font-bold mb-1 group-hover:text-[#0f0] transition-colors">{project.name}</div>
-              <div className="text-xs text-[#0f0]/40 mb-2">{project.description}</div>
-              <div className="inline-block text-xs bg-[#0f0]/10 text-[#0f0] px-2 py-1">{project.highlight}</div>
-            </motion.a>
-          ))}
+            </Block>
 
-          {/* Contact Form */}
-          <motion.div 
-            id="contact"
-            className="col-span-12 lg:col-span-8 row-span-3 bg-[#0f0]/5 border border-[#0f0]/20 p-6 md:p-10"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-4">// CONTACT.init</div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">
-              <TypeWriter text="SEND_SIGNAL_" />
-            </h2>
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[#0f0]/40 text-xs">--type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-transparent border-[#0f0]/20 rounded-none text-[#0f0] focus:ring-[#0f0]/30" data-testid="select-role">
-                            <SelectValue placeholder="SELECT_ROLE" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-[#0a0a0a] border-[#0f0]/20 text-[#0f0]">
-                          <SelectItem value="Investor">INVESTOR</SelectItem>
-                          <SelectItem value="Partner">PARTNER</SelectItem>
-                          <SelectItem value="Collaborator">BUILDER</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-[#f00]" />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[#0f0]/40 text-xs">--name</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="your_name" 
-                            className="bg-transparent border-[#0f0]/20 rounded-none text-[#0f0] placeholder:text-[#0f0]/20 focus-visible:ring-[#0f0]/30" 
-                            data-testid="input-name"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[#f00]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[#0f0]/40 text-xs">--email</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="you@domain.com" 
-                            className="bg-transparent border-[#0f0]/20 rounded-none text-[#0f0] placeholder:text-[#0f0]/20 focus-visible:ring-[#0f0]/30" 
-                            data-testid="input-email"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[#f00]" />
-                      </FormItem>
-                    )}
-                  />
+            {/* Stats Blocks */}
+            <Block color="sky" className="md:col-span-4" delay={0.1}>
+              <div className="flex items-center gap-4">
+                <Users className="w-8 h-8 opacity-60" />
+                <div>
+                  <div className="text-4xl md:text-5xl font-extrabold">125K+</div>
+                  <div className="text-sm opacity-70">Total users</div>
                 </div>
+              </div>
+            </Block>
 
-                <FormField
-                  control={form.control}
-                  name="exploring"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[#0f0]/40 text-xs">--message</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="what_are_you_exploring?" 
-                          className="bg-transparent border-[#0f0]/20 rounded-none text-[#0f0] placeholder:text-[#0f0]/20 focus-visible:ring-[#0f0]/30 min-h-[100px] resize-none" 
-                          data-testid="input-message"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage className="text-[#f00]" />
-                    </FormItem>
-                  )}
-                />
+            <Block color="coral" className="md:col-span-4" delay={0.2}>
+              <div className="flex items-center gap-4">
+                <Rocket className="w-8 h-8 opacity-60" />
+                <div>
+                  <div className="text-4xl md:text-5xl font-extrabold">8</div>
+                  <div className="text-sm opacity-70">Products shipped</div>
+                </div>
+              </div>
+            </Block>
 
-                <FormField
-                  control={form.control}
-                  name="consent"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value} 
-                          onCheckedChange={field.onChange} 
-                          className="border-[#0f0]/30 data-[state=checked]:bg-[#0f0] data-[state=checked]:text-black"
-                          data-testid="checkbox-consent" 
-                        />
-                      </FormControl>
-                      <FormLabel className="text-[#0f0]/30 text-xs font-normal">
-                        --accept-communications
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="bg-[#0f0] text-black hover:bg-[#0f0]/80 rounded-none font-mono w-full md:w-auto px-8"
-                  data-testid="submit-btn"
-                >
-                  ./send --execute <Zap className="ml-2 w-4 h-4" />
+            {/* CTA Block */}
+            <Block color="sunflower" className="md:col-span-4" delay={0.15}>
+              <div className="flex flex-col h-full justify-between">
+                <div className="text-lg font-semibold mb-4">Ready to build together?</div>
+                <Button asChild className="bg-[#0B1F3A] hover:bg-[#0B1F3A]/90 rounded-full w-fit" data-testid="hero-cta">
+                  <a href="#contact">
+                    Let's talk <ArrowRight className="ml-2 w-4 h-4" />
+                  </a>
                 </Button>
-              </form>
-            </Form>
-          </motion.div>
+              </div>
+            </Block>
+
+            {/* Speed Block */}
+            <Block color="lilac" className="md:col-span-4" delay={0.25}>
+              <div className="flex items-center gap-4">
+                <Zap className="w-8 h-8 opacity-60" />
+                <div>
+                  <div className="text-4xl md:text-5xl font-extrabold">&lt;4</div>
+                  <div className="text-sm opacity-70">Weeks to ship</div>
+                </div>
+              </div>
+            </Block>
+          </div>
+
+          {/* Manifesto Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <Block color="mint" delay={0.3}>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">Most studios wait.</h2>
+              <p className="text-lg opacity-80">We ship. No decks. No vapor. Real products, real users, real data.</p>
+            </Block>
+            <Block color="sky" delay={0.35}>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">AI for speed.</h2>
+              <p className="text-lg opacity-80">Partners for distribution. MiniPay. Celo. Talent Protocol. Existing users, day one.</p>
+            </Block>
+          </div>
+
+          {/* Process Blocks */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { num: "01", title: "Observe", color: "coral" as const },
+              { num: "02", title: "Build", color: "sunflower" as const },
+              { num: "03", title: "Measure", color: "lilac" as const },
+              { num: "04", title: "Iterate", color: "mint" as const },
+            ].map((step, i) => (
+              <Block key={i} color={step.color} delay={0.4 + i * 0.1}>
+                <div className="text-sm opacity-50 mb-2">{step.num}</div>
+                <div className="text-xl md:text-2xl font-bold">{step.title}</div>
+              </Block>
+            ))}
+          </div>
+
+          {/* Portfolio Section */}
+          <Block color="navy" delay={0.5} hover={false}>
+            <div className="mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">Shipped products</h2>
+              <p className="text-white/60">Live experiments with real traction.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {projects.map((project, i) => (
+                <a
+                  key={i}
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group p-5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  data-testid={`project-${i}`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-xl font-bold group-hover:text-[#5BC0EB] transition-colors">{project.name}</h3>
+                    <ExternalLink className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-white/50 text-sm mb-4">{project.description}</p>
+                  <SmallBlock color="sky" className="inline-block text-sm font-medium">
+                    {project.highlight}
+                  </SmallBlock>
+                </a>
+              ))}
+            </div>
+          </Block>
 
           {/* Partners */}
-          <motion.div 
-            className="col-span-12 lg:col-span-4 row-span-2 bg-[#0f0]/5 border border-[#0f0]/20 p-6"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
-            <div className="text-xs text-[#0f0]/40 mb-4">// PARTNER_RAILS</div>
-            <div className="space-y-4">
-              {["MiniPay", "Celo", "Talent Protocol"].map((partner, i) => (
-                <div key={partner} className="flex items-center gap-3 text-sm">
-                  <span className="w-2 h-2 bg-[#0f0]" />
-                  <span className="text-[#0f0]/70">{partner}</span>
-                </div>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { name: "MiniPay", desc: "Mobile distribution", color: "coral" as const },
+              { name: "Celo", desc: "Protocol ecosystem", color: "sunflower" as const },
+              { name: "Talent Protocol", desc: "Builder network", color: "lilac" as const },
+            ].map((partner, i) => (
+              <Block key={i} color={partner.color} delay={0.6 + i * 0.1}>
+                <div className="text-xl font-bold mb-1">{partner.name}</div>
+                <div className="text-sm opacity-70">{partner.desc}</div>
+              </Block>
+            ))}
+          </div>
+
+          {/* Contact Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6" id="contact">
+            <Block color="mint" className="lg:col-span-2" delay={0.7}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Let's connect</h2>
+              <p className="text-lg opacity-80 mb-6">
+                Whether you're an investor, partner, or builder — we'd love to hear from you.
+              </p>
+              <div className="space-y-3">
+                <a href="mailto:thwayf@gmail.com" className="flex items-center gap-2 hover:opacity-70 transition-opacity" data-testid="link-email">
+                  <Mail className="w-4 h-4" />
+                  <span>thwayf@gmail.com</span>
+                </a>
+                <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:opacity-70 transition-opacity" data-testid="link-twitter">
+                  <span>@zenoVision_</span>
+                </a>
+              </div>
+            </Block>
+
+            <Block color="light" className="lg:col-span-3" delay={0.8} hover={false}>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[#0B1F3A]/60">I am a</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white border-[#0B1F3A]/10 rounded-xl h-12" data-testid="select-role">
+                              <SelectValue placeholder="Select your role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Investor">Investor</SelectItem>
+                            <SelectItem value="Partner">Partner</SelectItem>
+                            <SelectItem value="Collaborator">Builder</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[#0B1F3A]/60">Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your name" className="bg-white border-[#0B1F3A]/10 rounded-xl h-12" data-testid="input-name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[#0B1F3A]/60">Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="you@company.com" className="bg-white border-[#0B1F3A]/10 rounded-xl h-12" data-testid="input-email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="exploring"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[#0B1F3A]/60">What brings you here?</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Tell us what you're looking for..." className="bg-white border-[#0B1F3A]/10 rounded-xl min-h-[100px] resize-none" data-testid="input-message" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="consent"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} data-testid="checkbox-consent" />
+                        </FormControl>
+                        <FormLabel className="text-[#0B1F3A]/50 text-sm font-normal">
+                          I agree to receive communications
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" size="lg" className="w-full bg-[#0B1F3A] hover:bg-[#0B1F3A]/90 rounded-xl h-14 text-lg" data-testid="submit-btn">
+                    Send message <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </form>
+              </Form>
+            </Block>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center pt-8 text-[#0B1F3A]/40 text-sm">
+            <div className="flex justify-center gap-2 mb-4">
+              <div className="w-3 h-3 rounded bg-[#5BC0EB]" />
+              <div className="w-3 h-3 rounded bg-[#F25F5C]" />
+              <div className="w-3 h-3 rounded bg-[#FFE066]" />
+              <div className="w-3 h-3 rounded bg-[#C89BFC]" />
+              <div className="w-3 h-3 rounded bg-[#8CE2B8]" />
             </div>
-            <div className="mt-6 pt-4 border-t border-[#0f0]/10 text-xs text-[#0f0]/30">
-              distribution_networks_active
-            </div>
-          </motion.div>
-
-          {/* Footer Links */}
-          <motion.div 
-            className="col-span-12 lg:col-span-4 row-span-1 bg-[#0f0]/5 border border-[#0f0]/20 p-4 md:p-6 flex items-center justify-between"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.1 }}
-          >
-            <a href="mailto:thwayf@gmail.com" className="text-xs text-[#0f0]/40 hover:text-[#0f0] transition-colors flex items-center gap-2" data-testid="link-email">
-              <Mail className="w-3 h-3" />
-              thwayf@gmail.com
-            </a>
-            <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="text-xs text-[#0f0]/40 hover:text-[#0f0] transition-colors" data-testid="link-twitter">
-              @zenoVision_
-            </a>
-          </motion.div>
-
-        </div>
-
-        {/* Terminal Footer */}
-        <div className="mt-4 text-xs text-[#0f0]/20 text-center py-4">
-          zeno_vision_v2.4.1 // © 2025 // measure_what_matters
+            © 2025 Zeno Vision
+          </div>
         </div>
       </main>
     </div>
