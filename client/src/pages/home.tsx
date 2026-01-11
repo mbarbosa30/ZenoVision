@@ -144,7 +144,7 @@ export default function Home() {
                   transition={{ duration: 0.6 }}
                 >
                   <div className="text-sm text-[#a0aec0] uppercase tracking-widest mb-8">
-                    AI-Native Web3 Venture Studio
+                    AI-Native App Studio
                   </div>
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight mb-8">
                     We build products
