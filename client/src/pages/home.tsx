@@ -213,12 +213,17 @@ export default function Home() {
 
         {/* Partners */}
         <section className="border-b border-[#2d2d2d]">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3">
-            {[
-              { name: "MiniPay", desc: "Mobile distribution at scale" },
-              { name: "Celo", desc: "Protocol-level infrastructure" },
-              { name: "Talent Protocol", desc: "Builder network access" },
-            ].map((partner, i) => (
+          <div className="max-w-7xl mx-auto">
+            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+              <h2 className="text-3xl font-semibold mb-2">Distribution Partners</h2>
+              <p className="text-[#a0aec0]">We build on rails that already have users.</p>
+            </Block>
+            <div className="grid grid-cols-1 md:grid-cols-3">
+              {[
+                { name: "MiniPay", desc: "Mobile distribution at scale" },
+                { name: "Celo", desc: "Protocol-level infrastructure" },
+                { name: "Talent Protocol", desc: "Builder network access" },
+              ].map((partner, i) => (
               <Block 
                 key={i} 
                 variant="dark" 
@@ -229,6 +234,7 @@ export default function Home() {
                 <div className="text-sm text-[#a0aec0]">{partner.desc}</div>
               </Block>
             ))}
+            </div>
           </div>
         </section>
 
