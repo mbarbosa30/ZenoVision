@@ -42,7 +42,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3" data-testid="link-logo">
             <div className="w-8 h-8 bg-[#3b82f6]" />
-            <span className="font-semibold text-lg tracking-tight">Zeno Vision</span>
+            <span className="font-semibold text-lg tracking-tight">Zeno</span>
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/about" className="text-sm text-white hover:text-[#3b82f6] transition-colors" data-testid="nav-about">About</Link>
@@ -156,7 +156,7 @@ export default function About() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">The Zeno Vision</h2>
+              <h2 className="text-3xl font-semibold mb-2">The Zeno <span className="font-light text-white/50">Vision</span></h2>
               <p className="text-[#a0aec0]">Where we sit, and why it matters</p>
             </Block>
             
@@ -321,7 +321,7 @@ export default function About() {
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-sm text-[#4a5568]">
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-[#3b82f6]" />
-              <span>Zeno Vision</span>
+              <span>Zeno</span>
             </div>
             <div className="flex items-center gap-6">
               <Link href="/about" className="hover:text-white transition-colors" data-testid="footer-about">About</Link>
