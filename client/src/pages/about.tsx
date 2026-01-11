@@ -326,7 +326,6 @@ export default function About() {
             <div className="flex items-center gap-6">
               <Link href="/about" className="hover:text-white transition-colors" data-testid="footer-about">About</Link>
               <Link href="/memo" className="hover:text-white transition-colors" data-testid="footer-memo">Memo</Link>
-              <a href="mailto:thwayf@gmail.com" className="hover:text-white transition-colors" data-testid="footer-email">thwayf@gmail.com</a>
             </div>
           </div>
         </footer>

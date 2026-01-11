@@ -1,17 +1,8 @@
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowRight, Zap, Users, Rocket, Mail, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
 interface Project {
@@ -32,24 +23,6 @@ const PROJECTS: Project[] = [
   { name: "TimeCapsule.news", highlight: "Live", description: "Time-bound content", url: "https://timecapsule.news" },
 ];
 
-const formSchema = z.object({
-  role: z.enum(["Investor", "Partner", "Collaborator"]),
-  name: z.string().min(2, "Required"),
-  email: z.string().email("Invalid"),
-  organization: z.string().optional(),
-  exploring: z.string().min(10, "Tell us more"),
-  consent: z.boolean().default(true),
-});
-
-const COLORS = {
-  charcoal: "#1a1a1a",
-  slate: "#2d2d2d",
-  steel: "#4a5568",
-  silver: "#a0aec0",
-  white: "#ffffff",
-  accent: "#3b82f6",
-  accentDark: "#1d4ed8",
-};
 
 interface BlockProps {
   variant?: "dark" | "light" | "accent";
@@ -82,12 +55,6 @@ const Block = ({ variant = "dark", children, className = "", delay = 0 }: BlockP
 };
 
 export default function Home() {
-  const { toast } = useToast();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { consent: true },
-  });
-
   const { data } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
     queryFn: async () => {
@@ -98,21 +65,6 @@ export default function Home() {
   });
 
   const projects = data?.projects || PROJECTS;
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const res = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) throw new Error("Failed");
-      toast({ title: "Message sent", description: "We'll be in touch soon." });
-      form.reset();
-    } catch {
-      toast({ title: "Error", description: "Please try again.", variant: "destructive" });
-    }
-  }
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
@@ -282,112 +234,15 @@ export default function Home() {
 
         {/* Contact */}
         <section id="contact">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12">
-            <Block variant="accent" className="lg:col-span-4 border-r border-[#2563eb]" delay={0.1}>
+          <div className="max-w-7xl mx-auto">
+            <Block variant="accent" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-6">Let's connect</h2>
               <p className="text-white/80 mb-8">
                 Investors, distribution partners, and builders welcome.
               </p>
-              <div className="space-y-4 text-sm">
-                <a href="mailto:thwayf@gmail.com" className="flex items-center gap-3 text-white/80 hover:text-white transition-colors" data-testid="link-email">
-                  <Mail className="w-4 h-4" />
-                  thwayf@gmail.com
-                </a>
-                <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/80 hover:text-white transition-colors" data-testid="link-twitter">
-                  @zenoVision_
-                </a>
-              </div>
-            </Block>
-
-            <Block variant="light" className="lg:col-span-8" delay={0.2}>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[#4a5568] text-sm">I am a</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none h-12" data-testid="select-role">
-                              <SelectValue placeholder="Select your role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Investor">Investor</SelectItem>
-                            <SelectItem value="Partner">Partner</SelectItem>
-                            <SelectItem value="Collaborator">Builder</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[#4a5568] text-sm">Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your name" className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none h-12" data-testid="input-name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[#4a5568] text-sm">Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="you@company.com" className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none h-12" data-testid="input-email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="exploring"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[#4a5568] text-sm">What brings you here?</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Tell us what you're looking for..." className="bg-[#f7f7f7] border-[#e5e5e5] rounded-none min-h-[120px] resize-none" data-testid="input-message" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="consent"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} className="rounded-none" data-testid="checkbox-consent" />
-                        </FormControl>
-                        <FormLabel className="text-[#4a5568] text-sm font-normal">
-                          I agree to receive communications
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button type="submit" className="bg-[#1a1a1a] hover:bg-[#2d2d2d] text-white rounded-none h-12 px-8" data-testid="submit-btn">
-                    Send message <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </form>
-              </Form>
+              <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 text-white hover:text-white/80 transition-colors text-lg" data-testid="link-twitter">
+                @zenoVision_
+              </a>
             </Block>
           </div>
         </section>
@@ -402,7 +257,6 @@ export default function Home() {
             <div className="flex items-center gap-6">
               <Link href="/about" className="hover:text-white transition-colors" data-testid="footer-about">About</Link>
               <Link href="/memo" className="hover:text-white transition-colors" data-testid="footer-memo">Memo</Link>
-              <a href="mailto:thwayf@gmail.com" className="hover:text-white transition-colors" data-testid="footer-email">thwayf@gmail.com</a>
             </div>
           </div>
         </footer>

@@ -190,36 +190,6 @@ export default function Memo() {
           </div>
         </section>
 
-        {/* Scale-or-Kill Gates */}
-        <section className="border-b border-[#2d2d2d]">
-          <div className="max-w-7xl mx-auto">
-            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">How We Avoid Chaos</h2>
-              <p className="text-[#a0aec0]">Every experiment must earn its way forward. We do not scale every app.</p>
-            </Block>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
-              {[
-                { title: "Retention", desc: "Are users coming back?" },
-                { title: "Activation", desc: "Core action completion" },
-                { title: "Revenue", desc: "Where applicable" },
-                { title: "Security", desc: "Minimum bar before scale" },
-                { title: "Distribution", desc: "Does the rail convert?" },
-              ].map((gate, i) => (
-                <Block 
-                  key={i} 
-                  variant="dark" 
-                  className={`${i < 4 ? "border-r border-[#2d2d2d]" : ""}`} 
-                  delay={0.15 + i * 0.05}
-                >
-                  <div className="text-lg font-semibold mb-2">{gate.title}</div>
-                  <div className="text-sm text-[#a0aec0]">{gate.desc}</div>
-                </Block>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Business Model */}
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
@@ -360,7 +330,6 @@ export default function Memo() {
             <div className="flex items-center gap-6">
               <Link href="/about" className="hover:text-white transition-colors" data-testid="footer-about">About</Link>
               <Link href="/memo" className="hover:text-white transition-colors" data-testid="footer-memo">Memo</Link>
-              <a href="mailto:thwayf@gmail.com" className="hover:text-white transition-colors" data-testid="footer-email">thwayf@gmail.com</a>
             </div>
           </div>
         </footer>
