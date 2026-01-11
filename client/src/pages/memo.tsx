@@ -46,7 +46,6 @@ export default function Memo() {
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/about" className="text-sm text-[#a0aec0] hover:text-white transition-colors" data-testid="nav-about">About</Link>
-            <Link href="/memo" className="text-sm text-white hover:text-[#3b82f6] transition-colors" data-testid="nav-memo">Investment Memo</Link>
             <Button asChild className="bg-white text-black hover:bg-white/90 rounded-none h-10 px-6">
               <Link href="/#contact" data-testid="nav-cta">Contact</Link>
             </Button>

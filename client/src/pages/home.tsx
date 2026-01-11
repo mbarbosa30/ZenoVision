@@ -125,7 +125,6 @@ export default function Home() {
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/about" className="text-sm text-[#a0aec0] hover:text-white transition-colors" data-testid="nav-about">About</Link>
-            <Link href="/memo" className="text-sm text-[#a0aec0] hover:text-white transition-colors" data-testid="nav-memo">Investment Memo</Link>
             <Button asChild className="bg-white text-black hover:bg-white/90 rounded-none h-10 px-6">
               <a href="#contact" data-testid="nav-cta">Contact</a>
             </Button>
