@@ -268,8 +268,8 @@ export default function About() {
                 <div className="text-2xl font-semibold mb-2">Marco</div>
                 <p className="text-[#a0aec0] mb-4">Leading vision, strategy, and execution</p>
                 <div className="flex items-center gap-4 text-sm">
-                  <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors">X</a>
-                  <a href="https://talent.protocol" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors">Talent</a>
+                  <a href="https://x.com/mbarrbosa" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors" data-testid="link-marco-x">X</a>
+                  <a href="https://talent.app/barbosa" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors" data-testid="link-marco-talent">Talent</a>
                 </div>
               </Block>
               
@@ -278,8 +278,8 @@ export default function About() {
                 <div className="text-2xl font-semibold mb-2">Pedro</div>
                 <p className="text-[#a0aec0] mb-4">Operations, partnerships, and growth</p>
                 <div className="flex items-center gap-4 text-sm">
-                  <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors">X</a>
-                  <a href="https://talent.protocol" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors">Talent</a>
+                  <a href="https://x.com/pcbo" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors" data-testid="link-pedro-x">X</a>
+                  <a href="https://talent.app/pcbo" target="_blank" rel="noopener noreferrer" className="text-[#a0aec0] hover:text-white transition-colors" data-testid="link-pedro-talent">Talent</a>
                 </div>
               </Block>
             </div>
