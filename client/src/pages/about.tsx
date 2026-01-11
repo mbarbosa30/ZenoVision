@@ -229,7 +229,7 @@ export default function About() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Distribution Rails</h2>
+              <h2 className="text-3xl font-semibold mb-2">Ecosystem Partners</h2>
               <p className="text-[#a0aec0]">Traction through partners, not synthetic hype</p>
             </Block>
             
@@ -237,7 +237,7 @@ export default function About() {
               {[
                 { name: "Platform Partners", example: "Opera MiniPay", desc: "Mobile-first distribution at scale across emerging markets" },
                 { name: "Protocol Ecosystems", example: "Celo", desc: "Infrastructure, liquidity, and composable building blocks" },
-                { name: "Community Networks", example: "Funding the Commons", desc: "Access to builder talent and aligned communities" },
+                { name: "Community Networks", example: "Talent Protocol", desc: "Access to builder talent and aligned communities" },
               ].map((partner, i) => (
                 <Block 
                   key={i} 
