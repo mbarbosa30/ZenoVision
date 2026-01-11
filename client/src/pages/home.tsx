@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Zap, Users, Rocket, Mail, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,9 +22,14 @@ interface Project {
 }
 
 const PROJECTS: Project[] = [
-  { name: "MiniPlay", highlight: "125K+ users", description: "Gaming platform", url: "https://miniplay.studio" },
-  { name: "nanoPay", highlight: "10K+ txs", description: "Payments", url: "https://nanopay.live" },
-  { name: "MaxFlow", highlight: "5K+ signals", description: "Analytics", url: "https://maxflow.one" },
+  { name: "MiniPlay.studio", highlight: "~130K users", description: "Cognition gaming platform", url: "https://miniplay.studio" },
+  { name: "nanoPay.live", highlight: "20K+ txs", description: "Digital financial utility", url: "https://nanopay.live" },
+  { name: "MaxFlow.one", highlight: "5K+ signals", description: "Signal computation engine", url: "https://maxflow.one" },
+  { name: "Tempos.bet", highlight: "Experiment", description: "Conviction markets", url: "https://tempos.bet" },
+  { name: "inspecTor.markets", highlight: "Live", description: "Tor network analysis", url: "https://inspector.markets" },
+  { name: "x4pp.xyz", highlight: "Prototype", description: "Attention-driven inbox", url: "https://x4pp.xyz" },
+  { name: "ProsperON.market", highlight: "Beta", description: "Tokenomics utility OS", url: "https://prosperon.market" },
+  { name: "TimeCapsule.news", highlight: "Live", description: "Time-bound content", url: "https://timecapsule.news" },
 ];
 
 const formSchema = z.object({
@@ -91,7 +97,7 @@ export default function Home() {
     },
   });
 
-  const projects = data?.projects?.slice(0, 3) || PROJECTS;
+  const projects = data?.projects || PROJECTS;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -113,13 +119,17 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#2d2d2d] bg-[#0f0f0f]/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3" data-testid="link-logo">
             <div className="w-8 h-8 bg-[#3b82f6]" />
             <span className="font-semibold text-lg tracking-tight">Zeno Vision</span>
-          </div>
-          <Button asChild className="bg-white text-black hover:bg-white/90 rounded-none h-10 px-6">
-            <a href="#contact" data-testid="nav-cta">Contact</a>
-          </Button>
+          </Link>
+          <nav className="flex items-center gap-6">
+            <Link href="/about" className="text-sm text-[#a0aec0] hover:text-white transition-colors" data-testid="nav-about">About</Link>
+            <Link href="/memo" className="text-sm text-[#a0aec0] hover:text-white transition-colors" data-testid="nav-memo">Investment Memo</Link>
+            <Button asChild className="bg-white text-black hover:bg-white/90 rounded-none h-10 px-6">
+              <a href="#contact" data-testid="nav-cta">Contact</a>
+            </Button>
+          </nav>
         </div>
       </header>
 
@@ -157,20 +167,20 @@ export default function Home() {
               <div className="lg:col-span-4 grid grid-rows-3">
                 <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.1}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">125K+</div>
+                    <div className="text-4xl font-semibold mb-1">130K+</div>
                     <div className="text-sm text-[#a0aec0]">Total users</div>
                   </div>
                 </Block>
                 <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.2}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">8</div>
+                    <div className="text-4xl font-semibold mb-1">10+</div>
                     <div className="text-sm text-[#a0aec0]">Products shipped</div>
                   </div>
                 </Block>
                 <Block variant="accent" className="flex items-center" delay={0.3}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">&lt;4 wks</div>
-                    <div className="text-sm text-white/80">Average time to ship</div>
+                    <div className="text-4xl font-semibold mb-1">20K+</div>
+                    <div className="text-sm text-white/80">Onchain transactions</div>
                   </div>
                 </Block>
               </div>
@@ -224,24 +234,24 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-2">Portfolio</h2>
-              <p className="text-[#a0aec0]">Live products with real traction</p>
+              <p className="text-[#a0aec0]">10+ products shipped with real traction</p>
             </Block>
-            <div className="grid grid-cols-1 md:grid-cols-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {projects.map((project, i) => (
                 <a
                   key={i}
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group p-6 md:p-8 ${i < 2 ? "border-r border-[#2d2d2d]" : ""} hover:bg-[#1a1a1a] transition-colors`}
+                  className={`group p-6 md:p-8 border-b border-[#2d2d2d] ${(i % 4 !== 3) ? "lg:border-r" : ""} ${(i % 2 === 0) ? "md:border-r" : ""} hover:bg-[#1a1a1a] transition-colors`}
                   data-testid={`project-${i}`}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-semibold group-hover:text-[#3b82f6] transition-colors">{project.name}</h3>
-                    <ExternalLink className="w-4 h-4 text-[#4a5568] group-hover:text-[#3b82f6] transition-colors" />
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold group-hover:text-[#3b82f6] transition-colors">{project.name}</h3>
+                    <ExternalLink className="w-4 h-4 text-[#4a5568] group-hover:text-[#3b82f6] transition-colors flex-shrink-0" />
                   </div>
-                  <p className="text-sm text-[#a0aec0] mb-4">{project.description}</p>
-                  <div className="inline-block text-sm bg-[#3b82f6]/10 text-[#3b82f6] px-3 py-1">
+                  <p className="text-sm text-[#a0aec0] mb-3">{project.description}</p>
+                  <div className="inline-block text-xs bg-[#3b82f6]/10 text-[#3b82f6] px-3 py-1">
                     {project.highlight}
                   </div>
                 </a>
@@ -390,7 +400,11 @@ export default function Home() {
               <div className="w-4 h-4 bg-[#3b82f6]" />
               <span>Zeno Vision</span>
             </div>
-            <span>© 2025</span>
+            <div className="flex items-center gap-6">
+              <Link href="/about" className="hover:text-white transition-colors" data-testid="footer-about">About</Link>
+              <Link href="/memo" className="hover:text-white transition-colors" data-testid="footer-memo">Memo</Link>
+              <a href="mailto:thwayf@gmail.com" className="hover:text-white transition-colors" data-testid="footer-email">thwayf@gmail.com</a>
+            </div>
           </div>
         </footer>
       </main>

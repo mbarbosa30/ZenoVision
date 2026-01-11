@@ -1,14 +1,24 @@
-# Zeno Vision / LabyRhythm Landing Page
+# Zeno Vision Landing Page
 
 ## Overview
 
-This is a single-page landing site for an AI-native Web3 venture studio. The primary purpose is to capture qualified interest from potential investors, partners, and collaborators through an interest form. The site showcases the studio's portfolio of shipped products with traction metrics and explains the partner-powered distribution model.
+This is the marketing website for Zeno Vision, an AI-native Web3 venture studio. The site targets investors, partners, and collaborators with a professional, sharp-cornered design aesthetic. Core tagline: "Measure what matters. Ship what moves."
 
 Key features:
-- Landing page with hero, portfolio showcase, partner network section, and contact form
+- **Homepage** (`/`): Hero section with metrics, thesis blocks, process steps, full portfolio (8 products), partner network, and contact form
+- **About page** (`/about`): "Why Zeno" section (quantum physics, Stoic philosophy, paradoxes), vision, operations, distribution rails, and team
+- **Investment Memo page** (`/memo`): Full investment thesis with TL;DR, status, portfolio highlights, business model, $ZENO tokenomics, and fundraising round details
+- **Admin page** (`/admin`): Protected dashboard for viewing inquiries and managing projects (requires ADMIN_PASSWORD)
 - Interest form submission with role selection (Investor/Partner/Collaborator)
-- Dark/light theme toggle
+- Professional dark theme with sharp corners (no rounded elements)
 - Responsive design for desktop and mobile
+
+## Design System
+
+- **Color Palette**: Dark charcoal (#0f0f0f, #1a1a1a, #2d2d2d), blue accent (#3b82f6)
+- **Typography**: Sharp, professional headings with gray body text (#a0aec0)
+- **Components**: Sharp corners only (CSS radius: 0), visible borders
+- **Animations**: Subtle fade-in on scroll with Framer Motion
 
 ## User Preferences
 
@@ -44,6 +54,10 @@ client/           # Frontend React application
   src/
     components/   # UI components (shadcn/ui)
     pages/        # Route components
+      home.tsx    # Homepage with portfolio and contact form
+      about.tsx   # About page with Why Zeno, vision, team
+      memo.tsx    # Investment memo page
+      admin.tsx   # Protected admin dashboard
     hooks/        # Custom React hooks
     lib/          # Utilities and query client
 server/           # Backend Express application
@@ -54,6 +68,12 @@ server/           # Backend Express application
 shared/           # Shared code between client/server
   schema.ts       # Drizzle schema definitions
 ```
+
+### Page Routes
+- `/` - Homepage
+- `/about` - About page
+- `/memo` - Investment Memo page
+- `/admin` - Admin dashboard (password protected)
 
 ### Development vs Production
 - Development: Vite dev server with HMR, proxied through Express

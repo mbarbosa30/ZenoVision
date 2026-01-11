@@ -6,11 +6,15 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Admin from "@/pages/admin";
+import About from "@/pages/about";
+import Memo from "@/pages/memo";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/about" component={About} />
+      <Route path="/memo" component={Memo} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

@@ -1,0 +1,209 @@
+Zeno Investment Memo
+Measure what matters. Ship what moves.
+Zeno is an AI-native app studio. We run high-throughput product experiments, validate them through partner distribution rails, and compound upside across a portfolio of products and co-builds.
+For discussion and feedback purposes only. Not investment advice.
+
+TL;DR
+Zeno is built for a moment where three things became true at once:
+AI collapses build costs: execution becomes a high-speed, low-cost loop.
+
+
+Crypto is the economic layer: global value exchange and coordination (including AI agent transactions) will happen onchain.
+
+
+Distribution is king: in an era of abundant software supply, the scarce resources are real distribution rails and the discipline to turn them into traction.
+We are a high-throughput experimentation machine with explicit scale-or-kill gates. We build in-house products, co-build with partners, and operate as a native onchain business.
+Status: 10+ products shipped, initial revenue, real-world usage, and strong partners for distribution, infrastructure, and talent discovery.
+We’re raising a round to improve experiment throughput, robustness for scaling projects, and deepen partner co-builds.
+
+Why Zeno, Why now
+AI collapses build costs
+AI turns development into a fast loop. The bottleneck moves from “can you build?” to:
+Choosing the right experiments.
+
+
+Validating with real users quickly.
+
+
+Scaling what works without accumulating legacy costs.
+
+
+Crypto is the economic layer for coordination
+Crypto has matured into practical infrastructure for:
+Ownership and incentives.
+
+
+Cross-border value exchange and composable protocols.
+
+
+A coming wave of AI agents coordination and transaction coordination.
+Distribution is king
+With infinite software supply, the winners are defined by:
+Distribution access.
+
+
+Operational discipline to convert access into traction experiments and scaled products.
+
+How Zeno Works
+Zeno is an app studio with a simple operating stance:
+Ship quickly (AI-native execution, low burn per experiment)
+
+
+Measure honestly (a few signals that matter, not dashboard theatre)
+
+
+Double down or kill (scale what moves, stop what doesn’t)
+
+
+Each cycle compounds by strengthening our agent’s craft, our network, as well as optionality.
+
+The Zeno Vision
+Zeno sits at an unusual intersection:
+AI + Math + Psychology
+
+
+Builder economy
+
+
+Protocol design
+This matters because the future is moving away from technical skills. The future is mostly behavioral, incentive-driven, and has a premium on distribution.
+We prioritize value creation over short-term extraction:
+We optimize for trust (not hours-for-cash),
+
+
+We work with partners where we share upside, learn in public, and move fast together.
+
+How Zeno operates
+We run a “heavy redux” mindset: legacy costs are heavy, so we ruthlessly cut what doesn’t work.
+we ship quickly: AI-native execution keeps burn per experiment low.
+
+
+we measure honestly: track only high-signal metrics.
+
+
+Decide: scale, pivot, or kill.
+
+
+Compound: reusable tools, agent workflows, integrations, and playbooks accumulate over time.
+We explore widely, but we scale narrowly.
+
+Distribution Rails
+Traction and experimentation environments are unlocked through partners and ecosystems such as:
+Platform partners (e.g., Opera MiniPay)
+
+
+Protocol/ecosystem partners (e.g., Celo)
+
+
+Community networks (e.g., Funding the Commons)
+This is how we run traction experiments that produce real signal, not synthetic hype.
+
+Zeno Apps Portfolio
+We’ve shipped 10+ products, with initial revenue and real-world usage. Selected examples with hard early signals:
+Miniplay.studio: ~130K users and 2.5M+ games played after 3 weeks
+
+
+nanoPay.live: 7,500+ users and 20K onchain transactions after 4 weeks
+
+
+MaxFlow.one: 5,000+ signals computed
+Other shipped experiments include: oracle360.net. tempos.bet, inspector.markets, x4pp.xyz, prosperon.market, timecapsule.social (and more).
+What this proves: Zeno is not an idea. It’s a throughput machine that already ships.
+
+How We Avoid Chaos
+Every experiment must earn its way forward as we do not scale every app.
+Typical scale-or-kill gates include:
+Retention / repeat usage (are users coming back?)
+
+
+Activation into the core action (e.g., transactions, creation, referrals)
+
+
+Revenue signal (where applicable)
+
+
+Security and fraud thresholds (minimum bar before scale)
+
+
+Partner distribution signal (does a rail reliably convert?)
+If an experiment doesn’t meet signal thresholds, we pivot or stop.
+
+Business Model
+We don’t sell hours: we either build in-house, or co-build with a partner.
+We’re still early but can anticipate three potential revenue streams:
+Retainer with high-trust preferred partners.
+
+
+Co-build + heavy upside via token/revenue share.
+
+
+Pure-upside for high-conviction bets.
+
+Onchain Ownership
+Zeno is designed as a native onchain business and plans to incorporate as a DAO LLC using MIDAO, which provides a practical legal entity wrapper (e.g., contracting, holding assets), and defines membership interests that may be represented by digital assets / governance tokens.
+$ZENO tokens
+Ownership is expressed via $ZENO under the DAO LLC structure. Final rights, governance scope, disclosures, and any value-accrual mechanics will be defined soon.
+Planned $ZENO token allocation:
+Pilot/Co-Pilot: 70%
+
+
+Agents (including humans): 10%
+
+
+Investors: 10%
+
+
+FAFO: 10%
+
+$ZENO Flywheel
+We intend to allocate a portion of $ZENO to create permanent liquidity pools pairing $ZENO with tokens from apps (app coins) we build or co-build ($APP) under a fee tier.
+Draft mechanism (per $ZENO/$APP pool):
+Liquidity Pools (LPs) are tokenholders-owned and intended for long-duration.
+
+
+Fees paid in $ZENO are burned (supply reduction tied to ecosystem activity).
+
+
+Fees paid in $APP accrue to the Zeno treasury as assets (a growing portfolio exposure to the ecosystem).
+Intended outcome:
+$ZENO supply reduction becomes usage-linked (rather than narrative-linked).
+
+
+The treasury accumulates a diversified basket of $APP tokens through activity, aligning builders, partners, and tokenholders around shared growth.
+Expected safeguards (governance-controlled):
+eligibility requirements before creating a pool (security review, minimum liquidity, partner alignment)
+
+
+concentration limits per $APP token
+
+
+ability to pause/adjust parameters via governance with time delays
+This flywheel is designed to be measurable and activity-driven, not a promise of returns.
+
+The Round 
+Round is open:
+Instrument: SAFT / token purchase agreement (final form pending DAO LLC formation).
+
+
+Valuation: $10M post-money.
+
+
+Ticket size: $50K – $150K.
+The funds will be invested on coding agents, ops agents, and human agents. A small allocation will be allocated for growth marketing experiments, and to cover other costs eg. legal.
+Our goal is to have some kick-off capital to:
+Increase shipping throughput (AI + human agents).
+
+
+Improve reliability/security as projects scale.
+
+
+Deepen partner pilots and distribution experiments.
+
+Team (Human Agents)
+Our Pilot is Marco: X, Talent.
+
+
+Our Co-pilot is Pedro: X, Talent.
+
+
+Plus human collaborators/advisors spanning AI research, psychology, builder economy, and protocol design.
