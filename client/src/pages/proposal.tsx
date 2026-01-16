@@ -379,6 +379,35 @@ export default function Proposal() {
           </div>
         </section>
 
+        {/* Benefits to Opera */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto">
+            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+              <h2 className="text-3xl font-semibold mb-2">Benefits to Opera</h2>
+              <p className="text-[#a0aec0]">How this partnership drives broader business value</p>
+            </Block>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                { title: "Growth Acceleration", desc: "More high-quality mini apps = higher user stickiness. MiniPlay proved this with 150K users driving daily transactions." },
+                { title: "Innovation Edge", desc: "AI-native, curiosity-driven experiments introduce creative features that differentiate MiniPay in the market." },
+                { title: "Ecosystem Influence", desc: "Enhanced mini apps boost Celo activity, stablecoin adoption, and Opera's browser/wallet metrics across 60+ countries." },
+                { title: "Opera Value Creation", desc: "Increased DAU, transaction volume, and revenue per user directly contribute to Opera's overall business performance." },
+              ].map((benefit, i) => (
+                <Block 
+                  key={i} 
+                  variant="dark" 
+                  className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""}`} 
+                  delay={0.15 + i * 0.05}
+                >
+                  <h3 className="text-lg font-semibold mb-2 text-[#3b82f6]">{benefit.title}</h3>
+                  <p className="text-sm text-[#a0aec0]">{benefit.desc}</p>
+                </Block>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Why Zeno */}
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
