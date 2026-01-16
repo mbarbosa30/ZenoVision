@@ -391,8 +391,8 @@ export default function Proposal() {
               {[
                 { title: "Growth Acceleration", desc: "More high-quality mini apps = higher user stickiness, driving daily engagement and transaction volume across MiniPay's user base." },
                 { title: "Innovation Edge", desc: "AI-native, curiosity-driven experiments introduce creative features that differentiate MiniPay in the market." },
+                { title: "Strategic Advisory", desc: "Consultancy and strategic input on AI-native innovation, helping shape Opera and MiniPay's vision in this new era of acceleration." },
                 { title: "Ecosystem Influence", desc: "Enhanced mini apps boost Celo activity, stablecoin adoption, and Opera's browser/wallet metrics across 60+ countries." },
-                { title: "Opera Value Creation", desc: "Increased DAU, transaction volume, and revenue per user directly contribute to Opera's overall business performance." },
               ].map((benefit, i) => (
                 <Block 
                   key={i} 
@@ -426,8 +426,8 @@ export default function Proposal() {
                   <h3 className="text-xl font-semibold mb-3">Partner Mindset</h3>
                   <ul className="space-y-2 text-white/80">
                     <li>We co-build, we elevate the ecosystem</li>
+                    <li>Strategic input on AI-native innovation trends</li>
                     <li>Fast experiments + honest measurement</li>
-                    <li>Compound winners, kill losers quickly</li>
                   </ul>
                 </div>
               </div>
