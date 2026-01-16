@@ -1,0 +1,284 @@
+Below is a **proposal draft you can send to the Opera MiniPay team**. It’s written to feel credible and operational (not “studio poetry”), while still carrying the Zeno voice. You can paste this into Notion/Google Docs and add branding.
+
+---
+
+# Proposal: Zeno Vision MiniPay App Studio Retainer
+
+**From:** Zeno Vision (zeno.vision)
+**To:** Opera MiniPay Team
+**Model:** Monthly studio retainer + optional upside alignment
+**Focus:** Daily engagement, Celo onchain transactions, sustainable revenue (minimizing direct user-reward mechanisms)
+
+## 1) Executive Summary
+
+Over the past month, Zeno Vision collaborated closely with the Opera MiniPay team to launch **MiniPlay**, which reached **~150K users in under 1 month**. We’re now prototyping additional mini apps and refining the playbook for what “good” looks like inside MiniPay: products that can handle scale from day one, drive daily habit loops, and generate measurable onchain activity and revenue.
+
+We propose a **$25,000/month retainer** for Zeno Vision to operate as a dedicated **MiniPay App Studio**, building new mini apps and/or helping other developers improve and launch apps to be listed in MiniPay.
+
+This engagement is designed to:
+
+* accelerate MiniPay’s miniapp pipeline and quality bar,
+* increase **daily engagement** and **Celo onchain transaction volume**,
+* increase sustainable revenue per active user,
+* create a **repeatable best-practices framework** and a **KPI scoring system** to decide what to scale, iterate, or delist.
+
+Optionally, because Zeno Vision is structured as a DAO LLC with token-based ownership, MiniPay can receive a **monthly token allocation** as a long-term alignment incentive (details below, subject to legal review and mutual agreement).
+
+---
+
+## 2) Scope of Work (What Zeno Delivers)
+
+### A) Build and ship MiniPay mini apps
+
+Zeno will ship new mini apps and improvements in short cycles, optimized for:
+
+* **daily engagement loops** (including an onchain check-in mechanic when appropriate),
+* **onchain utility on Celo** (microtransactions, in-app actions, payments, fees),
+* **revenue mechanics** (subscriptions, fees, paid boosts, marketplace fees, partner sponsorships, etc.),
+* avoiding or limiting “pay users to play” style reward schemes.
+
+**Expected monthly output (baseline):**
+
+* **1 new miniapp MVP** shipped + **1–2 major iterations** on existing apps
+  *(or equivalent throughput: 2 smaller apps + ongoing improvements)*
+  Output is managed via a shared backlog and agreed priorities.
+
+### B) MiniPay Launch Playbook and Best Practices (Studio Guidelines)
+
+Zeno will produce and maintain a living playbook (“MiniPay Miniapp Launch Standard”) covering:
+
+* product UX patterns that perform in MiniPay,
+* scalability/performance requirements,
+* instrumentation/analytics standards,
+* community/communication standards,
+* growth/referral standards,
+* onchain design patterns (fees, check-ins, gating, anti-abuse),
+* token/app coin decision framework (optional, case-by-case).
+
+### C) Developer Support Program (helping other builders launch)
+
+Zeno will operate as a “quality + acceleration layer” for third-party developers applying to list in MiniPay:
+
+* architecture and UX review,
+* launch readiness checklist,
+* performance hardening guidance,
+* analytics instrumentation,
+* onchain transaction design review,
+* admin dashboard best practices,
+* final QA and go-live support.
+
+This reduces MiniPay team load and increases the quality of listed apps.
+
+### D) KPI Framework + Delist/Iterate Decision System
+
+Zeno will define and maintain a measurable system to evaluate mini apps:
+
+* core KPIs and benchmarks,
+* scorecard model,
+* diagnosis playbook (“what to fix if retention drops”, etc.),
+* delist criteria and remediation process.
+
+---
+
+## 3) Operating Model (How We Work Together)
+
+### Cadence
+
+* **Weekly**: 30–45 min sync with MiniPay team (priorities, blockers, launches)
+* **Biweekly**: release planning + KPI review
+* **Monthly**: strategic review (pipeline, what’s working, what to kill, next bets)
+
+### Communication & Visibility
+
+* Shared backlog (Linear / Jira / Notion)
+* Weekly status update: shipped, in progress, next, risks
+* Monthly report: KPI snapshots, learnings, decisions
+
+### Approval workflow (lightweight)
+
+* MiniPay provides: approval on new concepts, branding constraints, and listing readiness gates
+* Zeno executes: build, test, instrument, deploy, iterate
+
+---
+
+## 4) Best Practices Guidelines (Initial Draft)
+
+Based on MiniPlay lessons learned, Zeno will adopt these standards across builds:
+
+### Community & Brand Management
+
+* Prefer a **broadcast channel** (updates, announcements, initiatives) over an open group for brand safety.
+* Provide a **ticket/feedback system** (e.g., form + triage board) for issues and feature requests.
+* Create structured community rituals: weekly challenges, patch notes, “what’s next” posts.
+
+### Scalability from Day One
+
+* Apps must withstand **hundreds of concurrent users** on launch day.
+* Load testing, caching strategy, rate limits, and graceful degradation are mandatory.
+* Observability: error tracking, latency monitoring, uptime alerts.
+
+### Habit Loop / Daily Check-ins
+
+* Include a **daily check-in** mechanic when it fits the app.
+* Prefer check-ins that involve an **onchain transaction** (micro-action) to deepen wallet habit and onchain volume.
+* Avoid direct “pay users to come back”; instead use progression, status, streaks, unlocks, and social proof.
+
+### Roadmap + Release Rhythm
+
+* Avoid shipping a massive feature set on day one.
+* Launch small and improve continuously with a predictable cadence (weekly/biweekly drops).
+* Roadmap should be visible enough to create anticipation without creating obligations.
+
+### Analytics + Dashboards + Admin Controls
+
+* Google Analytics (or equivalent) integrated by default.
+* Internal KPI dashboard for the app + a MiniPay-wide dashboard view.
+* Admin panel to tweak parameters safely without redeploying (limits, prices, difficulty, feature flags, etc.).
+
+### Growth Loops (Referral + Social Proof)
+
+* Referral mechanisms that reward *progress/status/unlocks* more than direct cash-like rewards.
+* Social sharing prompts designed around achievement and identity (“look what I unlocked”), not spam.
+* Viral hooks must be measurable: invite conversion, K-factor proxies, share rate.
+
+### App Coin / Token Integration (Optional)
+
+* Only when it meaningfully improves engagement or economic design.
+* Must include anti-abuse and clear utility (unlocking, governance later if needed).
+* Token design must avoid “infinite incentives” and volume farming loops.
+
+---
+
+## 5) KPI Framework (What We Measure)
+
+Zeno will propose a standard set of KPIs across all MiniPay apps, with benchmarks and thresholds.
+
+### Core KPIs (per app)
+
+**Engagement**
+
+* DAU / WAU / MAU
+* Sessions per user per day
+* Median session length
+* Streak adoption rate
+
+**Retention**
+
+* D1, D7, D30 retention
+* Cohort retention by acquisition channel
+
+**Onchain Activity**
+
+* Transactions per active user (daily/weekly)
+* % of users completing at least 1 onchain action
+* Repeat tx rate per user
+* Fee volume (if applicable)
+
+**Revenue**
+
+* Revenue per active user
+* Conversion rate to paid actions
+* ARPDAU (or equivalent)
+* Refund/dispute rate (if any)
+
+**Growth**
+
+* Invite/share rate
+* Referral conversion rate
+* Organic vs partner-driven adoption split
+
+**Quality**
+
+* Crash/error rate
+* Latency (p95)
+* Support ticket volume + resolution time
+
+### Decision System: iterate, scale, delist
+
+Zeno will create a scorecard and apply consistent actions:
+
+* **Green**: scale (add features, invest in growth)
+* **Yellow**: iterate (targeted fixes)
+* **Red**: pause / delist candidate (unless clear fix exists)
+
+This gives MiniPay an objective way to keep the ecosystem healthy.
+
+---
+
+## 6) Budget and Resources (Retainer)
+
+### Monthly retainer: **$25,000**
+
+Includes:
+
+* **Human agents (3 people)**: product/engineering/growth blend
+* **AI coding tools** (e.g., Replit and other agent workflows)
+* Servers/infrastructure/hosting/ops
+* QA, analytics setup, monitoring tools
+* Community systems (ticketing and comms workflows)
+
+*(Exact allocation can be provided as a breakdown upon request.)*
+
+---
+
+## 7) Alignment: Optional $ZENO Token Allocation for MiniPay
+
+To strengthen long-term alignment, Zeno can allocate a **monthly token reward** to Opera MiniPay as an ecosystem partner.
+
+Suggested structure (draft, negotiable):
+
+* Monthly allocation of $ZENO vesting over time (or locked with a cliff)
+* Optional performance component (e.g., tied to a KPI like onchain activity growth or app adoption)
+
+Important: token structure, rights, and any transfer restrictions should be defined clearly in documentation and reviewed by counsel. This proposal is not legal advice.
+
+---
+
+## 8) Proposed First 30 Days (Kickoff Plan)
+
+**Week 1**
+
+* confirm goals and KPIs
+* define MiniPay launch standard v1 (checklist + templates)
+* set up shared dashboard + reporting format
+
+**Weeks 2–3**
+
+* ship 1–2 improvements to existing apps (MiniPlay + others)
+* begin 1 new miniapp MVP build (or support 1 external builder app)
+* implement community + ticketing system blueprint
+
+**Week 4**
+
+* ship MVP / pilot launch
+* publish first KPI report + learnings
+* finalize delist/iterate scorecard v1
+
+---
+
+## 9) Why Zeno Vision
+
+* Proven ability to ship: 10+ products and early revenue
+* Proven MiniPay execution: MiniPlay reached ~150K users in <1 month
+* Studio philosophy: **fast experiments + honest measurement + compounding winners**
+* Partner mindset: we co-build, we elevate the ecosystem, and we keep quality high
+
+---
+
+## 10) Next Step
+
+If this proposal is aligned, we suggest:
+
+1. 30-minute call to confirm priorities and retainer scope
+2. finalize retainer terms + reporting cadence
+3. start a 30-day pilot period that rolls into monthly
+
+**Zeno Vision** (zeno.vision)
+Contact: Marco Barbosa (@mbarbosa)
+
+---
+
+If you want, I can also produce:
+
+* a shorter **1-page “summary version”** for execs, and
+* a **MiniPay Miniapp Launch Standard v1** checklist (super tactical: infra, analytics, UX, security, launch steps), plus a scorecard template you can reuse across every developer submission.
