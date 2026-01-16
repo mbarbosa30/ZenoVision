@@ -79,7 +79,7 @@ export default function Proposal() {
             <Block variant="accent" className="border-b border-[#2563eb]" delay={0.1}>
               <h2 className="text-2xl font-semibold mb-4">Executive Summary</h2>
               <p className="text-white/90 leading-relaxed mb-4">
-                We propose a <strong>$25,000/month retainer</strong> for Zeno to operate as a dedicated MiniPay App Studio, building new mini apps and helping other developers improve and launch apps for MiniPay listing.
+                We propose a <strong>6-month initial collaboration</strong> at <strong>$25,000/month</strong> for Zeno to operate as a dedicated MiniPay App Studio, building new mini apps and helping other developers improve and launch apps for MiniPay listing.
               </p>
               <p className="text-white/80 leading-relaxed">
                 Our mandate is twofold: <strong>Build</strong> high-quality, engagement-driven apps internally, and <strong>Empower</strong> the wider ecosystem by establishing best practices and optimizing third-party apps.
@@ -88,7 +88,7 @@ export default function Proposal() {
             
             <div className="grid grid-cols-2 md:grid-cols-4">
               {[
-                { value: "1", label: "Month collaborating", sub: "with MiniPay team" },
+                { value: "6", label: "Month initial term", sub: "with option to extend" },
                 { value: "$25K", label: "Monthly retainer", sub: "all-inclusive" },
                 { value: "3", label: "Dedicated agents", sub: "human + AI" },
                 { value: "2-4", label: "Apps per month", sub: "launches/improvements" },
@@ -266,7 +266,7 @@ export default function Proposal() {
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-2">Investment & Alignment</h2>
-              <p className="text-[#a0aec0]">Monthly retainer: $25,000 (all-inclusive)</p>
+              <p className="text-[#a0aec0]">6-month initial term at $25,000/month (all-inclusive)</p>
             </Block>
             
             <div className="grid grid-cols-2 md:grid-cols-4">
@@ -459,7 +459,7 @@ export default function Proposal() {
                   <div className="w-10 h-10 bg-[#3b82f6] flex items-center justify-center text-lg font-semibold flex-shrink-0">3</div>
                   <div>
                     <h3 className="font-semibold mb-1">Kickoff</h3>
-                    <p className="text-sm text-[#a0aec0]">Start 30-day pilot that rolls into monthly retainer</p>
+                    <p className="text-sm text-[#a0aec0]">Start 30-day pilot that rolls into 6-month collaboration</p>
                   </div>
                 </div>
               </div>
