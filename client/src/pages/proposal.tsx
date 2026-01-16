@@ -67,7 +67,7 @@ export default function Proposal() {
                 Accelerating Ecosystem Growth via an AI-Native Studio Partner
               </p>
               <p className="text-xl text-[#a0aec0] max-w-3xl">
-                A strategic partnership to establish a dedicated MiniPay Studio Engine. Following the successful launch of MiniPlay (150K+ users in under 30 days), Zeno has proven its ability to ship high-traction, high-performance mini-apps rapidly.
+                A strategic partnership to establish a dedicated MiniPay Studio Engine. Building on early traction with MiniPlay and ongoing collaboration with the MiniPay team, Zeno has demonstrated the ability to ship and iterate on mini-apps rapidly.
               </p>
             </motion.div>
           </div>
@@ -88,7 +88,7 @@ export default function Proposal() {
             
             <div className="grid grid-cols-2 md:grid-cols-4">
               {[
-                { value: "150K+", label: "MiniPlay users", sub: "in <30 days" },
+                { value: "1", label: "Month collaborating", sub: "with MiniPay team" },
                 { value: "$25K", label: "Monthly retainer", sub: "all-inclusive" },
                 { value: "3", label: "Dedicated agents", sub: "human + AI" },
                 { value: "2-4", label: "Apps per month", sub: "launches/improvements" },
@@ -389,7 +389,7 @@ export default function Proposal() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { title: "Growth Acceleration", desc: "More high-quality mini apps = higher user stickiness. MiniPlay proved this with 150K users driving daily transactions." },
+                { title: "Growth Acceleration", desc: "More high-quality mini apps = higher user stickiness, driving daily engagement and transaction volume across MiniPay's user base." },
                 { title: "Innovation Edge", desc: "AI-native, curiosity-driven experiments introduce creative features that differentiate MiniPay in the market." },
                 { title: "Ecosystem Influence", desc: "Enhanced mini apps boost Celo activity, stablecoin adoption, and Opera's browser/wallet metrics across 60+ countries." },
                 { title: "Opera Value Creation", desc: "Increased DAU, transaction volume, and revenue per user directly contribute to Opera's overall business performance." },
@@ -417,8 +417,8 @@ export default function Proposal() {
                 <div>
                   <h3 className="text-xl font-semibold mb-3">Proven Execution</h3>
                   <ul className="space-y-2 text-white/80">
-                    <li>10+ products shipped with early revenue</li>
-                    <li>MiniPlay: 150K+ users in under 30 days</li>
+                    <li>Multiple experiments live, several with early traction and revenue</li>
+                    <li>MiniPlay launched with strong initial engagement</li>
                     <li>High-throughput experimentation machine</li>
                   </ul>
                 </div>
