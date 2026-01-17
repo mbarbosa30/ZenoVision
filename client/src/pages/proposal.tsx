@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowLeft, Factory, Hammer, CheckCircle, BarChart3, Users, Zap, Target, TrendingUp, Calendar } from "lucide-react";
+import { ArrowLeft, Factory, Hammer, CheckCircle, Users, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 interface BlockProps {
@@ -79,10 +79,10 @@ export default function Proposal() {
             <Block variant="accent" className="border-b border-[#2563eb]" delay={0.1}>
               <h2 className="text-2xl font-semibold mb-4">Executive Summary</h2>
               <p className="text-white/90 leading-relaxed mb-4">
-                We propose a <strong>6-month initial collaboration</strong> at <strong>$25,000/month</strong> for Zeno to operate as a dedicated MiniPay App Studio, building new mini apps and helping other developers improve and launch apps for MiniPay listing.
+                We propose a <strong>6-month initial collaboration</strong> at <strong>$25,000/month</strong> for Zeno to operate as a dedicated MiniPay App Studio, building new mini apps for the ecosystem.
               </p>
               <p className="text-white/80 leading-relaxed">
-                Our mandate is twofold: <strong>Build</strong> high-quality, engagement-driven apps internally, and <strong>Empower</strong> the wider ecosystem by establishing best practices and optimizing third-party apps.
+                Core focus on shipping high-quality, engagement-driven apps. We'll also run an exploratory pilot to help external developers list on MiniPay.
               </p>
             </Block>
             
@@ -108,21 +108,21 @@ export default function Proposal() {
           </div>
         </section>
 
-        {/* The Mandate: Factory & Foundry */}
+        {/* The Mandate: Factory + Foundry Pilot */}
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">The Mandate: Factory & Foundry</h2>
-              <p className="text-[#a0aec0]">Zeno will operate on two parallel tracks to drive value for MiniPay and the Celo ecosystem.</p>
+              <h2 className="text-3xl font-semibold mb-2">The Mandate</h2>
+              <p className="text-[#a0aec0]">Core focus on building apps, with an exploratory pilot to support ecosystem developers.</p>
             </Block>
             
             <div className="grid grid-cols-1 md:grid-cols-2">
               <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
                 <div className="flex items-center gap-3 mb-4">
                   <Factory className="w-8 h-8 text-[#3b82f6]" />
-                  <h3 className="text-2xl font-semibold">Track A: The Factory</h3>
+                  <h3 className="text-2xl font-semibold">The Factory</h3>
                 </div>
-                <p className="text-sm text-[#a0aec0] uppercase tracking-widest mb-4">Internal Builds</p>
+                <p className="text-sm text-[#3b82f6] uppercase tracking-widest mb-4">Core Deliverable</p>
                 <ul className="space-y-3 text-[#a0aec0]">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-[#3b82f6] mt-1 flex-shrink-0" />
@@ -141,22 +141,19 @@ export default function Proposal() {
               
               <Block variant="dark" delay={0.2}>
                 <div className="flex items-center gap-3 mb-4">
-                  <Hammer className="w-8 h-8 text-[#3b82f6]" />
-                  <h3 className="text-2xl font-semibold">Track B: The Foundry</h3>
+                  <Hammer className="w-8 h-8 text-[#a0aec0]" />
+                  <h3 className="text-2xl font-semibold text-[#a0aec0]">The Foundry</h3>
                 </div>
-                <p className="text-sm text-[#a0aec0] uppercase tracking-widest mb-4">Ecosystem Optimization</p>
+                <p className="text-sm text-[#a0aec0] uppercase tracking-widest mb-4">Exploratory Pilot</p>
+                <p className="text-sm text-[#a0aec0] mb-4">Test with 1-2 external apps to validate the model before scaling.</p>
                 <ul className="space-y-3 text-[#a0aec0]">
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-[#3b82f6] mt-1 flex-shrink-0" />
-                    <span><strong className="text-white">Developer Support:</strong> Assist third-party developers applying to list on MiniPay</span>
+                    <CheckCircle className="w-4 h-4 text-[#a0aec0] mt-1 flex-shrink-0" />
+                    <span>Assist third-party developers applying to list on MiniPay</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-[#3b82f6] mt-1 flex-shrink-0" />
-                    <span><strong className="text-white">Audits & Refactoring:</strong> Review apps for UX, onchain logic, and scalability</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-[#3b82f6] mt-1 flex-shrink-0" />
-                    <span><strong className="text-white">Scale or Kill:</strong> Data-driven recommendations on which apps to promote or delist</span>
+                    <CheckCircle className="w-4 h-4 text-[#a0aec0] mt-1 flex-shrink-0" />
+                    <span>Review apps for UX, onchain logic, and scalability</span>
                   </li>
                 </ul>
               </Block>
@@ -203,59 +200,48 @@ export default function Proposal() {
           </div>
         </section>
 
-        {/* KPI Framework */}
+        {/* How We Measure ROI */}
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Health Score Framework</h2>
-              <p className="text-[#a0aec0]">Standardized KPIs to measure app performance and guide ecosystem decisions</p>
+              <h2 className="text-3xl font-semibold mb-2">How We Measure ROI</h2>
+              <p className="text-[#a0aec0]">Two metrics that matter for app performance decisions</p>
             </Block>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-              {[
-                { icon: Users, title: "Engagement", metrics: ["DAU / WAU / MAU", "Sessions per user/day", "Median session length", "Streak adoption rate"] },
-                { icon: TrendingUp, title: "Retention", metrics: ["D1, D7, D30 retention", "Cohort by channel", "Repeat tx rate", "Check-in completion"] },
-                { icon: Zap, title: "Onchain Activity", metrics: ["Tx per active user", "% users with 1+ tx", "Fee volume", "Network velocity"] },
-                { icon: Target, title: "Revenue", metrics: ["Revenue per user", "Conversion rate", "ARPDAU", "Sustainable economics"] },
-              ].map((category, i) => (
-                <Block 
-                  key={i} 
-                  variant="dark" 
-                  className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""}`} 
-                  delay={0.15 + i * 0.05}
-                >
-                  <category.icon className="w-6 h-6 text-[#3b82f6] mb-3" />
-                  <h3 className="text-lg font-semibold mb-3">{category.title}</h3>
-                  <ul className="space-y-2 text-sm text-[#a0aec0]">
-                    {category.metrics.map((metric, j) => (
-                      <li key={j}>{metric}</li>
-                    ))}
-                  </ul>
-                </Block>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
+                <Users className="w-8 h-8 text-[#3b82f6] mb-3" />
+                <h3 className="text-2xl font-semibold mb-2">DAU</h3>
+                <p className="text-[#a0aec0]">Daily Active Users — the core engagement signal. Are people coming back?</p>
+              </Block>
+              <Block variant="dark" delay={0.2}>
+                <Zap className="w-8 h-8 text-[#3b82f6] mb-3" />
+                <h3 className="text-2xl font-semibold mb-2">Transactions</h3>
+                <p className="text-[#a0aec0]">Onchain transactions per user — the value signal. Are users transacting on Celo?</p>
+              </Block>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3">
               <Block variant="dark" className="border-r border-[#2d2d2d] border-t-0" delay={0.3}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-3 h-3 bg-green-500" />
-                  <span className="font-semibold">Green: Scale</span>
+                  <span className="font-semibold">Scale</span>
                 </div>
-                <p className="text-sm text-[#a0aec0]">DAU &gt;10K, Retention &gt;30%, Tx &gt;1/user/day. Invest in features and marketing.</p>
+                <p className="text-sm text-[#a0aec0]">Strong DAU + Txs. Invest in features and marketing.</p>
               </Block>
               <Block variant="dark" className="border-r border-[#2d2d2d] border-t-0" delay={0.35}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-3 h-3 bg-yellow-500" />
-                  <span className="font-semibold">Yellow: Optimize</span>
+                  <span className="font-semibold">Optimize</span>
                 </div>
-                <p className="text-sm text-[#a0aec0]">Below thresholds but positive trends. Iterate based on analytics and user feedback.</p>
+                <p className="text-sm text-[#a0aec0]">Positive trends but below thresholds. Iterate.</p>
               </Block>
               <Block variant="dark" className="border-t-0" delay={0.4}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-3 h-3 bg-red-500" />
-                  <span className="font-semibold">Red: Delist</span>
+                  <span className="font-semibold">Sunset</span>
                 </div>
-                <p className="text-sm text-[#a0aec0]">Stagnant/declining after 2-4 weeks. Sunset to free resources unless clear fix exists.</p>
+                <p className="text-sm text-[#a0aec0]">Stagnant after 2-4 weeks. Free resources.</p>
               </Block>
             </div>
           </div>
@@ -289,183 +275,63 @@ export default function Proposal() {
               ))}
             </div>
 
-            <Block variant="accent" className="border-t-0" delay={0.3}>
-              <h3 className="text-xl font-semibold mb-3">Strategic Alignment: Skin in the Game</h3>
-              <p className="text-white/90 mb-4">
-                Zeno is structured as a DAO LLC. As part of this partnership, we propose allocating a monthly grant of <strong>$ZENO tokens</strong> (vested) to Opera MiniPay.
+            <Block variant="dark" className="border-t-0" delay={0.3}>
+              <h3 className="text-xl font-semibold mb-3">Future Opportunity: Shared Upside</h3>
+              <p className="text-[#a0aec0] mb-4">
+                As Zeno grows, we're exploring a <strong>$ZENO token</strong> model that could give partners like Opera MiniPay exposure to the studio's success.
               </p>
-              <p className="text-white/80">
-                <strong>Why?</strong> This aligns our incentives. If Zeno builds successful apps that drive value to MiniPay and Celo, the value of the Zeno studio grows, and Opera shares in that upside.
+              <p className="text-sm text-[#a0aec0]">
+                This is worth exploring as a way to align long-term incentives — if Zeno builds successful apps that drive value to MiniPay and Celo, Opera could share in that upside.
               </p>
             </Block>
           </div>
         </section>
 
-        {/* 30-Day Kickoff */}
+        {/* How We Work */}
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
-            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">30-Day Kickoff Plan</h2>
-              <p className="text-[#a0aec0]">Immediate deployment to begin the next sprint</p>
-            </Block>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4">
-              {[
-                { week: "Week 1", title: "Foundation", tasks: ["Confirm goals and KPIs", "Define MiniPay Launch Standard v1", "Set up shared dashboard + reporting"] },
-                { week: "Week 2", title: "Build", tasks: ["Ship 1-2 improvements to existing apps", "Begin new miniapp MVP build", "Implement community blueprint"] },
-                { week: "Week 3", title: "Iterate", tasks: ["Continue MVP development", "Support 1 external builder app", "Refine KPI tracking"] },
-                { week: "Week 4", title: "Launch", tasks: ["Ship MVP / pilot launch", "Publish first KPI report", "Finalize Health Score v1"] },
-              ].map((week, i) => (
-                <Block 
-                  key={i} 
-                  variant="dark" 
-                  className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""}`} 
-                  delay={0.15 + i * 0.05}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-5 h-5 text-[#3b82f6]" />
-                    <span className="text-sm text-[#3b82f6] font-medium">{week.week}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-3">{week.title}</h3>
-                  <ul className="space-y-2 text-sm text-[#a0aec0]">
-                    {week.tasks.map((task, j) => (
-                      <li key={j} className="flex items-start gap-2">
-                        <CheckCircle className="w-3 h-3 text-[#3b82f6] mt-1 flex-shrink-0" />
-                        <span>{task}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Block>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Operating Model */}
-        <section className="border-b border-[#2d2d2d]">
-          <div className="max-w-7xl mx-auto">
-            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Operating Model</h2>
-              <p className="text-[#a0aec0]">How we work together</p>
-            </Block>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3">
-              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
-                <h3 className="text-lg font-semibold mb-3">Cadence</h3>
-                <ul className="space-y-2 text-sm text-[#a0aec0]">
-                  <li><strong className="text-white">Weekly:</strong> 30-45 min sync (priorities, blockers, launches)</li>
-                  <li><strong className="text-white">Biweekly:</strong> Release planning + KPI review</li>
-                  <li><strong className="text-white">Monthly:</strong> Strategic review (pipeline, learnings, next bets)</li>
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.1}>
+                <h2 className="text-2xl font-semibold mb-4">How We Work</h2>
+                <ul className="space-y-2 text-[#a0aec0]">
+                  <li><strong className="text-white">Weekly sync:</strong> 30-45 min on priorities and launches</li>
+                  <li><strong className="text-white">Monthly report:</strong> KPIs, learnings, next bets</li>
+                  <li><strong className="text-white">MiniPay approves</strong> concepts and listing; <strong className="text-white">Zeno builds</strong></li>
                 </ul>
               </Block>
-              
-              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.2}>
-                <h3 className="text-lg font-semibold mb-3">Communication</h3>
-                <ul className="space-y-2 text-sm text-[#a0aec0]">
-                  <li>Shared backlog (Linear / Notion)</li>
-                  <li>Weekly status: shipped, in progress, next, risks</li>
-                  <li>Monthly report: KPI snapshots, learnings, decisions</li>
+              <Block variant="dark" delay={0.15}>
+                <h2 className="text-2xl font-semibold mb-4">Value to Opera</h2>
+                <ul className="space-y-2 text-[#a0aec0]">
+                  <li><strong className="text-white">More apps, more stickiness:</strong> Daily engagement and transactions</li>
+                  <li><strong className="text-white">AI-native innovation:</strong> Strategic input on product direction</li>
                 </ul>
               </Block>
-              
-              <Block variant="dark" delay={0.25}>
-                <h3 className="text-lg font-semibold mb-3">Workflow</h3>
-                <ul className="space-y-2 text-sm text-[#a0aec0]">
-                  <li><strong className="text-white">MiniPay:</strong> Approval on concepts, branding, listing gates</li>
-                  <li><strong className="text-white">Zeno:</strong> Build, test, instrument, deploy, iterate</li>
-                </ul>
-              </Block>
-            </div>
-          </div>
-        </section>
-
-        {/* Benefits to Opera */}
-        <section className="border-b border-[#2d2d2d]">
-          <div className="max-w-7xl mx-auto">
-            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Benefits to Opera</h2>
-              <p className="text-[#a0aec0]">How this partnership drives broader business value</p>
-            </Block>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-              {[
-                { title: "Growth Acceleration", desc: "More high-quality mini apps = higher user stickiness, driving daily engagement and transaction volume across MiniPay's user base." },
-                { title: "Innovation Edge", desc: "AI-native, curiosity-driven experiments introduce creative features that differentiate MiniPay in the market." },
-                { title: "Strategic Advisory", desc: "Consultancy and strategic input on AI-native innovation, helping shape Opera and MiniPay's vision in this new era of acceleration." },
-                { title: "Ecosystem Influence", desc: "Enhanced mini apps boost Celo activity, stablecoin adoption, and Opera's browser/wallet metrics across 60+ countries." },
-              ].map((benefit, i) => (
-                <Block 
-                  key={i} 
-                  variant="dark" 
-                  className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""}`} 
-                  delay={0.15 + i * 0.05}
-                >
-                  <h3 className="text-lg font-semibold mb-2 text-[#3b82f6]">{benefit.title}</h3>
-                  <p className="text-sm text-[#a0aec0]">{benefit.desc}</p>
-                </Block>
-              ))}
             </div>
           </div>
         </section>
 
         {/* Why Zeno */}
-        <section className="border-b border-[#2d2d2d]">
+        <section>
           <div className="max-w-7xl mx-auto">
             <Block variant="accent" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-6">Why Zeno</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
-                  <h3 className="text-xl font-semibold mb-3">Proven Execution</h3>
-                  <ul className="space-y-2 text-white/80">
-                    <li>Multiple experiments live, several with early traction and revenue</li>
-                    <li>MiniPlay launched with strong initial engagement</li>
-                    <li>High-throughput experimentation machine</li>
-                  </ul>
+                  <h3 className="text-xl font-semibold mb-3">Team</h3>
+                  <p className="text-white/80">Marco Barbosa (Forbes 30U30) + Pedro Oliveira, with 15+ years combined experience in fintech and impact products at scale.</p>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-3">Partner Mindset</h3>
-                  <ul className="space-y-2 text-white/80">
-                    <li>We co-build, we elevate the ecosystem</li>
-                    <li>Strategic input on AI-native innovation trends</li>
-                    <li>Fast experiments + honest measurement</li>
-                  </ul>
+                  <h3 className="text-xl font-semibold mb-3">MiniPlay</h3>
+                  <p className="text-white/80">Launched on MiniPay with strong initial engagement. Built in weeks, iterated based on real user data.</p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-3">Alignment</h3>
+                  <p className="text-white/80">We're already building for MiniPay and want to deepen the partnership. Same mission, shared success.</p>
                 </div>
               </div>
-            </Block>
-          </div>
-        </section>
-
-        {/* Next Steps */}
-        <section>
-          <div className="max-w-7xl mx-auto">
-            <Block variant="dark" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-6">Next Steps</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#3b82f6] flex items-center justify-center text-lg font-semibold flex-shrink-0">1</div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Review</h3>
-                    <p className="text-sm text-[#a0aec0]">Does the Factory & Foundry model align with your current needs?</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#3b82f6] flex items-center justify-center text-lg font-semibold flex-shrink-0">2</div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Call</h3>
-                    <p className="text-sm text-[#a0aec0]">30-minute call to confirm priorities and retainer scope</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#3b82f6] flex items-center justify-center text-lg font-semibold flex-shrink-0">3</div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Kickoff</h3>
-                    <p className="text-sm text-[#a0aec0]">Start 30-day pilot that rolls into 6-month collaboration</p>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-[#2d2d2d] pt-6">
-                <p className="text-[#a0aec0] mb-2">Contact: Marco Barbosa</p>
-                <a href="https://x.com/mbarrbosa" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:text-white transition-colors" data-testid="link-contact-x">@mbarrbosa</a>
+              <div className="border-t border-white/20 pt-6">
+                <p className="text-white/80 mb-2">Contact: Marco Barbosa</p>
+                <a href="https://x.com/mbarrbosa" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80 transition-colors" data-testid="link-contact-x">@mbarrbosa</a>
               </div>
             </Block>
           </div>
