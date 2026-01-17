@@ -90,7 +90,7 @@ export default function Proposal() {
               {[
                 { value: "6", label: "Month initial term", sub: "with option to extend" },
                 { value: "$25K", label: "Monthly retainer", sub: "all-inclusive" },
-                { value: "4", label: "Dedicated agents", sub: "human + AI" },
+                { value: "4+", label: "Dedicated agents", sub: "human + AI" },
                 { value: "2-4", label: "Apps per month", sub: "launches/improvements" },
               ].map((stat, i) => (
                 <Block 
