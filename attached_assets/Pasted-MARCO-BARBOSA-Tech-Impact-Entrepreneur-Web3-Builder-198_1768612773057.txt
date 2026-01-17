@@ -1,0 +1,73 @@
+MARCO BARBOSA
+Tech Impact Entrepreneur & Web3 Builder
+1987 | Aveiro, Portugal | thwayf@gmail.com | LinkedIn | GitHub
+
+PROFESSIONAL SUMMARY
+"I build financial rails for the next billion users." Tech entrepreneur and Product Leader with 15+ years of experience bridging social impact and fintech. I’m experienced in Celo-native (L2 / EVM chains) DeFi, gasless payments, and yield-powered savings and gamification for emerging markets. I don’t just design strategies; I build and ship products.
+
+
+Proven Scale: Built platforms serving 100k+ users and moving $3M+ in value in the Global South. Expanded social impact marketplaces from Portugal to the UK and US.
+
+Recognition: Forbes 30 Under 30 (Social Entrepreneurship). Microsoft Imagine Cup: 4th Place Worldwide (Sustainability / IoT). European Youth Award: Best Business Potential.
+
+CORE COMPETENCIES
+Product Strategy
+Technical Stack
+Growth & Leadership
+Zero-to-One Discovery
+Celo, Base, Arbitrum
+Emerging Markets
+DeFi & Savings Mechanics
+ERC-4626 / EIP-3009 / x402
+Venture Funding & Deals
+Mobile-First / Offline-UX
+Tokenomics, Protocols
+Remote Team Management
+Tokenomics & Incentives
+Sybil Resistance & AI
+International Expansion
+
+
+PROFESSIONAL EXPERIENCE
+BUILDER & GROWTH STRATEGIST | 2023 – Present
+Leveraging AI to design onchain primitives for regenerative finance. Advisor TalentProtocol.com 
+
+
+NanoPay.live (Wallet Mechanics): Built a gasless, offline-ready, lightweight wallet.
+Tech: Implemented standards & protocols for instant settlements and auto-savings.
+MaxFlow.one (Sybil Resistance): Developed a graph-based AI trust algorithm.
+Impact: Verifiable & uncorrelated signals to stop bots and enable fair participation.
+Others: Tempos.bet (Conviction Markets), inspecTor.markets (Privacy Analytics), x4pp.xyz (Attention Markets via Messaging), ProsperON (New Celo’s Economic OS).
+
+CO-FOUNDER & PRESIDENT | impactMarket | 2019 – 2023
+Built a decentralized poverty alleviation protocol. Led product from idea to global scale.
+
+
+Scale: Scaled the team to 20+ members, and the protocol to 100k+ users across
+30+ developing countries, handling $3M+ cUSD distributed as UBI and MicroCredit.
+Mobile-First UX: Led the design of a protocol & wallet specifically for low-end Android.
+DeFi Integration: Integrated cUSD, compound yield, and DAO governance to create sustainable UBI flows. $PACT token design and launch.
+
+CO-FOUNDER & CEO | eSolidar | 2013 – 2021
+A social marketplace & CSR dashboard, connecting brands, consumers, and charities.
+
+
+UK Expansion: Launched operations in the United Kingdom (2015), entering one of the world's most competitive fundraising markets and securing traction with British charities.
+Innovation: Pioneered "We-Commerce" through tools, like charity auctions and CSR.
+Fundraising: Raised €1M+ for charities and secured venture backing.
+
+EDUCATION
+MSc in Computer Science | Vila Real, Portugal
+Specialization in Data Systems & Algorithms.
+MIT Sloan | Boston, US
+Startup Bootstrapping & Entrepreneurship
+Draper University | Silicon Valley, US
+Entrepreneurship & Venture Capital intensive program.
+
+OTHERS
+The Orchestra (10+ years): Trombonist & Percussionist at Banda Visconde de Salreu.
+Insight: Playing in a philharmonic band requires listening, discipline, and the understanding that if you are out of time, the whole team fails.
+
+
+Competitive Swimming (7+ years): Former pre-professional swimmer.
+Insight: Instilled the grit to focus on long-term metrics and incremental improvements (lapping the pool), regardless of the immediate difficulty.
