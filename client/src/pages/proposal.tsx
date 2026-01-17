@@ -90,7 +90,7 @@ export default function Proposal() {
               {[
                 { value: "6", label: "Month initial term", sub: "with option to extend" },
                 { value: "$25K", label: "Monthly retainer", sub: "all-inclusive" },
-                { value: "3", label: "Dedicated agents", sub: "human + AI" },
+                { value: "4", label: "Dedicated agents", sub: "human + AI" },
                 { value: "2-4", label: "Apps per month", sub: "launches/improvements" },
               ].map((stat, i) => (
                 <Block 
@@ -185,7 +185,7 @@ export default function Proposal() {
               <Block variant="dark" className="border-r border-[#2d2d2d] border-b md:border-b-0" delay={0.2}>
                 <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Product & Retention</div>
                 <ul className="space-y-3 text-sm text-[#a0aec0]">
-                  <li><strong className="text-white">Staged Roadmaps:</strong> Launch lean, release features in waves to sustain retention</li>
+                  <li><strong className="text-white">Staged Roadmaps:</strong> Pre-launch QA, lean listing, release features in waves to sustain retention</li>
                   <li><strong className="text-white">Daily Onchain Habit:</strong> Check-in mechanics triggering low-cost Celo transactions</li>
                   <li><strong className="text-white">No Pay-to-Play:</strong> Progression, status, streaks over direct rewards</li>
                 </ul>
@@ -271,7 +271,7 @@ export default function Proposal() {
             
             <div className="grid grid-cols-2 md:grid-cols-4">
               {[
-                { amount: "$17.5K", category: "Human Agents", desc: "Pilot, Co-Pilot, Ops Lead" },
+                { amount: "$17.5K", category: "Human Agents", desc: "Pilot, Co-Pilot, Dev, Support" },
                 { amount: "$3K", category: "AI Tools", desc: "Replit, custom agents" },
                 { amount: "$3K", category: "Infrastructure", desc: "Servers, hosting, ops" },
                 { amount: "$1.5K", category: "Growth & Misc", desc: "Analytics, compliance" },
