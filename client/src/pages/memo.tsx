@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight, ArrowLeft, Zap, Users, TrendingUp, Shield, Coins, Target, BarChart3, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { PasswordGate } from "@/components/password-gate";
 
 interface BlockProps {
   variant?: "dark" | "light" | "accent";
@@ -36,6 +37,7 @@ const Block = ({ variant = "dark", children, className = "", delay = 0 }: BlockP
 
 export default function Memo() {
   return (
+    <PasswordGate storageKey="memoAuth" title="Investment Memo">
     <div className="min-h-screen bg-[#0f0f0f] text-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#2d2d2d] bg-[#0f0f0f]/95 backdrop-blur-sm">
@@ -335,5 +337,6 @@ export default function Memo() {
         </footer>
       </main>
     </div>
+    </PasswordGate>
   );
 }
