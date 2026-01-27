@@ -118,7 +118,7 @@ export default function Home() {
               <div className="lg:col-span-4 grid grid-rows-3">
                 <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.1}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">130K+</div>
+                    <div className="text-4xl font-semibold mb-1">200K+</div>
                     <div className="text-sm text-[#a0aec0]">Total users</div>
                   </div>
                 </Block>
@@ -130,7 +130,7 @@ export default function Home() {
                 </Block>
                 <Block variant="accent" className="flex items-center" delay={0.3}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">20K+</div>
+                    <div className="text-4xl font-semibold mb-1">100K+</div>
                     <div className="text-sm text-white/80">Onchain transactions</div>
                   </div>
                 </Block>
