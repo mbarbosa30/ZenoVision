@@ -13,7 +13,7 @@ interface Project {
 }
 
 const PROJECTS: Project[] = [
-  { name: "MiniPlay.studio", highlight: "~130K users", description: "Cognition gaming platform", url: "https://miniplay.studio" },
+  { name: "MiniPlay.studio", highlight: "200K+ users", description: "Cognition gaming platform", url: "https://miniplay.studio" },
   { name: "nanoPay.live", highlight: "20K+ txs", description: "Digital financial utility", url: "https://nanopay.live" },
   { name: "MaxFlow.one", highlight: "5K+ signals", description: "Signal computation engine", url: "https://maxflow.one" },
   { name: "Tempos.bet", highlight: "Experiment", description: "Conviction markets", url: "https://tempos.bet" },

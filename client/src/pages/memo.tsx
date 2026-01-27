@@ -139,8 +139,8 @@ export default function Memo() {
             <div className="grid grid-cols-2 md:grid-cols-4">
               {[
                 { value: "10+", label: "Products shipped" },
-                { value: "130K+", label: "Users (MiniPlay)" },
-                { value: "20K+", label: "Onchain txs" },
+                { value: "200K+", label: "Users (MiniPlay)" },
+                { value: "100K+", label: "Onchain txs" },
                 { value: "5K+", label: "Signals computed" },
               ].map((stat, i) => (
                 <Block 
@@ -167,7 +167,7 @@ export default function Memo() {
             
             <div className="grid grid-cols-1 md:grid-cols-3">
               {[
-                { name: "Miniplay.studio", stat: "~130K users, 2.5M+ games played", time: "3 weeks" },
+                { name: "Miniplay.studio", stat: "200K+ users, 100K+ onchain txs", time: "3 weeks" },
                 { name: "nanoPay.live", stat: "7,500+ users, 20K onchain transactions", time: "4 weeks" },
                 { name: "MaxFlow.one", stat: "5,000+ signals computed", time: "Live" },
               ].map((project, i) => (
