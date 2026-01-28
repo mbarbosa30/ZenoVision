@@ -178,10 +178,6 @@ export default function ProposalMarco() {
                 <ul className="space-y-3 text-[#a0aec0]">
                   <li className="flex items-start gap-2">
                     <span className="text-[#3b82f6] mt-1">•</span>
-                    <span><strong className="text-white">Forbes 30 Under 30</strong> — Social Entrepreneurship</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#3b82f6] mt-1">•</span>
                     <span><strong className="text-white">Microsoft Imagine Cup</strong> — 4th Place Worldwide (Sustainability / IoT)</span>
                   </li>
                   <li className="flex items-start gap-2">

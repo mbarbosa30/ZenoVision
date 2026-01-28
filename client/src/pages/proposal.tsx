@@ -320,7 +320,7 @@ export default function Proposal() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                   <h3 className="text-xl font-semibold mb-3">Team</h3>
-                  <p className="text-white/80">Marco Barbosa (Forbes 30U30) + Pedro Oliveira, with 15+ years combined experience in fintech and impact products at scale.</p>
+                  <p className="text-white/80">Marco Barbosa + Pedro Oliveira, with 15+ years combined experience in fintech and impact products at scale.</p>
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-3">MiniPlay</h3>
