@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { motion, useInView } from "framer-motion";
 import { 
   Users, TrendingUp, TrendingDown, DollarSign, Zap, Activity, 
@@ -259,19 +259,12 @@ function DashboardContent() {
   }, [snapshots]);
 
   const historicalData = useMemo(() => 
-    generateMockHistoricalData(snapshots, projects), 
-    [snapshots, projects]
+    processHistoricalSnapshots(historicalSnapshots, projects), 
+    [historicalSnapshots, projects]
   );
 
   const appComparisonData = useMemo(() => {
-    if (snapshots.length === 0) {
-      return projects.slice(0, 8).map((p, i) => ({
-        name: p.name.split('.')[0],
-        DAU: Math.round(1000 + Math.random() * 5000),
-        Revenue: Math.round(500 + Math.random() * 3000),
-        Transactions: Math.round(2000 + Math.random() * 8000),
-      }));
-    }
+    if (snapshots.length === 0) return [];
     
     return snapshots.map(s => {
       const project = projects.find(p => p.id === s.projectId);
@@ -280,6 +273,7 @@ function DashboardContent() {
         DAU: s.metrics.users.daily_active,
         Revenue: s.metrics.revenue.net_income,
         Transactions: s.metrics.onchain.transactions,
+        Volume: s.metrics.onchain.volume,
       };
     });
   }, [snapshots, projects]);
@@ -313,32 +307,70 @@ function DashboardContent() {
       const recentWeek = historical.slice(-7);
       const previousWeek = historical.slice(-14, -7);
       
-      const recentDAU = recentWeek.reduce((sum, d) => sum + (d.totalDAU || 0), 0) / 7;
-      const previousDAU = previousWeek.reduce((sum, d) => sum + (d.totalDAU || 0), 0) / 7;
+      const recentDAU = recentWeek.reduce((sum: number, d: any) => sum + (d.totalDAU || 0), 0) / 7;
+      const previousDAU = previousWeek.reduce((sum: number, d: any) => sum + (d.totalDAU || 0), 0) / 7;
       dauGrowthRate = previousDAU > 0 ? ((recentDAU - previousDAU) / previousDAU) * 100 : 0;
       
-      const recentRev = recentWeek.reduce((sum, d) => sum + (d.totalRevenue || 0), 0) / 7;
-      const previousRev = previousWeek.reduce((sum, d) => sum + (d.totalRevenue || 0), 0) / 7;
+      const recentRev = recentWeek.reduce((sum: number, d: any) => sum + (d.totalRevenue || 0), 0) / 7;
+      const previousRev = previousWeek.reduce((sum: number, d: any) => sum + (d.totalRevenue || 0), 0) / 7;
       revenueGrowthRate = previousRev > 0 ? ((recentRev - previousRev) / previousRev) * 100 : 0;
       
-      const recentMAU = recentWeek.reduce((sum, d) => sum + (d.totalMAU || 0), 0) / 7;
-      const previousMAU = previousWeek.reduce((sum, d) => sum + (d.totalMAU || 0), 0) / 7;
+      const recentMAU = recentWeek.reduce((sum: number, d: any) => sum + (d.totalMAU || 0), 0) / 7;
+      const previousMAU = previousWeek.reduce((sum: number, d: any) => sum + (d.totalMAU || 0), 0) / 7;
       mauGrowthRate = previousMAU > 0 ? ((recentMAU - previousMAU) / previousMAU) * 100 : 0;
+    } else if (historical.length >= 2) {
+      const recent = historical[historical.length - 1];
+      const previous = historical[0];
+      
+      dauGrowthRate = previous.totalDAU > 0 ? ((recent.totalDAU - previous.totalDAU) / previous.totalDAU) * 100 : 0;
+      revenueGrowthRate = previous.totalRevenue > 0 ? ((recent.totalRevenue - previous.totalRevenue) / previous.totalRevenue) * 100 : 0;
+      mauGrowthRate = previous.totalMAU > 0 ? ((recent.totalMAU - previous.totalMAU) / previous.totalMAU) * 100 : 0;
     }
     
     const monthlyGrowthRate = revenueGrowthRate / 100;
-    const arrMultiples = { conservative: 5, moderate: 10, aggressive: 20 };
-    const valuation = {
-      conservative: arr * arrMultiples.conservative,
-      moderate: arr * arrMultiples.moderate,
-      aggressive: arr * arrMultiples.aggressive,
-    };
     
     const revenuePerUser = stats.totalUsers > 0 ? stats.totalRevenue / stats.totalUsers : 0;
     const transactionsPerUser = stats.totalUsers > 0 ? stats.totalTransactions / stats.totalUsers : 0;
     const engagementPerUser = stats.totalUsers > 0 ? stats.keyActions / stats.totalUsers : 0;
     
     const nrr = 100 + (revenueGrowthRate * 0.5);
+    
+    const annualizedVolume = stats.totalVolume * 12;
+    const annualizedRevenue = arr;
+    
+    const web3Valuation = {
+      revenueMultiple: {
+        low: annualizedRevenue * 10,
+        mid: annualizedRevenue * 25,
+        high: annualizedRevenue * 50,
+      },
+      volumeMultiple: {
+        low: annualizedVolume * 0.01,
+        mid: annualizedVolume * 0.05,
+        high: annualizedVolume * 0.1,
+      },
+      dauBased: {
+        low: stats.dau * 50,
+        mid: stats.dau * 150,
+        high: stats.dau * 300,
+      },
+      mauBased: {
+        low: stats.mau * 10,
+        mid: stats.mau * 30,
+        high: stats.mau * 75,
+      },
+      walletBased: {
+        low: stats.payingUsers * 100,
+        mid: stats.payingUsers * 500,
+        high: stats.payingUsers * 1500,
+      },
+    };
+    
+    const blendedValuation = {
+      low: Math.round((web3Valuation.revenueMultiple.low + web3Valuation.dauBased.low + web3Valuation.mauBased.low + web3Valuation.volumeMultiple.low + web3Valuation.walletBased.low) / 5),
+      mid: Math.round((web3Valuation.revenueMultiple.mid + web3Valuation.dauBased.mid + web3Valuation.mauBased.mid + web3Valuation.volumeMultiple.mid + web3Valuation.walletBased.mid) / 5),
+      high: Math.round((web3Valuation.revenueMultiple.high + web3Valuation.dauBased.high + web3Valuation.mauBased.high + web3Valuation.volumeMultiple.high + web3Valuation.walletBased.high) / 5),
+    };
     
     return {
       mrr, arr,
@@ -347,10 +379,12 @@ function DashboardContent() {
       stickiness,
       ltv, estimatedCac, ltvCacRatio, paybackMonths,
       dauGrowthRate, revenueGrowthRate, mauGrowthRate,
-      valuation,
+      web3Valuation,
+      blendedValuation,
       revenuePerUser, transactionsPerUser, engagementPerUser,
       nrr,
       monthlyGrowthRate,
+      annualizedVolume,
     };
   }, [aggregatedStats, historicalData]);
 
@@ -382,22 +416,10 @@ function DashboardContent() {
   }, [aggregatedStats, financialMetrics]);
 
   const sortedTableData = useMemo(() => {
-    const data = snapshots.length > 0 
-      ? snapshots.map(s => {
-          const project = projects.find(p => p.id === s.projectId);
-          return { project, snapshot: s };
-        }).filter(d => d.project)
-      : projects.slice(0, 8).map(p => ({
-          project: p,
-          snapshot: {
-            metrics: {
-              users: { total: Math.round(5000 + Math.random() * 20000), daily_active: Math.round(500 + Math.random() * 2000), monthly_active: Math.round(3000 + Math.random() * 15000), paying: Math.round(10 + Math.random() * 100) },
-              revenue: { net_income: Math.round(500 + Math.random() * 3000) },
-              onchain: { transactions: Math.round(1000 + Math.random() * 10000), volume: Math.round(5000 + Math.random() * 50000) },
-              engagement: { key_actions: Math.round(1000 + Math.random() * 5000), sessions_today: Math.round(200 + Math.random() * 1000) },
-            }
-          } as MetricsSnapshot
-        }));
+    const data = snapshots.map(s => {
+      const project = projects.find(p => p.id === s.projectId);
+      return { project, snapshot: s };
+    }).filter(d => d.project);
 
     return data.sort((a, b) => {
       let aVal: any, bVal: any;
@@ -472,12 +494,19 @@ function DashboardContent() {
               </p>
               
               <div className="flex items-center gap-4 text-sm text-[#a0aec0]">
-                <span>{projects.length} products tracked</span>
+                <span>{connectedProjects.length} of {allProjects.length} apps connected</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
                 <span>{snapshots.length} with live metrics</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
-                <span>Last updated: {new Date().toLocaleTimeString()}</span>
+                <span>{historicalData.length} historical snapshots</span>
+                <span className="w-1 h-1 bg-[#3b82f6]" />
+                <span>Updated: {new Date().toLocaleTimeString()}</span>
               </div>
+              {connectedProjects.length === 0 && (
+                <div className="mt-4 p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] text-sm">
+                  No apps with metrics endpoints configured. Add API endpoints in the Admin panel to see real data.
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
@@ -639,21 +668,76 @@ function DashboardContent() {
               </Block>
             </div>
 
-            <Block delay={0.4} className="bg-gradient-to-r from-[#10b981]/10 to-[#3b82f6]/10 border-[#10b981]/30">
-              <h3 className="text-lg font-medium mb-4">Valuation Estimates (ARR Multiple)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-sm text-[#a0aec0] mb-2">Conservative (5x ARR)</div>
-                  <div className="text-2xl font-semibold" data-testid="value-valuation-5x">${(financialMetrics.valuation.conservative / 1000).toFixed(0)}K</div>
+            <Block delay={0.4} className="bg-gradient-to-r from-[#8b5cf6]/10 to-[#06b6d4]/10 border-[#8b5cf6]/30">
+              <div className="flex items-center gap-3 mb-6">
+                <h3 className="text-xl font-semibold">Zeno Studio Valuation</h3>
+                <span className="text-xs text-[#666] px-2 py-1 bg-[#2d2d2d]">Web3 / dApps / MiniApps</span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="text-center p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-sm text-[#a0aec0] mb-2">Conservative</div>
+                  <div className="text-3xl font-bold text-[#a0aec0]" data-testid="value-valuation-low">
+                    ${financialMetrics.blendedValuation.low >= 1000000 
+                      ? (financialMetrics.blendedValuation.low / 1000000).toFixed(2) + 'M' 
+                      : (financialMetrics.blendedValuation.low / 1000).toFixed(0) + 'K'}
+                  </div>
                 </div>
-                <div className="text-center border-x border-[#2d2d2d]">
-                  <div className="text-sm text-[#a0aec0] mb-2">Moderate (10x ARR)</div>
-                  <div className="text-2xl font-semibold text-[#10b981]" data-testid="value-valuation-10x">${(financialMetrics.valuation.moderate / 1000).toFixed(0)}K</div>
+                <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30">
+                  <div className="text-sm text-[#10b981] mb-2">Mid-Range Estimate</div>
+                  <div className="text-3xl font-bold text-[#10b981]" data-testid="value-valuation-mid">
+                    ${financialMetrics.blendedValuation.mid >= 1000000 
+                      ? (financialMetrics.blendedValuation.mid / 1000000).toFixed(2) + 'M' 
+                      : (financialMetrics.blendedValuation.mid / 1000).toFixed(0) + 'K'}
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-sm text-[#a0aec0] mb-2">Aggressive (20x ARR)</div>
-                  <div className="text-2xl font-semibold text-[#3b82f6]" data-testid="value-valuation-20x">${(financialMetrics.valuation.aggressive / 1000).toFixed(0)}K</div>
+                <div className="text-center p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-sm text-[#3b82f6] mb-2">Aggressive</div>
+                  <div className="text-3xl font-bold text-[#3b82f6]" data-testid="value-valuation-high">
+                    ${financialMetrics.blendedValuation.high >= 1000000 
+                      ? (financialMetrics.blendedValuation.high / 1000000).toFixed(2) + 'M' 
+                      : (financialMetrics.blendedValuation.high / 1000).toFixed(0) + 'K'}
+                  </div>
                 </div>
+              </div>
+
+              <div className="text-xs text-[#666] mb-4">Valuation methodology breakdown:</div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] mb-1">Revenue (10-50x)</div>
+                  <div className="font-semibold" data-testid="value-rev-multiple">
+                    ${(financialMetrics.web3Valuation.revenueMultiple.mid / 1000).toFixed(0)}K
+                  </div>
+                </div>
+                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] mb-1">Volume (1-10%)</div>
+                  <div className="font-semibold" data-testid="value-vol-multiple">
+                    ${(financialMetrics.web3Valuation.volumeMultiple.mid / 1000).toFixed(0)}K
+                  </div>
+                </div>
+                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] mb-1">Per DAU ($50-300)</div>
+                  <div className="font-semibold" data-testid="value-dau-multiple">
+                    ${(financialMetrics.web3Valuation.dauBased.mid / 1000).toFixed(0)}K
+                  </div>
+                </div>
+                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] mb-1">Per MAU ($10-75)</div>
+                  <div className="font-semibold" data-testid="value-mau-multiple">
+                    ${(financialMetrics.web3Valuation.mauBased.mid / 1000).toFixed(0)}K
+                  </div>
+                </div>
+                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] mb-1">Per Wallet ($100-1.5K)</div>
+                  <div className="font-semibold" data-testid="value-wallet-multiple">
+                    ${(financialMetrics.web3Valuation.walletBased.mid / 1000).toFixed(0)}K
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 text-xs text-[#666] italic">
+                * Blended valuation uses Web3/dApp industry multiples: revenue (10-50x for high-growth), transaction volume (1-10%), 
+                DAU ($50-300/user for gaming/miniapps), MAU ($10-75/user), and wallet value ($100-1.5K/active wallet).
               </div>
             </Block>
           </div>
@@ -915,9 +999,8 @@ function DashboardContent() {
                   </thead>
                   <tbody>
                     {sortedTableData.map(({ project, snapshot }) => (
-                      <>
+                      <React.Fragment key={project!.id}>
                         <tr 
-                          key={project!.id} 
                           className="border-b border-[#2d2d2d] hover:bg-[#1a1a1a]/50 transition-colors"
                           data-testid={`row-app-${project!.id}`}
                         >
@@ -981,7 +1064,7 @@ function DashboardContent() {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
