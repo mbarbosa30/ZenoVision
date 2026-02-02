@@ -88,6 +88,22 @@ const Block = ({ children, className = "", delay = 0 }: BlockProps) => {
   );
 };
 
+const formatNum = (num: number, prefix = ""): string => {
+  if (num >= 1000000) {
+    return `${prefix}${(num / 1000000).toFixed(1)}M`;
+  }
+  if (num >= 10000) {
+    return `${prefix}${(num / 1000).toFixed(0)}K`;
+  }
+  if (num >= 1000) {
+    return `${prefix}${(num / 1000).toFixed(1)}K`;
+  }
+  if (num < 10000 && num !== Math.floor(num)) {
+    return `${prefix}${num.toFixed(2)}`;
+  }
+  return `${prefix}${num.toLocaleString()}`;
+};
+
 const StatCard = ({ 
   label, 
   value, 
@@ -1046,8 +1062,8 @@ function DashboardContent() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {metricVisibility.revenue && (
                 <StatCard 
-                  label="Net Revenue" 
-                  value={`$${aggregatedStats.totalRevenue.toLocaleString()}`} 
+                  label="Net Income" 
+                  value={formatNum(aggregatedStats.totalRevenue, "$")} 
                   change={aggregatedStats.totalRevenue > 0 && historicalData.length >= 2 ? financialMetrics.revenueGrowthRate : undefined}
                   icon={DollarSign} 
                   color="green"
@@ -1057,8 +1073,8 @@ function DashboardContent() {
               )}
               {metricVisibility.revenue && (
                 <StatCard 
-                  label="Payments" 
-                  value={aggregatedStats.totalPayments.toLocaleString()} 
+                  label="All Payments" 
+                  value={formatNum(aggregatedStats.totalPayments)} 
                   change={aggregatedStats.totalPayments > 0 && historicalData.length >= 2 ? financialMetrics.paymentsGrowthRate : undefined}
                   icon={CreditCard} 
                   color="green"
@@ -1068,8 +1084,8 @@ function DashboardContent() {
               )}
               {metricVisibility.engagement && (
                 <StatCard 
-                  label="Key Actions" 
-                  value={aggregatedStats.keyActions.toLocaleString()} 
+                  label="Daily Actions" 
+                  value={formatNum(aggregatedStats.keyActions)} 
                   change={aggregatedStats.keyActions > 0 && historicalData.length >= 2 ? financialMetrics.actionsGrowthRate : undefined}
                   icon={MousePointer} 
                   color="blue"
@@ -1079,8 +1095,8 @@ function DashboardContent() {
               )}
               {metricVisibility.engagement && (
                 <StatCard 
-                  label="Sessions" 
-                  value={aggregatedStats.sessions.toLocaleString()} 
+                  label="Daily Sessions" 
+                  value={formatNum(aggregatedStats.sessions)} 
                   change={aggregatedStats.sessions > 0 && historicalData.length >= 2 ? financialMetrics.sessionsGrowthRate : undefined}
                   icon={Target} 
                   color="purple"
@@ -1090,8 +1106,8 @@ function DashboardContent() {
               )}
               {metricVisibility.onchain && (
                 <StatCard 
-                  label="Transactions" 
-                  value={aggregatedStats.totalTransactions.toLocaleString()} 
+                  label="All Transactions" 
+                  value={formatNum(aggregatedStats.totalTransactions)} 
                   change={aggregatedStats.totalTransactions > 0 && historicalData.length >= 2 ? financialMetrics.txGrowthRate : undefined}
                   icon={Zap} 
                   color="yellow"
@@ -1101,8 +1117,8 @@ function DashboardContent() {
               )}
               {metricVisibility.onchain && (
                 <StatCard 
-                  label="Volume" 
-                  value={`$${aggregatedStats.totalVolume.toLocaleString()}`} 
+                  label="Total Volume" 
+                  value={formatNum(aggregatedStats.totalVolume, "$")} 
                   change={aggregatedStats.totalVolume > 0 && historicalData.length >= 2 ? financialMetrics.volumeGrowthRate : undefined}
                   icon={Wallet} 
                   color="cyan"
