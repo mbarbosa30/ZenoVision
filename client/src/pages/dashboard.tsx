@@ -3,7 +3,8 @@ import { motion, useInView } from "framer-motion";
 import { 
   Users, TrendingUp, TrendingDown, DollarSign, Zap, Activity, 
   ArrowUpRight, ArrowDownRight, RefreshCw, ChevronDown, ChevronUp,
-  BarChart3, LineChart as LineChartIcon, PieChart
+  BarChart3, LineChart as LineChartIcon, PieChart, CreditCard, MousePointer,
+  Calendar, Wallet, Box, Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -12,7 +13,9 @@ import { PasswordGate } from "@/components/password-gate";
 import { format, subDays } from "date-fns";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ScatterChart, Scatter, ZAxis
 } from "recharts";
 
 interface Project {
@@ -87,7 +90,8 @@ const StatCard = ({
   change, 
   icon: Icon, 
   color = "blue",
-  delay = 0 
+  delay = 0,
+  testId
 }: { 
   label: string; 
   value: string | number; 
@@ -95,6 +99,7 @@ const StatCard = ({
   icon: any;
   color?: "blue" | "green" | "yellow" | "purple" | "cyan";
   delay?: number;
+  testId?: string;
 }) => {
   const colors = {
     blue: "text-[#3b82f6] bg-[#3b82f6]/10",
@@ -109,9 +114,9 @@ const StatCard = ({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">{label}</div>
-          <div className="text-3xl md:text-4xl font-semibold mb-2">{value}</div>
+          <div className="text-3xl md:text-4xl font-semibold mb-2" data-testid={testId}>{value}</div>
           {change !== undefined && (
-            <div className={`flex items-center gap-1 text-sm ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
+            <div className={`flex items-center gap-1 text-sm ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
               {change >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
               {Math.abs(change).toFixed(1)}% vs last period
             </div>
@@ -170,10 +175,15 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     
     let totalUsers = 0;
     let totalDAU = 0;
+    let totalWAU = 0;
     let totalMAU = 0;
+    let totalPaying = 0;
     let totalRevenue = 0;
+    let totalPayments = 0;
     let totalTransactions = 0;
     let totalVolume = 0;
+    let totalKeyActions = 0;
+    let totalSessions = 0;
     
     sessionSnapshots.forEach(snapshot => {
       const project = projects.find(p => p.id === snapshot.projectId);
@@ -181,10 +191,15 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
       
       totalUsers += snapshot.metrics.users.total;
       totalDAU += snapshot.metrics.users.daily_active;
+      totalWAU += snapshot.metrics.users.weekly_active;
       totalMAU += snapshot.metrics.users.monthly_active;
+      totalPaying += snapshot.metrics.users.paying;
       totalRevenue += snapshot.metrics.revenue.net_income;
+      totalPayments += snapshot.metrics.revenue.total_payments;
       totalTransactions += snapshot.metrics.onchain.transactions;
       totalVolume += snapshot.metrics.onchain.volume;
+      totalKeyActions += snapshot.metrics.engagement.key_actions;
+      totalSessions += snapshot.metrics.engagement.sessions_today;
       
       const safeKey = project.id.slice(0, 8);
       pointData[`${safeKey}_DAU`] = snapshot.metrics.users.daily_active;
@@ -194,10 +209,15 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     
     pointData.totalUsers = totalUsers;
     pointData.totalDAU = totalDAU;
+    pointData.totalWAU = totalWAU;
     pointData.totalMAU = totalMAU;
+    pointData.totalPaying = totalPaying;
     pointData.totalRevenue = totalRevenue;
+    pointData.totalPayments = totalPayments;
     pointData.totalTransactions = totalTransactions;
     pointData.totalVolume = totalVolume;
+    pointData.totalKeyActions = totalKeyActions;
+    pointData.totalSessions = totalSessions;
     pointData.appsInSession = sessionSnapshots.length;
     
     return pointData;
@@ -205,18 +225,21 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
 }
 
 function calculateTimeWeightedGrowth(historical: any[]) {
-  if (historical.length < 2) {
-    return { userGrowthRate: 0, dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, txGrowthRate: 0, hoursElapsed: 0, daysElapsed: 0 };
-  }
+  const defaultRates = { 
+    userGrowthRate: 0, dauGrowthRate: 0, wauGrowthRate: 0, mauGrowthRate: 0, 
+    payingGrowthRate: 0, revenueGrowthRate: 0, paymentsGrowthRate: 0,
+    txGrowthRate: 0, volumeGrowthRate: 0, actionsGrowthRate: 0, sessionsGrowthRate: 0,
+    hoursElapsed: 0, daysElapsed: 0 
+  };
+  
+  if (historical.length < 2) return defaultRates;
   
   const first = historical[0];
   const last = historical[historical.length - 1];
   const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
   const daysElapsed = hoursElapsed / 24;
   
-  if (daysElapsed < 0.5) {
-    return { userGrowthRate: 0, dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, txGrowthRate: 0, hoursElapsed, daysElapsed };
-  }
+  if (daysElapsed < 0.5) return { ...defaultRates, hoursElapsed, daysElapsed };
   
   const calculateWeeklyRate = (firstVal: number, lastVal: number): number => {
     if (firstVal <= 0 || lastVal <= 0) return 0;
@@ -227,10 +250,16 @@ function calculateTimeWeightedGrowth(historical: any[]) {
   
   return {
     userGrowthRate: calculateWeeklyRate(first.totalUsers || 0, last.totalUsers || 0),
-    dauGrowthRate: calculateWeeklyRate(first.totalDAU, last.totalDAU),
-    revenueGrowthRate: calculateWeeklyRate(first.totalRevenue, last.totalRevenue),
-    mauGrowthRate: calculateWeeklyRate(first.totalMAU, last.totalMAU),
-    txGrowthRate: calculateWeeklyRate(first.totalTransactions, last.totalTransactions),
+    dauGrowthRate: calculateWeeklyRate(first.totalDAU || 0, last.totalDAU || 0),
+    wauGrowthRate: calculateWeeklyRate(first.totalWAU || 0, last.totalWAU || 0),
+    mauGrowthRate: calculateWeeklyRate(first.totalMAU || 0, last.totalMAU || 0),
+    payingGrowthRate: calculateWeeklyRate(first.totalPaying || 0, last.totalPaying || 0),
+    revenueGrowthRate: calculateWeeklyRate(first.totalRevenue || 0, last.totalRevenue || 0),
+    paymentsGrowthRate: calculateWeeklyRate(first.totalPayments || 0, last.totalPayments || 0),
+    txGrowthRate: calculateWeeklyRate(first.totalTransactions || 0, last.totalTransactions || 0),
+    volumeGrowthRate: calculateWeeklyRate(first.totalVolume || 0, last.totalVolume || 0),
+    actionsGrowthRate: calculateWeeklyRate(first.totalKeyActions || 0, last.totalKeyActions || 0),
+    sessionsGrowthRate: calculateWeeklyRate(first.totalSessions || 0, last.totalSessions || 0),
     hoursElapsed,
     daysElapsed,
   };
@@ -294,7 +323,7 @@ function DashboardContent() {
     if (snapshots.length === 0) {
       return {
         totalUsers: 0, dau: 0, wau: 0, mau: 0, payingUsers: 0,
-        totalRevenue: 0, totalTransactions: 0, totalVolume: 0,
+        totalRevenue: 0, totalPayments: 0, totalTransactions: 0, totalVolume: 0,
         keyActions: 0, sessions: 0, connectedApps: 0,
       };
     }
@@ -306,13 +335,14 @@ function DashboardContent() {
       mau: acc.mau + s.metrics.users.monthly_active,
       payingUsers: acc.payingUsers + s.metrics.users.paying,
       totalRevenue: acc.totalRevenue + s.metrics.revenue.net_income,
+      totalPayments: acc.totalPayments + s.metrics.revenue.total_payments,
       totalTransactions: acc.totalTransactions + s.metrics.onchain.transactions,
       totalVolume: acc.totalVolume + s.metrics.onchain.volume,
       keyActions: acc.keyActions + s.metrics.engagement.key_actions,
       sessions: acc.sessions + s.metrics.engagement.sessions_today,
     }), {
       totalUsers: 0, dau: 0, wau: 0, mau: 0, payingUsers: 0,
-      totalRevenue: 0, totalTransactions: 0, totalVolume: 0,
+      totalRevenue: 0, totalPayments: 0, totalTransactions: 0, totalVolume: 0,
       keyActions: 0, sessions: 0,
     });
     
@@ -332,10 +362,43 @@ function DashboardContent() {
       return {
         name: project?.name.split('.')[0] || 'Unknown',
         DAU: s.metrics.users.daily_active,
+        WAU: s.metrics.users.weekly_active,
+        MAU: s.metrics.users.monthly_active,
         Revenue: s.metrics.revenue.net_income,
         Transactions: s.metrics.onchain.transactions,
         Volume: s.metrics.onchain.volume,
+        KeyActions: s.metrics.engagement.key_actions,
+        Sessions: s.metrics.engagement.sessions_today,
       };
+    });
+  }, [snapshots, projects]);
+
+  const radarData = useMemo(() => {
+    if (snapshots.length === 0) return [];
+    
+    const maxValues = snapshots.reduce((acc, s) => ({
+      DAU: Math.max(acc.DAU, s.metrics.users.daily_active || 1),
+      WAU: Math.max(acc.WAU, s.metrics.users.weekly_active || 1),
+      MAU: Math.max(acc.MAU, s.metrics.users.monthly_active || 1),
+      Revenue: Math.max(acc.Revenue, s.metrics.revenue.net_income || 1),
+      Transactions: Math.max(acc.Transactions, s.metrics.onchain.transactions || 1),
+      Volume: Math.max(acc.Volume, s.metrics.onchain.volume || 1),
+    }), { DAU: 1, WAU: 1, MAU: 1, Revenue: 1, Transactions: 1, Volume: 1 });
+    
+    return ['DAU', 'WAU', 'MAU', 'Revenue', 'Transactions', 'Volume'].map(metric => {
+      const result: any = { metric };
+      snapshots.forEach(s => {
+        const project = projects.find(p => p.id === s.projectId);
+        const name = project?.name.split('.')[0] || 'Unknown';
+        const value = metric === 'DAU' ? s.metrics.users.daily_active :
+                      metric === 'WAU' ? s.metrics.users.weekly_active :
+                      metric === 'MAU' ? s.metrics.users.monthly_active :
+                      metric === 'Revenue' ? s.metrics.revenue.net_income :
+                      metric === 'Transactions' ? s.metrics.onchain.transactions :
+                      s.metrics.onchain.volume;
+        result[name] = Math.round((value / (maxValues as any)[metric]) * 100);
+      });
+      return result;
     });
   }, [snapshots, projects]);
 
@@ -361,7 +424,11 @@ function DashboardContent() {
     const paybackMonths = arpu > 0 ? estimatedCac / arpu : 0;
     
     const timeWeightedGrowth = calculateTimeWeightedGrowth(historical);
-    const { userGrowthRate, dauGrowthRate, revenueGrowthRate, mauGrowthRate, txGrowthRate, hoursElapsed, daysElapsed } = timeWeightedGrowth;
+    const { 
+      userGrowthRate, dauGrowthRate, wauGrowthRate, mauGrowthRate, payingGrowthRate,
+      revenueGrowthRate, paymentsGrowthRate, txGrowthRate, volumeGrowthRate,
+      actionsGrowthRate, sessionsGrowthRate, hoursElapsed, daysElapsed 
+    } = timeWeightedGrowth;
     
     const monthlyGrowthRate = revenueGrowthRate / 100;
     
@@ -408,16 +475,49 @@ function DashboardContent() {
       high: Math.round((web3Valuation.revenueMultiple.high + web3Valuation.dauBased.high + web3Valuation.mauBased.high + web3Valuation.volumeMultiple.high + web3Valuation.walletBased.high) / 5),
     };
     
+    // Advanced metrics
+    const arppu = stats.payingUsers > 0 ? stats.totalRevenue / stats.payingUsers : 0;
+    const revenuePerTx = stats.totalTransactions > 0 ? stats.totalRevenue / stats.totalTransactions : 0;
+    const avgTxSize = stats.totalTransactions > 0 ? stats.totalVolume / stats.totalTransactions : 0;
+    
+    // Cohort ratios
+    const dauWauRatio = stats.wau > 0 ? (stats.dau / stats.wau) * 100 : 0;
+    const wauMauRatio = stats.mau > 0 ? (stats.wau / stats.mau) * 100 : 0;
+    const payingMauRatio = stats.mau > 0 ? (stats.payingUsers / stats.mau) * 100 : 0;
+    
+    // Engagement quality
+    const actionsPerSession = stats.sessions > 0 ? stats.keyActions / stats.sessions : 0;
+    const actionsPerDAU = stats.dau > 0 ? stats.keyActions / stats.dau : 0;
+    const sessionsPerDAU = stats.dau > 0 ? stats.sessions / stats.dau : 0;
+    
+    // On-chain health
+    const txPerUser = stats.totalUsers > 0 ? stats.totalTransactions / stats.totalUsers : 0;
+    const volumePerTx = stats.totalTransactions > 0 ? stats.totalVolume / stats.totalTransactions : 0;
+    const volumePerActiveUser = stats.dau > 0 ? stats.totalVolume / stats.dau : 0;
+    
+    // Engagement funnel conversion rates
+    const dauToTotal = stats.totalUsers > 0 ? (stats.dau / stats.totalUsers) * 100 : 0;
+    const wauToDau = stats.dau > 0 ? (stats.wau / stats.dau) * 100 : 0;
+    const mauToWau = stats.wau > 0 ? (stats.mau / stats.wau) * 100 : 0;
+    const payingToMau = stats.mau > 0 ? (stats.payingUsers / stats.mau) * 100 : 0;
+    
     return {
       mrr, arr,
-      arpu, arpuAll,
+      arpu, arpuAll, arppu,
       conversionRate,
       stickiness,
       ltv, estimatedCac, ltvCacRatio, paybackMonths,
-      userGrowthRate, dauGrowthRate, revenueGrowthRate, mauGrowthRate, txGrowthRate,
+      userGrowthRate, dauGrowthRate, wauGrowthRate, mauGrowthRate, payingGrowthRate,
+      revenueGrowthRate, paymentsGrowthRate, txGrowthRate, volumeGrowthRate,
+      actionsGrowthRate, sessionsGrowthRate,
       web3Valuation,
       blendedValuation,
       revenuePerUser, transactionsPerUser, engagementPerUser,
+      revenuePerTx, avgTxSize,
+      dauWauRatio, wauMauRatio, payingMauRatio,
+      actionsPerSession, actionsPerDAU, sessionsPerDAU,
+      txPerUser, volumePerTx, volumePerActiveUser,
+      dauToTotal, wauToDau, mauToWau, payingToMau,
       nrr,
       monthlyGrowthRate,
       annualizedVolume,
@@ -553,7 +653,11 @@ function DashboardContent() {
 
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto p-8 md:p-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="w-6 h-6 text-[#3b82f6]" />
+              <h2 className="text-2xl font-semibold">User Metrics</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
               <StatCard 
                 label="Total Users" 
                 value={aggregatedStats.totalUsers.toLocaleString()} 
@@ -561,6 +665,7 @@ function DashboardContent() {
                 icon={Users} 
                 color="blue"
                 delay={0.1}
+                testId="stat-total-users"
               />
               <StatCard 
                 label="Daily Active" 
@@ -568,7 +673,17 @@ function DashboardContent() {
                 change={aggregatedStats.dau > 0 && historicalData.length >= 2 ? financialMetrics.dauGrowthRate : undefined}
                 icon={Activity} 
                 color="green"
-                delay={0.15}
+                delay={0.12}
+                testId="stat-dau"
+              />
+              <StatCard 
+                label="Weekly Active" 
+                value={aggregatedStats.wau.toLocaleString()} 
+                change={aggregatedStats.wau > 0 && historicalData.length >= 2 ? financialMetrics.wauGrowthRate : undefined}
+                icon={Calendar} 
+                color="cyan"
+                delay={0.14}
+                testId="stat-wau"
               />
               <StatCard 
                 label="Monthly Active" 
@@ -576,15 +691,60 @@ function DashboardContent() {
                 change={aggregatedStats.mau > 0 && historicalData.length >= 2 ? financialMetrics.mauGrowthRate : undefined}
                 icon={TrendingUp} 
                 color="purple"
-                delay={0.2}
+                delay={0.16}
+                testId="stat-mau"
               />
               <StatCard 
-                label="Revenue" 
+                label="Paying Users" 
+                value={aggregatedStats.payingUsers.toLocaleString()} 
+                change={aggregatedStats.payingUsers > 0 && historicalData.length >= 2 ? financialMetrics.payingGrowthRate : undefined}
+                icon={CreditCard} 
+                color="green"
+                delay={0.18}
+                testId="stat-paying-users"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 mb-6">
+              <DollarSign className="w-6 h-6 text-[#10b981]" />
+              <h2 className="text-2xl font-semibold">Revenue & Engagement</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
+              <StatCard 
+                label="Net Revenue" 
                 value={`$${aggregatedStats.totalRevenue.toLocaleString()}`} 
                 change={aggregatedStats.totalRevenue > 0 && historicalData.length >= 2 ? financialMetrics.revenueGrowthRate : undefined}
                 icon={DollarSign} 
                 color="green"
-                delay={0.25}
+                delay={0.2}
+                testId="stat-net-revenue"
+              />
+              <StatCard 
+                label="Total Payments" 
+                value={aggregatedStats.totalPayments.toLocaleString()} 
+                change={aggregatedStats.totalPayments > 0 && historicalData.length >= 2 ? financialMetrics.paymentsGrowthRate : undefined}
+                icon={CreditCard} 
+                color="green"
+                delay={0.21}
+                testId="stat-total-payments"
+              />
+              <StatCard 
+                label="Key Actions" 
+                value={aggregatedStats.keyActions.toLocaleString()} 
+                change={aggregatedStats.keyActions > 0 && historicalData.length >= 2 ? financialMetrics.actionsGrowthRate : undefined}
+                icon={MousePointer} 
+                color="blue"
+                delay={0.22}
+                testId="stat-key-actions"
+              />
+              <StatCard 
+                label="Sessions" 
+                value={aggregatedStats.sessions.toLocaleString()} 
+                change={aggregatedStats.sessions > 0 && historicalData.length >= 2 ? financialMetrics.sessionsGrowthRate : undefined}
+                icon={Target} 
+                color="purple"
+                delay={0.24}
+                testId="stat-sessions"
               />
               <StatCard 
                 label="Transactions" 
@@ -592,7 +752,25 @@ function DashboardContent() {
                 change={aggregatedStats.totalTransactions > 0 && historicalData.length >= 2 ? financialMetrics.txGrowthRate : undefined}
                 icon={Zap} 
                 color="yellow"
+                delay={0.26}
+                testId="stat-transactions"
+              />
+              <StatCard 
+                label="On-chain Volume" 
+                value={`$${aggregatedStats.totalVolume.toLocaleString()}`} 
+                change={aggregatedStats.totalVolume > 0 && historicalData.length >= 2 ? financialMetrics.volumeGrowthRate : undefined}
+                icon={Wallet} 
+                color="cyan"
+                delay={0.28}
+                testId="stat-volume"
+              />
+              <StatCard 
+                label="Connected Apps" 
+                value={aggregatedStats.connectedApps.toString()} 
+                icon={Box} 
+                color="purple"
                 delay={0.3}
+                testId="stat-connected-apps"
               />
             </div>
           </div>
@@ -786,6 +964,166 @@ function DashboardContent() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto p-8 md:p-12">
             <div className="flex items-center gap-3 mb-8">
+              <Target className="w-6 h-6 text-[#8b5cf6]" />
+              <h2 className="text-2xl font-semibold">Engagement Funnel</h2>
+            </div>
+            
+            <Block delay={0.1}>
+              <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 py-6">
+                <div className="text-center p-4 bg-[#3b82f6]/10 border border-[#3b82f6]/30 min-w-[120px]">
+                  <div className="text-2xl font-bold text-[#3b82f6]">{aggregatedStats.totalUsers.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">Total Users</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                  <div className="text-xs text-[#666]">{financialMetrics.dauToTotal.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[120px]">
+                  <div className="text-2xl font-bold text-[#10b981]">{aggregatedStats.dau.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">DAU</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                  <div className="text-xs text-[#666]">{financialMetrics.dauWauRatio.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-4 bg-[#06b6d4]/10 border border-[#06b6d4]/30 min-w-[120px]">
+                  <div className="text-2xl font-bold text-[#06b6d4]">{aggregatedStats.wau.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">WAU</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                  <div className="text-xs text-[#666]">{financialMetrics.wauMauRatio.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-4 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 min-w-[120px]">
+                  <div className="text-2xl font-bold text-[#8b5cf6]">{aggregatedStats.mau.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">MAU</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                  <div className="text-xs text-[#666]">{financialMetrics.payingToMau.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[120px]">
+                  <div className="text-2xl font-bold text-[#f59e0b]">{aggregatedStats.payingUsers.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">Paying</div>
+                </div>
+              </div>
+              <div className="text-xs text-[#666] text-center mt-2">
+                Conversion rates shown between each stage
+              </div>
+            </Block>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
+              <BarChart3 className="w-6 h-6 text-[#06b6d4]" />
+              <h2 className="text-2xl font-semibold">Advanced Analytics</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Block delay={0.1}>
+                <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">Cohort Ratios</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">DAU/WAU</span>
+                    <span className={`font-semibold ${financialMetrics.dauWauRatio >= 30 ? "text-[#10b981]" : financialMetrics.dauWauRatio >= 20 ? "text-[#f59e0b]" : "text-white"}`}>
+                      {financialMetrics.dauWauRatio.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">WAU/MAU</span>
+                    <span className={`font-semibold ${financialMetrics.wauMauRatio >= 50 ? "text-[#10b981]" : financialMetrics.wauMauRatio >= 30 ? "text-[#f59e0b]" : "text-white"}`}>
+                      {financialMetrics.wauMauRatio.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Paying/MAU</span>
+                    <span className={`font-semibold ${financialMetrics.payingMauRatio >= 5 ? "text-[#10b981]" : financialMetrics.payingMauRatio >= 2 ? "text-[#f59e0b]" : "text-white"}`}>
+                      {financialMetrics.payingMauRatio.toFixed(2)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">DAU/MAU (Stickiness)</span>
+                    <span className={`font-semibold ${financialMetrics.stickiness >= 20 ? "text-[#10b981]" : financialMetrics.stickiness >= 10 ? "text-[#f59e0b]" : "text-white"}`}>
+                      {financialMetrics.stickiness.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.15}>
+                <h3 className="text-lg font-medium mb-4 text-[#10b981]">Revenue Analytics</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">ARPPU</span>
+                    <span className="font-semibold">${financialMetrics.arppu.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Revenue/Tx</span>
+                    <span className="font-semibold">${financialMetrics.revenuePerTx.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Avg Tx Size</span>
+                    <span className="font-semibold">${financialMetrics.avgTxSize.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">ARPU (All)</span>
+                    <span className="font-semibold">${financialMetrics.arpuAll.toFixed(2)}</span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.2}>
+                <h3 className="text-lg font-medium mb-4 text-[#f59e0b]">On-chain Health</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Tx/User</span>
+                    <span className="font-semibold">{financialMetrics.txPerUser.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Volume/Tx</span>
+                    <span className="font-semibold">${financialMetrics.volumePerTx.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Volume/DAU</span>
+                    <span className="font-semibold">${financialMetrics.volumePerActiveUser.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">Total Volume</span>
+                    <span className="font-semibold">${aggregatedStats.totalVolume.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.25}>
+                <h3 className="text-lg font-medium mb-4 text-[#8b5cf6]">Engagement Quality</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Actions/Session</span>
+                    <span className="font-semibold">{financialMetrics.actionsPerSession.toFixed(1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Actions/DAU</span>
+                    <span className="font-semibold">{financialMetrics.actionsPerDAU.toFixed(1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Sessions/DAU</span>
+                    <span className="font-semibold">{financialMetrics.sessionsPerDAU.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">Total Sessions</span>
+                    <span className="font-semibold">{aggregatedStats.sessions.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Block>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
               <LineChartIcon className="w-6 h-6 text-[#3b82f6]" />
               <h2 className="text-2xl font-semibold">Growth Trends</h2>
             </div>
@@ -872,25 +1210,144 @@ function DashboardContent() {
               <h2 className="text-2xl font-semibold">App Comparison</h2>
             </div>
             
-            <Block delay={0.1}>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={appComparisonData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-                    <XAxis type="number" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
-                    <YAxis dataKey="name" type="category" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} width={100} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
-                      labelStyle={{ color: '#fff' }}
-                    />
-                    <Legend />
-                    <Bar dataKey="DAU" fill="#3b82f6" />
-                    <Bar dataKey="Revenue" fill="#10b981" />
-                    <Bar dataKey="Transactions" fill="#f59e0b" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Block>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Block delay={0.1}>
+                <h3 className="text-lg font-medium mb-4">Performance by App</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={appComparisonData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis type="number" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <YAxis dataKey="name" type="category" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} width={100} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        labelStyle={{ color: '#fff' }}
+                      />
+                      <Legend />
+                      <Bar dataKey="DAU" fill="#3b82f6" />
+                      <Bar dataKey="Revenue" fill="#10b981" />
+                      <Bar dataKey="Transactions" fill="#f59e0b" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Block>
+
+              {radarData.length > 0 && snapshots.length >= 2 && (
+                <Block delay={0.15}>
+                  <h3 className="text-lg font-medium mb-4">Normalized Comparison (Radar)</h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData}>
+                        <PolarGrid stroke="#2d2d2d" />
+                        <PolarAngleAxis dataKey="metric" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#666', fontSize: 10 }} />
+                        {snapshots.map((s, idx) => {
+                          const project = projects.find(p => p.id === s.projectId);
+                          const name = project?.name.split('.')[0] || 'Unknown';
+                          const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                          return (
+                            <Radar 
+                              key={s.id} 
+                              name={name} 
+                              dataKey={name} 
+                              stroke={colors[idx % colors.length]} 
+                              fill={colors[idx % colors.length]} 
+                              fillOpacity={0.2} 
+                            />
+                          );
+                        })}
+                        <Legend />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                          labelStyle={{ color: '#fff' }}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="text-xs text-[#666] mt-2 text-center">Values normalized to 0-100% relative to highest performer per metric</div>
+                </Block>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <Block delay={0.2}>
+                <h3 className="text-lg font-medium mb-4">Engagement vs Revenue Correlation</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis 
+                        dataKey="KeyActions" 
+                        type="number" 
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 12 }}
+                        name="Key Actions"
+                        label={{ value: 'Key Actions', position: 'bottom', fill: '#a0aec0', fontSize: 12 }}
+                      />
+                      <YAxis 
+                        dataKey="Revenue" 
+                        type="number" 
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 12 }}
+                        name="Revenue"
+                        label={{ value: 'Revenue ($)', angle: -90, position: 'insideLeft', fill: '#a0aec0', fontSize: 12 }}
+                      />
+                      <ZAxis dataKey="DAU" range={[50, 500]} name="DAU" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        cursor={{ strokeDasharray: '3 3' }}
+                        formatter={(value: any, name: string) => [value.toLocaleString(), name]}
+                      />
+                      <Scatter 
+                        name="Apps" 
+                        data={appComparisonData} 
+                        fill="#8b5cf6"
+                      />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-xs text-[#666] mt-2 text-center">Bubble size represents DAU</div>
+              </Block>
+
+              <Block delay={0.25}>
+                <h3 className="text-lg font-medium mb-4">Volume vs Transactions</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis 
+                        dataKey="Transactions" 
+                        type="number" 
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 12 }}
+                        name="Transactions"
+                        label={{ value: 'Transactions', position: 'bottom', fill: '#a0aec0', fontSize: 12 }}
+                      />
+                      <YAxis 
+                        dataKey="Volume" 
+                        type="number" 
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 12 }}
+                        name="Volume"
+                        label={{ value: 'Volume ($)', angle: -90, position: 'insideLeft', fill: '#a0aec0', fontSize: 12 }}
+                      />
+                      <ZAxis dataKey="MAU" range={[50, 500]} name="MAU" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        cursor={{ strokeDasharray: '3 3' }}
+                        formatter={(value: any, name: string) => [typeof value === 'number' ? value.toLocaleString() : value, name]}
+                      />
+                      <Scatter 
+                        name="Apps" 
+                        data={appComparisonData} 
+                        fill="#06b6d4"
+                      />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="text-xs text-[#666] mt-2 text-center">Bubble size represents MAU</div>
+              </Block>
+            </div>
           </div>
         </section>
 
