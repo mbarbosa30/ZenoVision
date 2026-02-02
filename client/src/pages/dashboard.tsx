@@ -114,16 +114,16 @@ const StatCard = ({
   };
 
   return (
-    <Block delay={delay} className="relative overflow-hidden min-h-[100px] p-4">
-      <div className={`absolute top-3 right-3 p-1.5 ${colors[color]}`}>
-        <Icon className="w-4 h-4" />
+    <Block delay={delay} className="relative overflow-hidden min-h-[120px] p-5">
+      <div className={`absolute top-4 right-4 p-2 ${colors[color]}`}>
+        <Icon className="w-5 h-5" />
       </div>
-      <div className="pr-8">
-        <div className="text-[10px] text-[#a0aec0] uppercase tracking-wider mb-1">{label}</div>
-        <div className="text-lg sm:text-xl md:text-2xl font-semibold mb-1" data-testid={testId}>{value}</div>
+      <div className="pr-10">
+        <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-2 font-medium">{label}</div>
+        <div className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 leading-tight" data-testid={testId}>{value}</div>
         {change !== undefined && (
-          <div className={`flex items-center gap-1 text-[10px] ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
-            {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+          <div className={`flex items-center gap-1 text-xs font-medium ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
+            {change >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
             {Math.abs(change).toFixed(1)}%
           </div>
         )}
@@ -989,7 +989,7 @@ function DashboardContent() {
                   <Users className="w-6 h-6 text-[#3b82f6]" />
                   <h2 className="text-2xl font-semibold">User Metrics</h2>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
                   <StatCard 
                     label="Total Users" 
                     value={aggregatedStats.totalUsers.toLocaleString()} 
@@ -1043,7 +1043,7 @@ function DashboardContent() {
               <DollarSign className="w-6 h-6 text-[#10b981]" />
               <h2 className="text-2xl font-semibold">Activity & Engagement</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
               {metricVisibility.revenue && (
                 <StatCard 
                   label="Net Revenue" 
@@ -1129,26 +1129,26 @@ function DashboardContent() {
               <h2 className="text-2xl font-semibold">Financial KPIs</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <Block delay={0.05}>
-                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">MRR</div>
-                <div className="text-3xl font-semibold text-[#10b981]" data-testid="value-mrr">${financialMetrics.mrr.toLocaleString()}</div>
-                <div className="text-sm text-[#a0aec0] mt-1">Net Revenue (Current Period)</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <Block delay={0.05} className="min-h-[130px]">
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">MRR</div>
+                <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-mrr">${financialMetrics.mrr.toLocaleString()}</div>
+                <div className="text-xs text-[#666] mt-2">Net Revenue (Current)</div>
               </Block>
-              <Block delay={0.1}>
-                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">ARR</div>
-                <div className="text-3xl font-semibold text-[#10b981]" data-testid="value-arr">${financialMetrics.arr.toLocaleString()}</div>
-                <div className="text-sm text-[#a0aec0] mt-1">Annualized Run Rate</div>
+              <Block delay={0.1} className="min-h-[130px]">
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">ARR</div>
+                <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-arr">${financialMetrics.arr.toLocaleString()}</div>
+                <div className="text-xs text-[#666] mt-2">Annualized Run Rate</div>
               </Block>
-              <Block delay={0.15}>
-                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">ARPU</div>
-                <div className="text-3xl font-semibold" data-testid="value-arpu">${financialMetrics.arpu.toFixed(2)}</div>
-                <div className="text-sm text-[#a0aec0] mt-1">Per Paying User</div>
+              <Block delay={0.15} className="min-h-[130px]">
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">ARPU</div>
+                <div className="text-2xl md:text-3xl font-bold" data-testid="value-arpu">${financialMetrics.arpu.toFixed(2)}</div>
+                <div className="text-xs text-[#666] mt-2">Per Paying User</div>
               </Block>
-              <Block delay={0.2}>
-                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">Conversion</div>
-                <div className="text-3xl font-semibold" data-testid="value-conversion">{financialMetrics.conversionRate.toFixed(2)}%</div>
-                <div className="text-sm text-[#a0aec0] mt-1">Paid / Total Users</div>
+              <Block delay={0.2} className="min-h-[130px]">
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">Conversion</div>
+                <div className="text-2xl md:text-3xl font-bold" data-testid="value-conversion">{financialMetrics.conversionRate.toFixed(2)}%</div>
+                <div className="text-xs text-[#666] mt-2">Paid / Total Users</div>
               </Block>
             </div>
 
@@ -1290,34 +1290,34 @@ function DashboardContent() {
               </div>
 
               <div className="text-xs text-[#666] mb-4">Valuation methodology breakdown:</div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] mb-1">Revenue (10-50x)</div>
-                  <div className="font-semibold" data-testid="value-rev-multiple">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
+                <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] text-xs mb-2">Revenue (10-50x)</div>
+                  <div className="font-bold text-lg" data-testid="value-rev-multiple">
                     ${(financialMetrics.web3Valuation.revenueMultiple.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
-                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] mb-1">Volume (1-10%)</div>
-                  <div className="font-semibold" data-testid="value-vol-multiple">
+                <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] text-xs mb-2">Volume (1-10%)</div>
+                  <div className="font-bold text-lg" data-testid="value-vol-multiple">
                     ${(financialMetrics.web3Valuation.volumeMultiple.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
-                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] mb-1">Per DAU ($50-300)</div>
-                  <div className="font-semibold" data-testid="value-dau-multiple">
+                <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] text-xs mb-2">Per DAU ($50-300)</div>
+                  <div className="font-bold text-lg" data-testid="value-dau-multiple">
                     ${(financialMetrics.web3Valuation.dauBased.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
-                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] mb-1">Per MAU ($10-75)</div>
-                  <div className="font-semibold" data-testid="value-mau-multiple">
+                <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] text-xs mb-2">Per MAU ($10-75)</div>
+                  <div className="font-bold text-lg" data-testid="value-mau-multiple">
                     ${(financialMetrics.web3Valuation.mauBased.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
-                <div className="p-3 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] mb-1">Per Wallet ($100-1.5K)</div>
-                  <div className="font-semibold" data-testid="value-wallet-multiple">
+                <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
+                  <div className="text-[#a0aec0] text-xs mb-2">Per Wallet ($100-1.5K)</div>
+                  <div className="font-bold text-lg" data-testid="value-wallet-multiple">
                     ${(financialMetrics.web3Valuation.walletBased.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
@@ -1401,9 +1401,9 @@ function DashboardContent() {
               <h2 className="text-2xl font-semibold">Advanced Analytics</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-wrap gap-4">
               {metricVisibility.users && (
-                <Block delay={0.1}>
+                <Block delay={0.1} className="flex-1 min-w-[280px] max-w-full md:max-w-[calc(50%-8px)] lg:max-w-[calc(25%-12px)]">
                   <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">Cohort Ratios</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -1435,7 +1435,7 @@ function DashboardContent() {
               )}
 
               {metricVisibility.revenue && (
-                <Block delay={0.15}>
+                <Block delay={0.15} className="flex-1 min-w-[280px] max-w-full md:max-w-[calc(50%-8px)] lg:max-w-[calc(25%-12px)]">
                   <h3 className="text-lg font-medium mb-4 text-[#10b981]">Revenue Analytics</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -1459,7 +1459,7 @@ function DashboardContent() {
               )}
 
               {metricVisibility.onchain && (
-                <Block delay={0.2}>
+                <Block delay={0.2} className="flex-1 min-w-[280px] max-w-full md:max-w-[calc(50%-8px)] lg:max-w-[calc(25%-12px)]">
                   <h3 className="text-lg font-medium mb-4 text-[#f59e0b]">On-chain Health</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -1483,7 +1483,7 @@ function DashboardContent() {
               )}
 
               {metricVisibility.engagement && (
-                <Block delay={0.25}>
+                <Block delay={0.25} className="flex-1 min-w-[280px] max-w-full md:max-w-[calc(50%-8px)] lg:max-w-[calc(25%-12px)]">
                   <h3 className="text-lg font-medium mb-4 text-[#8b5cf6]">Engagement Quality</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -1539,7 +1539,7 @@ function DashboardContent() {
                           labelStyle={{ color: '#fff' }}
                           labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                         />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                         {perAppTimeSeries.hasPerAppData ? (
                           perAppTimeSeries.apps.map((app, idx) => {
                             const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
@@ -1708,7 +1708,7 @@ function DashboardContent() {
                           labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                           formatter={(value: any) => [`$${Number(value).toFixed(2)}/day`, '']}
                         />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                         {estimatedDailyRevenueData.apps.map((app, idx) => {
                           const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
                           return (
@@ -1818,7 +1818,7 @@ function DashboardContent() {
                             />
                           );
                         })}
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                           labelStyle={{ color: '#fff' }}
