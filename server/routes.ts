@@ -288,8 +288,8 @@ export async function registerRoutes(
       for (const snapshot of latestSnapshots) {
         const metrics = snapshot.metrics as any;
         if (metrics) {
-          totalUsers += metrics.totalUsers || 0;
-          totalTransactions += metrics.totalTransactions || 0;
+          totalUsers += metrics.users?.total || 0;
+          totalTransactions += metrics.onchain?.transactions || 0;
         }
       }
       
