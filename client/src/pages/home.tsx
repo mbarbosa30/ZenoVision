@@ -145,7 +145,7 @@ export default function Home() {
                 <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.1}>
                   <div>
                     <div className="text-4xl font-semibold mb-1">
-                      {publicMetrics?.totalUsers ? formatNumber(publicMetrics.totalUsers) : "200K+"}
+                      {publicMetrics?.totalUsers ? publicMetrics.totalUsers.toLocaleString() : "200,000+"}
                     </div>
                     <div className="text-sm text-[#a0aec0]">Active users</div>
                   </div>
@@ -161,9 +161,9 @@ export default function Home() {
                 <Block variant="accent" className="flex items-center" delay={0.3}>
                   <div>
                     <div className="text-4xl font-semibold mb-1">
-                      {publicMetrics?.totalTransactions ? formatNumber(publicMetrics.totalTransactions) : "100K+"}
+                      {publicMetrics?.totalTransactions ? publicMetrics.totalTransactions.toLocaleString() : "100,000+"}
                     </div>
-                    <div className="text-sm text-white/80">Onchain transactions</div>
+                    <div className="text-sm text-white/80">Onchain transfers</div>
                   </div>
                 </Block>
               </div>
