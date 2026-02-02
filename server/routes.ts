@@ -273,6 +273,41 @@ export async function registerRoutes(
     }
   });
 
+  // Public metrics endpoint (aggregated stats for landing page)
+  app.get("/api/public-metrics", async (req, res) => {
+    try {
+      const projects = await storage.getAllProjects();
+      const trackedProjects = projects.filter(p => p.metricsEndpoint);
+      const trackedProjectIds = new Set(trackedProjects.map(p => p.id));
+      
+      const latestSnapshots = await storage.getAllLatestMetrics();
+      
+      let totalUsers = 0;
+      let totalTransactions = 0;
+      
+      for (const snapshot of latestSnapshots) {
+        const metrics = snapshot.metrics as any;
+        if (metrics) {
+          totalUsers += metrics.totalUsers || 0;
+          totalTransactions += metrics.totalTransactions || 0;
+        }
+      }
+      
+      res.json({
+        success: true,
+        metrics: {
+          totalUsers,
+          trackedApps: trackedProjects.length,
+          totalTransactions,
+          trackedProjectIds: Array.from(trackedProjectIds),
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching public metrics:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch public metrics" });
+    }
+  });
+
   // Delete all metrics snapshots (reset)
   app.delete("/api/metrics", async (req, res) => {
     try {

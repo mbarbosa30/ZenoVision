@@ -6,10 +6,18 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
 interface Project {
+  id?: string;
   name: string;
   description: string;
   highlight: string;
   url: string;
+}
+
+interface PublicMetrics {
+  totalUsers: number;
+  trackedApps: number;
+  totalTransactions: number;
+  trackedProjectIds: string[];
 }
 
 const PROJECTS: Project[] = [
@@ -64,7 +72,25 @@ export default function Home() {
     },
   });
 
+  const { data: metricsData } = useQuery<{ success: boolean; metrics: PublicMetrics }>({
+    queryKey: ["/api/public-metrics"],
+    queryFn: async () => {
+      const res = await fetch("/api/public-metrics");
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+
   const projects = data?.projects || PROJECTS;
+  const publicMetrics = metricsData?.metrics;
+  const trackedProjectIds = new Set(publicMetrics?.trackedProjectIds || []);
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(0)}K+`;
+    return num.toString();
+  };
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
@@ -118,19 +144,25 @@ export default function Home() {
               <div className="lg:col-span-4 grid grid-rows-3">
                 <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.1}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">200K+</div>
-                    <div className="text-sm text-[#a0aec0]">Total users</div>
+                    <div className="text-4xl font-semibold mb-1">
+                      {publicMetrics?.totalUsers ? formatNumber(publicMetrics.totalUsers) : "200K+"}
+                    </div>
+                    <div className="text-sm text-[#a0aec0]">Active users</div>
                   </div>
                 </Block>
                 <Block variant="dark" className="border-b border-[#2d2d2d] flex items-center" delay={0.2}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">10+</div>
-                    <div className="text-sm text-[#a0aec0]">Products shipped</div>
+                    <div className="text-4xl font-semibold mb-1">
+                      {publicMetrics?.trackedApps ? `${publicMetrics.trackedApps}+` : "3+"}
+                    </div>
+                    <div className="text-sm text-[#a0aec0]">Apps tracking</div>
                   </div>
                 </Block>
                 <Block variant="accent" className="flex items-center" delay={0.3}>
                   <div>
-                    <div className="text-4xl font-semibold mb-1">100K+</div>
+                    <div className="text-4xl font-semibold mb-1">
+                      {publicMetrics?.totalTransactions ? formatNumber(publicMetrics.totalTransactions) : "100K+"}
+                    </div>
                     <div className="text-sm text-white/80">Onchain transactions</div>
                   </div>
                 </Block>
@@ -198,7 +230,14 @@ export default function Home() {
                   data-testid={`project-${i}`}
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold group-hover:text-[#3b82f6] transition-colors">{project.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold group-hover:text-[#3b82f6] transition-colors">{project.name}</h3>
+                      {project.id && trackedProjectIds.has(project.id) && (
+                        <span className="text-[10px] uppercase tracking-wide bg-emerald-500/20 text-emerald-400 px-2 py-0.5 border border-emerald-500/30" data-testid={`badge-tracked-${project.id}`}>
+                          Live
+                        </span>
+                      )}
+                    </div>
                     <ExternalLink className="w-4 h-4 text-[#4a5568] group-hover:text-[#3b82f6] transition-colors flex-shrink-0" />
                   </div>
                   <p className="text-sm text-[#a0aec0] mb-3">{project.description}</p>
