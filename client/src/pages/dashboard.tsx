@@ -223,54 +223,93 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
 }
 
 type GrowthTimeframe = 'daily' | 'weekly' | 'monthly';
+type ConfidenceLevel = 'low' | 'medium' | 'high';
 
-function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'daily') {
-  const defaultRates = { 
+interface GrowthResult {
+  userGrowthRate: number;
+  dauGrowthRate: number;
+  wauGrowthRate: number;
+  mauGrowthRate: number;
+  payingGrowthRate: number;
+  revenueGrowthRate: number;
+  paymentsGrowthRate: number;
+  txGrowthRate: number;
+  volumeGrowthRate: number;
+  actionsGrowthRate: number;
+  sessionsGrowthRate: number;
+  hoursElapsed: number;
+  daysElapsed: number;
+  dataPoints: number;
+  confidence: ConfidenceLevel;
+  confidenceReason: string;
+  timeframeCoverage: number;
+}
+
+function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'daily'): GrowthResult {
+  const targetHours = timeframe === 'daily' ? 24 : timeframe === 'weekly' ? 168 : 720;
+  
+  const defaultRates: GrowthResult = { 
     userGrowthRate: 0, dauGrowthRate: 0, wauGrowthRate: 0, mauGrowthRate: 0, 
     payingGrowthRate: 0, revenueGrowthRate: 0, paymentsGrowthRate: 0,
     txGrowthRate: 0, volumeGrowthRate: 0, actionsGrowthRate: 0, sessionsGrowthRate: 0,
-    hoursElapsed: 0, daysElapsed: 0, dataPoints: 0
+    hoursElapsed: 0, daysElapsed: 0, dataPoints: 0,
+    confidence: 'low', confidenceReason: 'No data available', timeframeCoverage: 0
   };
   
   if (historical.length < 2) return defaultRates;
   
-  const first = historical[0];
-  const last = historical[historical.length - 1];
+  const now = Date.now();
+  const cutoffTime = now - (targetHours * 60 * 60 * 1000);
+  
+  const filteredHistorical = historical.filter(h => h.timestamp >= cutoffTime);
+  
+  const dataToUse = filteredHistorical.length >= 2 ? filteredHistorical : historical;
+  const usingAllData = filteredHistorical.length < 2;
+  
+  const first = dataToUse[0];
+  const last = dataToUse[dataToUse.length - 1];
   const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
   const daysElapsed = hoursElapsed / 24;
   
   if (hoursElapsed <= 0) return defaultRates;
   
-  // Target periods in hours for extrapolation
-  const targetHours = timeframe === 'daily' ? 24 : timeframe === 'weekly' ? 168 : 720;
+  const timeframeCoverage = Math.min(100, (hoursElapsed / targetHours) * 100);
   
-  // Simple linear growth rate calculation
-  // Formula: If value goes from 100 to 101 in 1 hour:
-  //   - Change per hour = 1 (which is 1% of 100)
-  //   - Daily rate = 1% * 24 = 24% per day
-  // 
-  // Using all data points for averaging when available
+  let confidence: ConfidenceLevel;
+  let confidenceReason: string;
+  
+  if (dataToUse.length >= 10 && timeframeCoverage >= 80) {
+    confidence = 'high';
+    confidenceReason = `${dataToUse.length} points over ${hoursElapsed.toFixed(1)}h`;
+  } else if (dataToUse.length >= 3 && timeframeCoverage >= 25) {
+    confidence = 'medium';
+    confidenceReason = `${dataToUse.length} points, ${timeframeCoverage.toFixed(0)}% of ${timeframe} window`;
+  } else {
+    confidence = 'low';
+    if (usingAllData) {
+      confidenceReason = `Limited: ${dataToUse.length} points over ${hoursElapsed.toFixed(1)}h (all available)`;
+    } else {
+      confidenceReason = `Early: ${dataToUse.length} points, ${timeframeCoverage.toFixed(0)}% coverage`;
+    }
+  }
+  
   const calculateLinearGrowth = (dataKey: string): number => {
-    // Get all valid data points
     const points: { t: number; y: number }[] = [];
-    const baseTime = historical[0].timestamp;
+    const baseTime = dataToUse[0].timestamp;
     
-    for (const h of historical) {
+    for (const h of dataToUse) {
       const val = h[dataKey];
       if (val !== undefined && val !== null) {
-        const t = (h.timestamp - baseTime) / (1000 * 60 * 60); // hours from start
+        const t = (h.timestamp - baseTime) / (1000 * 60 * 60);
         points.push({ t, y: val });
       }
     }
     
     if (points.length < 2) return 0;
     
-    // Calculate average value for percentage base
     const avgValue = points.reduce((s, p) => s + p.y, 0) / points.length;
     if (avgValue <= 0) return 0;
     
-    // Use linear regression to find average rate of change per hour
-    // slope = change in value per hour
     const n = points.length;
     const sumT = points.reduce((s, p) => s + p.t, 0);
     const sumY = points.reduce((s, p) => s + p.y, 0);
@@ -280,43 +319,32 @@ function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'd
     const denominator = n * sumT2 - sumT * sumT;
     if (Math.abs(denominator) < 1e-10) return 0;
     
-    const slope = (n * sumTY - sumT * sumY) / denominator; // change per hour
+    const slope = (n * sumTY - sumT * sumY) / denominator;
     
-    // Convert to percentage: (change per hour / avg value) * target hours * 100
     const changePerHourPercent = (slope / avgValue) * 100;
     const growthRate = changePerHourPercent * targetHours;
     
-    // Clamp to reasonable bounds
     return Math.max(-100, Math.min(500, growthRate));
   };
   
-  const userGrowthRate = calculateLinearGrowth('totalUsers');
-  const dauGrowthRate = calculateLinearGrowth('totalDAU');
-  const wauGrowthRate = calculateLinearGrowth('totalWAU');
-  const mauGrowthRate = calculateLinearGrowth('totalMAU');
-  const payingGrowthRate = calculateLinearGrowth('totalPaying');
-  const revenueGrowthRate = calculateLinearGrowth('totalRevenue');
-  const paymentsGrowthRate = calculateLinearGrowth('totalPayments');
-  const txGrowthRate = calculateLinearGrowth('totalTransactions');
-  const volumeGrowthRate = calculateLinearGrowth('totalVolume');
-  const actionsGrowthRate = calculateLinearGrowth('totalKeyActions');
-  const sessionsGrowthRate = calculateLinearGrowth('totalSessions');
-  
   return {
-    userGrowthRate,
-    dauGrowthRate,
-    wauGrowthRate,
-    mauGrowthRate,
-    payingGrowthRate,
-    revenueGrowthRate,
-    paymentsGrowthRate,
-    txGrowthRate,
-    volumeGrowthRate,
-    actionsGrowthRate,
-    sessionsGrowthRate,
+    userGrowthRate: calculateLinearGrowth('totalUsers'),
+    dauGrowthRate: calculateLinearGrowth('totalDAU'),
+    wauGrowthRate: calculateLinearGrowth('totalWAU'),
+    mauGrowthRate: calculateLinearGrowth('totalMAU'),
+    payingGrowthRate: calculateLinearGrowth('totalPaying'),
+    revenueGrowthRate: calculateLinearGrowth('totalRevenue'),
+    paymentsGrowthRate: calculateLinearGrowth('totalPayments'),
+    txGrowthRate: calculateLinearGrowth('totalTransactions'),
+    volumeGrowthRate: calculateLinearGrowth('totalVolume'),
+    actionsGrowthRate: calculateLinearGrowth('totalKeyActions'),
+    sessionsGrowthRate: calculateLinearGrowth('totalSessions'),
     hoursElapsed,
     daysElapsed,
-    dataPoints: historical.length,
+    dataPoints: dataToUse.length,
+    confidence,
+    confidenceReason,
+    timeframeCoverage,
   };
 }
 
@@ -629,6 +657,9 @@ function DashboardContent() {
       hoursElapsed: hoursElapsed || 0,
       daysElapsed: daysElapsed || 0,
       dataPoints: dataPoints || 0,
+      confidence: timeWeightedGrowth.confidence,
+      confidenceReason: timeWeightedGrowth.confidenceReason,
+      timeframeCoverage: timeWeightedGrowth.timeframeCoverage,
     };
   }, [aggregatedStats, historicalData, growthTimeframe]);
 
@@ -934,9 +965,27 @@ function DashboardContent() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Block delay={0.25}>
-                <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">
-                  Growth Rates ({growthTimeframe === 'daily' ? 'Daily' : growthTimeframe === 'weekly' ? 'Weekly' : 'Monthly'})
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-medium text-[#3b82f6]">
+                    Growth Rates ({growthTimeframe === 'daily' ? 'Daily' : growthTimeframe === 'weekly' ? 'Weekly' : 'Monthly'})
+                  </h3>
+                  <span 
+                    data-testid="confidence-badge"
+                    className={`text-xs px-2 py-0.5 font-medium ${
+                      financialMetrics.confidence === 'high' 
+                        ? 'bg-[#10b981]/20 text-[#10b981]' 
+                        : financialMetrics.confidence === 'medium'
+                        ? 'bg-[#f59e0b]/20 text-[#f59e0b]'
+                        : 'bg-[#ef4444]/20 text-[#ef4444]'
+                    }`}
+                    title={financialMetrics.confidenceReason}
+                  >
+                    {financialMetrics.confidence === 'high' ? 'Reliable' : financialMetrics.confidence === 'medium' ? 'Developing' : 'Early'}
+                  </span>
+                </div>
+                <p className="text-xs text-[#6b7280] mb-4" data-testid="confidence-reason">
+                  {financialMetrics.confidenceReason}
+                </p>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">DAU Growth</span>
