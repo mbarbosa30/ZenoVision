@@ -400,6 +400,33 @@ function DashboardContent() {
     });
   }, [snapshots, projects]);
 
+  // Per-app DAU time series for multi-line chart
+  const perAppTimeSeries = useMemo(() => {
+    if (historicalData.length === 0 || projects.length === 0) return { data: historicalData, apps: [], hasPerAppData: false };
+    
+    // Get unique apps that appear in the data
+    const appKeys = new Set<string>();
+    historicalData.forEach(point => {
+      Object.keys(point).forEach(key => {
+        if (key.endsWith('_DAU')) {
+          appKeys.add(key.replace('_DAU', ''));
+        }
+      });
+    });
+    
+    // Build app info with exact slice match
+    const apps = Array.from(appKeys).map(key => {
+      const project = projects.find(p => p.id.slice(0, 8) === key);
+      return {
+        key,
+        name: project?.name.split('.')[0] || key,
+        dataKey: `${key}_DAU`,
+      };
+    }).filter(app => app.name !== app.key || appKeys.size > 0); // Keep apps even if name falls back to key
+    
+    return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
+  }, [historicalData, projects]);
+
   const financialMetrics = useMemo(() => {
     const stats = aggregatedStats;
     const historical = historicalData;
@@ -1128,16 +1155,10 @@ function DashboardContent() {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Block delay={0.1}>
-                <h3 className="text-lg font-medium mb-4">Daily Active Users</h3>
-                <div className="h-72">
+                <h3 className="text-lg font-medium mb-4">Daily Active Users by App</h3>
+                <div className="h-72" data-testid="chart-dau-by-app">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={historicalData}>
-                      <defs>
-                        <linearGradient id="dauGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
+                    <LineChart data={perAppTimeSeries.data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
@@ -1145,8 +1166,34 @@ function DashboardContent() {
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
                       />
-                      <Area type="monotone" dataKey="totalDAU" stroke="#3b82f6" fill="url(#dauGradient)" strokeWidth={2} />
-                    </AreaChart>
+                      <Legend />
+                      {perAppTimeSeries.hasPerAppData ? (
+                        perAppTimeSeries.apps.map((app, idx) => {
+                          const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                          return (
+                            <Line 
+                              key={app.key}
+                              type="monotone" 
+                              dataKey={app.dataKey} 
+                              name={app.name}
+                              stroke={colors[idx % colors.length]} 
+                              strokeWidth={2}
+                              dot={false}
+                              connectNulls
+                            />
+                          );
+                        })
+                      ) : (
+                        <Line 
+                          type="monotone" 
+                          dataKey="totalDAU" 
+                          name="Total DAU"
+                          stroke="#3b82f6" 
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      )}
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </Block>
