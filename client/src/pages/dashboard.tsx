@@ -126,26 +126,46 @@ const StatCard = ({
 };
 
 function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Project[]) {
-  // Group snapshots by timestamp (each fetch = individual point)
-  const snapshotsByTime = new Map<string, MetricsSnapshot[]>();
+  // Group snapshots by fetch session (within 2-minute window = same session)
+  const SESSION_WINDOW_MS = 2 * 60 * 1000; // 2 minutes
   
-  snapshots.forEach(snapshot => {
-    const timeKey = new Date(snapshot.timestamp).toISOString();
-    if (!snapshotsByTime.has(timeKey)) {
-      snapshotsByTime.set(timeKey, []);
+  // Sort all snapshots by timestamp first
+  const sorted = [...snapshots].sort((a, b) => 
+    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
+  
+  // Group into sessions
+  const sessions: MetricsSnapshot[][] = [];
+  let currentSession: MetricsSnapshot[] = [];
+  let sessionStart = 0;
+  
+  sorted.forEach(snapshot => {
+    const ts = new Date(snapshot.timestamp).getTime();
+    if (currentSession.length === 0) {
+      currentSession.push(snapshot);
+      sessionStart = ts;
+    } else if (ts - sessionStart <= SESSION_WINDOW_MS) {
+      currentSession.push(snapshot);
+    } else {
+      sessions.push(currentSession);
+      currentSession = [snapshot];
+      sessionStart = ts;
     }
-    snapshotsByTime.get(timeKey)!.push(snapshot);
   });
+  if (currentSession.length > 0) {
+    sessions.push(currentSession);
+  }
   
-  const sortedTimes = Array.from(snapshotsByTime.keys()).sort();
-  
-  return sortedTimes.map(timeKey => {
-    const timeSnapshots = snapshotsByTime.get(timeKey)!;
-    const timestamp = new Date(timeKey);
+  return sessions.map(sessionSnapshots => {
+    // Use the earliest timestamp in the session as the representative time
+    const timestamps = sessionSnapshots.map(s => new Date(s.timestamp).getTime());
+    const sessionTime = Math.min(...timestamps);
+    const timestamp = new Date(sessionTime);
+    
     const pointData: any = {
       date: format(timestamp, "MMM d HH:mm"),
-      fullDate: timeKey,
-      timestamp: timestamp.getTime(),
+      fullDate: timestamp.toISOString(),
+      timestamp: sessionTime,
     };
     
     let totalDAU = 0;
@@ -154,7 +174,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     let totalTransactions = 0;
     let totalVolume = 0;
     
-    timeSnapshots.forEach(snapshot => {
+    sessionSnapshots.forEach(snapshot => {
       const project = projects.find(p => p.id === snapshot.projectId);
       if (!project) return;
       
@@ -175,6 +195,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     pointData.totalRevenue = totalRevenue;
     pointData.totalTransactions = totalTransactions;
     pointData.totalVolume = totalVolume;
+    pointData.appsInSession = sessionSnapshots.length;
     
     return pointData;
   });
