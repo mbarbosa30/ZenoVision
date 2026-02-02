@@ -386,7 +386,7 @@ Store the key as METRICS_API_KEY secret.`}
                 <Users className="w-4 h-4" /> Users
               </h4>
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>total</strong> — All registered accounts, including inactive ones</p>
+                <p><strong>total</strong> — All users who completed at least one key action (excluding visitors or users who only connected their wallet without further engagement)</p>
                 <p><strong>daily_active (DAU)</strong> — Unique users who performed any meaningful action in the last 24 hours (not just page views)</p>
                 <p><strong>weekly_active (WAU)</strong> — Unique users active in the last 7 days</p>
                 <p><strong>monthly_active (MAU)</strong> — Unique users active in the last 30 days</p>
