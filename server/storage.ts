@@ -13,6 +13,7 @@ export interface IStorage {
   getMetricsSnapshots(projectId: string, limit?: number): Promise<MetricsSnapshot[]>;
   getLatestMetricsSnapshot(projectId: string): Promise<MetricsSnapshot | null>;
   getAllLatestMetrics(): Promise<MetricsSnapshot[]>;
+  deleteAllMetricsSnapshots(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -72,6 +73,11 @@ export class DatabaseStorage implements IStorage {
       if (latest) snapshots.push(latest);
     }
     return snapshots;
+  }
+
+  async deleteAllMetricsSnapshots(): Promise<number> {
+    const result = await db.delete(metricsSnapshots).returning();
+    return result.length;
   }
 }
 

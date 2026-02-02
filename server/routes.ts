@@ -261,5 +261,16 @@ export async function registerRoutes(
     }
   });
 
+  // Delete all metrics snapshots (reset)
+  app.delete("/api/metrics", async (req, res) => {
+    try {
+      const deleted = await storage.deleteAllMetricsSnapshots();
+      res.json({ success: true, deleted });
+    } catch (error) {
+      console.error("Error deleting metrics:", error);
+      res.status(500).json({ success: false, error: "Failed to delete metrics" });
+    }
+  });
+
   return httpServer;
 }
