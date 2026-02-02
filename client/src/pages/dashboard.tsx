@@ -400,7 +400,7 @@ function DashboardContent() {
     });
   }, [snapshots, projects]);
 
-  // Per-app DAU time series for multi-line chart
+  // Per-app time series for multi-line charts (DAU and Revenue)
   const perAppTimeSeries = useMemo(() => {
     if (historicalData.length === 0 || projects.length === 0) return { data: historicalData, apps: [], hasPerAppData: false };
     
@@ -420,9 +420,10 @@ function DashboardContent() {
       return {
         key,
         name: project?.name.split('.')[0] || key,
-        dataKey: `${key}_DAU`,
+        dauKey: `${key}_DAU`,
+        revenueKey: `${key}_Revenue`,
       };
-    }).filter(app => app.name !== app.key || appKeys.size > 0); // Keep apps even if name falls back to key
+    }).filter(app => app.name !== app.key || appKeys.size > 0);
     
     return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
   }, [historicalData, projects]);
@@ -1174,7 +1175,7 @@ function DashboardContent() {
                             <Line 
                               key={app.key}
                               type="monotone" 
-                              dataKey={app.dataKey} 
+                              dataKey={app.dauKey} 
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
@@ -1199,26 +1200,46 @@ function DashboardContent() {
               </Block>
 
               <Block delay={0.15}>
-                <h3 className="text-lg font-medium mb-4">Revenue Trend</h3>
-                <div className="h-72">
+                <h3 className="text-lg font-medium mb-4">Revenue by App</h3>
+                <div className="h-72" data-testid="chart-revenue-by-app">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={historicalData}>
-                      <defs>
-                        <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
+                    <LineChart data={perAppTimeSeries.data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
-                        formatter={(value: any) => [`$${value.toLocaleString()}`, 'Revenue']}
+                        formatter={(value: any) => [`$${Number(value).toLocaleString()}`, '']}
                       />
-                      <Area type="monotone" dataKey="totalRevenue" stroke="#10b981" fill="url(#revenueGradient)" strokeWidth={2} />
-                    </AreaChart>
+                      <Legend />
+                      {perAppTimeSeries.hasPerAppData ? (
+                        perAppTimeSeries.apps.map((app, idx) => {
+                          const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                          return (
+                            <Line 
+                              key={app.key}
+                              type="monotone" 
+                              dataKey={app.revenueKey} 
+                              name={app.name}
+                              stroke={colors[idx % colors.length]} 
+                              strokeWidth={2}
+                              dot={false}
+                              connectNulls
+                            />
+                          );
+                        })
+                      ) : (
+                        <Line 
+                          type="monotone" 
+                          dataKey="totalRevenue" 
+                          name="Total Revenue"
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      )}
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </Block>
