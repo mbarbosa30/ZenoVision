@@ -4,7 +4,7 @@ import {
   Users, TrendingUp, TrendingDown, DollarSign, Zap, Activity, 
   ArrowUpRight, ArrowDownRight, RefreshCw, ChevronDown, ChevronUp,
   BarChart3, LineChart as LineChartIcon, PieChart, CreditCard, MousePointer,
-  Calendar, Wallet, Box, Target
+  Calendar, Wallet, Box, Target, Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -201,7 +201,11 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
       
       const safeKey = project.id.slice(0, 8);
       pointData[`${safeKey}_DAU`] = snapshot.metrics.users.daily_active;
+      pointData[`${safeKey}_MAU`] = snapshot.metrics.users.monthly_active;
       pointData[`${safeKey}_Revenue`] = snapshot.metrics.revenue.net_income;
+      pointData[`${safeKey}_Paying`] = snapshot.metrics.users.paying;
+      pointData[`${safeKey}_Txns`] = snapshot.metrics.onchain.transactions;
+      pointData[`${safeKey}_Volume`] = snapshot.metrics.onchain.volume;
       pointData[`${safeKey}_name`] = project.name;
     });
     
@@ -507,20 +511,99 @@ function DashboardContent() {
         key,
         name: project?.name.split('.')[0] || key,
         dauKey: `${key}_DAU`,
+        mauKey: `${key}_MAU`,
         revenueKey: `${key}_Revenue`,
+        payingKey: `${key}_Paying`,
+        txnsKey: `${key}_Txns`,
+        volumeKey: `${key}_Volume`,
       };
     }).filter(app => app.name !== app.key || appKeys.size > 0);
     
     return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
   }, [historicalData, projects]);
 
-  // Estimated Daily Revenue Rate per app - extrapolates each data point to 24h based on rate of change
+  // Estimated Daily Revenue Rate per app - uses 3+ data points within 24h window for stability
   const estimatedDailyRevenueData = useMemo(() => {
-    if (historicalData.length < 2 || !perAppTimeSeries.hasPerAppData) {
-      return { data: [], apps: perAppTimeSeries.apps, hasData: false };
+    if (historicalData.length < 3 || !perAppTimeSeries.hasPerAppData) {
+      return { data: [], apps: [], hasData: false };
     }
     
+    // For each point, look back up to 24h and require 3+ non-negative data points
     const rateData: any[] = [];
+    const appsWithEnoughData = new Set<string>();
+    
+    for (let i = 2; i < historicalData.length; i++) {
+      const curr = historicalData[i];
+      
+      // Get points within last 24h from this point
+      const windowStart = curr.timestamp - (24 * 60 * 60 * 1000);
+      const pointsInWindow = historicalData.slice(0, i + 1).filter(
+        h => h.timestamp >= windowStart && h.timestamp <= curr.timestamp
+      );
+      
+      if (pointsInWindow.length < 3) continue;
+      
+      const point: any = { timestamp: curr.timestamp };
+      
+      // Calculate rate for each app using all points in window
+      for (const app of perAppTimeSeries.apps) {
+        // Filter to non-negative revenue values (valid data points)
+        const appPoints = pointsInWindow
+          .map(h => ({ t: h.timestamp, rev: h[app.revenueKey] ?? 0 }))
+          .filter(p => p.rev >= 0);
+        
+        if (appPoints.length < 3) continue;
+        
+        // Calculate rate using first/last delta over window
+        const first = appPoints[0];
+        const last = appPoints[appPoints.length - 1];
+        const hoursElapsed = (last.t - first.t) / (1000 * 60 * 60);
+        
+        if (hoursElapsed <= 0) continue;
+        
+        const revChange = last.rev - first.rev;
+        const dailyRate = (revChange / hoursElapsed) * 24;
+        
+        // Show rate even if negative (but clamp display to 0 minimum)
+        point[`${app.key}_DailyRate`] = Math.max(0, dailyRate);
+        appsWithEnoughData.add(app.key);
+      }
+      
+      // Calculate total rate
+      const totalPoints = pointsInWindow
+        .map(h => ({ t: h.timestamp, rev: h.totalRevenue ?? 0 }))
+        .filter(p => p.rev >= 0);
+      
+      if (totalPoints.length >= 3) {
+        const first = totalPoints[0];
+        const last = totalPoints[totalPoints.length - 1];
+        const hoursElapsed = (last.t - first.t) / (1000 * 60 * 60);
+        if (hoursElapsed > 0) {
+          const totalChange = last.rev - first.rev;
+          point.totalDailyRate = Math.max(0, (totalChange / hoursElapsed) * 24);
+        }
+      }
+      
+      if (Object.keys(point).length > 1) {
+        rateData.push(point);
+      }
+    }
+    
+    // Include apps that have enough data (3+ non-negative points in window)
+    const validApps = perAppTimeSeries.apps.filter(app => appsWithEnoughData.has(app.key));
+    
+    return { 
+      data: rateData, 
+      apps: validApps,
+      hasData: rateData.length > 0 && validApps.length > 0
+    };
+  }, [historicalData, perAppTimeSeries]);
+
+  // Estimated daily activity data - transactions and volume extrapolated to 24h
+  const estimatedDailyActivityData = useMemo(() => {
+    if (historicalData.length < 2) return [];
+    
+    const result: any[] = [];
     
     for (let i = 1; i < historicalData.length; i++) {
       const prev = historicalData[i - 1];
@@ -529,38 +612,19 @@ function DashboardContent() {
       
       if (hoursElapsed <= 0) continue;
       
-      const point: any = { timestamp: curr.timestamp };
-      let hasAnyRate = false;
+      const txChange = (curr.totalTransactions ?? 0) - (prev.totalTransactions ?? 0);
+      const volChange = (curr.totalVolume ?? 0) - (prev.totalVolume ?? 0);
       
-      // Calculate 24h extrapolated rate for each app
-      for (const app of perAppTimeSeries.apps) {
-        const prevRev = prev[app.revenueKey] ?? 0;
-        const currRev = curr[app.revenueKey] ?? 0;
-        const revChange = currRev - prevRev;
-        
-        // Extrapolate to 24h: (change / hours) * 24
-        const dailyRate = (revChange / hoursElapsed) * 24;
-        point[`${app.key}_DailyRate`] = Math.max(0, dailyRate); // No negative rates
-        hasAnyRate = true;
-      }
-      
-      // Also calculate total daily rate
-      const prevTotal = prev.totalRevenue ?? 0;
-      const currTotal = curr.totalRevenue ?? 0;
-      const totalChange = currTotal - prevTotal;
-      point.totalDailyRate = Math.max(0, (totalChange / hoursElapsed) * 24);
-      
-      if (hasAnyRate) {
-        rateData.push(point);
-      }
+      result.push({
+        timestamp: curr.timestamp,
+        dailyTransactions: Math.max(0, (txChange / hoursElapsed) * 24),
+        dailyVolume: Math.max(0, (volChange / hoursElapsed) * 24),
+        totalPaying: curr.totalPaying ?? 0,
+      });
     }
     
-    return { 
-      data: rateData, 
-      apps: perAppTimeSeries.apps,
-      hasData: rateData.length > 0 
-    };
-  }, [historicalData, perAppTimeSeries]);
+    return result;
+  }, [historicalData]);
 
   const financialMetrics = useMemo(() => {
     const stats = aggregatedStats;
@@ -1406,7 +1470,61 @@ function DashboardContent() {
               </Block>
 
               <Block delay={0.15}>
-                <h3 className="text-lg font-medium mb-4">Revenue by App</h3>
+                <h3 className="text-lg font-medium mb-4">Monthly Active Users by App</h3>
+                <div className="h-72" data-testid="chart-mau-by-app">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={perAppTimeSeries.data}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis 
+                        dataKey="timestamp" 
+                        type="number"
+                        scale="time"
+                        domain={['dataMin', 'dataMax']}
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 10 }} 
+                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                      />
+                      <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        labelStyle={{ color: '#fff' }}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                      />
+                      <Legend />
+                      {perAppTimeSeries.hasPerAppData ? (
+                        perAppTimeSeries.apps.map((app, idx) => {
+                          const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#ef4444'];
+                          return (
+                            <Line 
+                              key={app.key}
+                              type="monotone" 
+                              dataKey={`${app.key}_MAU`} 
+                              name={app.name}
+                              stroke={colors[idx % colors.length]} 
+                              strokeWidth={2}
+                              dot={false}
+                              connectNulls
+                            />
+                          );
+                        })
+                      ) : (
+                        <Line 
+                          type="monotone" 
+                          dataKey="totalMAU" 
+                          name="Total MAU"
+                          stroke="#8b5cf6" 
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </Block>
+
+              <Block delay={0.2}>
+                <h3 className="text-lg font-medium mb-4">Monthly Revenue by App</h3>
+                <p className="text-xs text-[#6b7280] mb-3">Cumulative revenue (MRR equivalent)</p>
                 <div className="h-72" data-testid="chart-revenue-by-app">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={perAppTimeSeries.data}>
@@ -1507,10 +1625,10 @@ function DashboardContent() {
 
               <Block delay={0.25} className="lg:col-span-2">
                 <h3 className="text-lg font-medium mb-4">Daily Activity Comparison</h3>
-                <p className="text-xs text-[#6b7280] mb-3">All metrics shown as daily values for consistent comparison</p>
+                <p className="text-xs text-[#6b7280] mb-3">Transactions & Volume extrapolated to 24h rate; Payers shown as point-in-time</p>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={historicalData}>
+                    <ComposedChart data={estimatedDailyActivityData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis 
                         dataKey="timestamp" 
@@ -1522,16 +1640,16 @@ function DashboardContent() {
                         tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
                       />
                       <YAxis yAxisId="left" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
-                      <YAxis yAxisId="right" orientation="right" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <YAxis yAxisId="right" orientation="right" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v.toFixed(0)}`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                       />
                       <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="totalDAU" name="Daily Active Users" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                      <Line yAxisId="left" type="monotone" dataKey="totalSessions" name="Daily Sessions" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-                      <Bar yAxisId="right" dataKey="totalKeyActions" name="Daily Key Actions" fill="#f59e0b" opacity={0.6} />
+                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={false} />
+                      <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
@@ -1900,6 +2018,76 @@ function DashboardContent() {
                         )}
                       </React.Fragment>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            </Block>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
+              <Clock className="w-6 h-6 text-[#3b82f6]" />
+              <h2 className="text-2xl font-semibold">Snapshot History</h2>
+            </div>
+
+            <Block delay={0.1}>
+              <p className="text-sm text-[#a0aec0] mb-4">
+                All recorded data points ({historicalSnapshots.length} snapshots)
+              </p>
+              <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                <table className="w-full text-sm" data-testid="snapshot-history-table">
+                  <thead className="sticky top-0 bg-[#1a1a1a]">
+                    <tr className="border-b border-[#2d2d2d]">
+                      <th className="text-left py-3 px-3 text-[#a0aec0] font-medium">Timestamp</th>
+                      <th className="text-left py-3 px-3 text-[#a0aec0] font-medium">App</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">DAU</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">MAU</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Paying</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Revenue</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Txns</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Volume</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historicalSnapshots
+                      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                      .map((snapshot) => {
+                        const project = projects.find(p => p.id === snapshot.projectId);
+                        return (
+                          <tr 
+                            key={snapshot.id} 
+                            className="border-b border-[#2d2d2d]/50 hover:bg-[#1a1a1a]/50"
+                            data-testid={`snapshot-row-${snapshot.id}`}
+                          >
+                            <td className="py-2 px-3 font-mono text-xs">
+                              {format(new Date(snapshot.timestamp), "MMM d, HH:mm:ss")}
+                            </td>
+                            <td className="py-2 px-3">
+                              {project?.name.split('.')[0] || snapshot.metrics.app || 'Unknown'}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono">
+                              {snapshot.metrics.users.daily_active.toLocaleString()}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono">
+                              {snapshot.metrics.users.monthly_active.toLocaleString()}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono">
+                              {snapshot.metrics.users.paying.toLocaleString()}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono text-[#10b981]">
+                              ${snapshot.metrics.revenue.net_income.toFixed(2)}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono">
+                              {snapshot.metrics.onchain.transactions.toLocaleString()}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono text-[#f59e0b]">
+                              ${snapshot.metrics.onchain.volume.toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
