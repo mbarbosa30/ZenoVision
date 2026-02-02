@@ -644,6 +644,55 @@ function DashboardContent() {
     return result;
   }, [historicalData]);
 
+  // Estimated Daily Payments (DP) - calculated from cumulative payments difference over time
+  const dailyPaymentsEstimate = useMemo(() => {
+    if (historicalData.length < 2) {
+      return { value: 0, hasData: false, isEstimate: true };
+    }
+
+    // Get the first and last data point within 24h window
+    const now = historicalData[historicalData.length - 1].timestamp;
+    const windowStart = now - (24 * 60 * 60 * 1000);
+    const pointsInWindow = historicalData.filter(
+      h => h.timestamp >= windowStart && h.timestamp <= now
+    );
+
+    if (pointsInWindow.length < 2) {
+      // Not enough data in 24h, extrapolate from available data
+      const first = historicalData[0];
+      const last = historicalData[historicalData.length - 1];
+      const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
+      
+      if (hoursElapsed <= 0) {
+        return { value: 0, hasData: false, isEstimate: true };
+      }
+
+      const paymentsChange = (last.totalPayments ?? 0) - (first.totalPayments ?? 0);
+      const dailyPayments = Math.max(0, (paymentsChange / hoursElapsed) * 24);
+      
+      return { value: Math.round(dailyPayments), hasData: true, isEstimate: true };
+    }
+
+    // Use 24h window data
+    const first = pointsInWindow[0];
+    const last = pointsInWindow[pointsInWindow.length - 1];
+    const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
+
+    if (hoursElapsed <= 0) {
+      return { value: 0, hasData: false, isEstimate: true };
+    }
+
+    const paymentsChange = (last.totalPayments ?? 0) - (first.totalPayments ?? 0);
+    const dailyPayments = Math.max(0, (paymentsChange / hoursElapsed) * 24);
+    const has24hData = hoursElapsed >= 20; // Consider "enough" if at least 20h of data
+
+    return { 
+      value: Math.round(dailyPayments), 
+      hasData: true, 
+      isEstimate: !has24hData
+    };
+  }, [historicalData]);
+
   const financialMetrics = useMemo(() => {
     const stats = aggregatedStats;
     const historical = historicalData;
@@ -1322,15 +1371,23 @@ function DashboardContent() {
                   </div>
                   <div className="flex flex-col items-center">
                     <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                    <div className="text-xs text-[#666]">{financialMetrics.payingToDau.toFixed(1)}%</div>
+                    <div className="text-xs text-[#666]">
+                      {aggregatedStats.dau > 0 && dailyPaymentsEstimate.hasData 
+                        ? ((dailyPaymentsEstimate.value / aggregatedStats.dau) * 100).toFixed(1) 
+                        : "0.0"}%
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#f59e0b]">{aggregatedStats.payingUsers.toLocaleString()}</div>
-                    <div className="text-xs text-[#a0aec0]">Paying</div>
+                    <div className="text-2xl font-bold text-[#f59e0b]">
+                      {dailyPaymentsEstimate.hasData ? dailyPaymentsEstimate.value.toLocaleString() : "—"}
+                    </div>
+                    <div className="text-xs text-[#a0aec0]">
+                      DP{dailyPaymentsEstimate.isEstimate ? "*" : ""}
+                    </div>
                   </div>
                 </div>
                 <div className="text-xs text-[#666] text-center mt-2">
-                  Conversion rates shown between each stage (largest → smallest audience)
+                  Conversion rates between stages. DP = Daily Payments{dailyPaymentsEstimate.isEstimate ? " (*estimated, needs 24h+ data)" : ""}
                 </div>
               </Block>
             </div>

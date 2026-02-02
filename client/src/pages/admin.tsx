@@ -396,11 +396,11 @@ Store the key as METRICS_API_KEY secret.`}
 
             <div className="border-l-2 border-green-500 pl-4">
               <h4 className="font-medium flex items-center gap-2 mb-2">
-                <Activity className="w-4 h-4" /> Engagement
+                <Activity className="w-4 h-4" /> Engagement <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5">DAILY</span>
               </h4>
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>sessions_today</strong> — Distinct user visits in the last 24h. A session starts when the user opens the app and ends after 30 minutes of inactivity or explicit logout. One user can have multiple sessions.</p>
-                <p><strong>key_actions</strong> — Core value-generating interactions that show real engagement. Define based on your app's purpose:</p>
+                <p><strong>sessions_today</strong> — Distinct user visits in the last 24h. A session starts when the user opens the app and ends after 30 minutes of inactivity or explicit logout. One user can have multiple sessions. <em>(Resets daily)</em></p>
+                <p><strong>key_actions</strong> — Core value-generating interactions in the last 24h. Define based on your app's purpose: <em>(Resets daily)</em></p>
                 <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
                   <li><em>Trading app:</em> Trades executed</li>
                   <li><em>AI tool:</em> Prompts/queries submitted</li>
@@ -413,23 +413,24 @@ Store the key as METRICS_API_KEY secret.`}
 
             <div className="border-l-2 border-yellow-500 pl-4">
               <h4 className="font-medium flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4" /> Revenue
+                <DollarSign className="w-4 h-4" /> Revenue <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5">CUMULATIVE</span>
               </h4>
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>total_payments</strong> — Cumulative count of completed payment transactions (lifetime)</p>
+                <p><strong>total_payments</strong> — Cumulative count of user-initiated purchases (lifetime). A payment is when a user pays for something in your app (purchases, subscriptions, tips).</p>
                 <p><strong>net_income</strong> — Cumulative revenue after platform fees and refunds (lifetime, in USD). This is the actual money received.</p>
                 <p><strong>currency</strong> — Always report as "USD". Convert other currencies at time of transaction.</p>
+                <p className="italic mt-2">The dashboard calculates Daily Payments from the difference between snapshots.</p>
               </div>
             </div>
 
             <div className="border-l-2 border-purple-500 pl-4">
               <h4 className="font-medium flex items-center gap-2 mb-2">
-                <Zap className="w-4 h-4" /> On-chain (Web3 apps only)
+                <Zap className="w-4 h-4" /> On-chain (Web3 apps only) <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5">CUMULATIVE</span>
               </h4>
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>transactions</strong> — Cumulative count of blockchain transactions initiated through the app (lifetime)</p>
+                <p><strong>transactions</strong> — Cumulative count of ALL blockchain transactions through the app (lifetime). Includes user actions, system operations, swaps, transfers — everything on-chain.</p>
                 <p><strong>volume</strong> — Cumulative USD value of on-chain transactions (lifetime). Use price at time of transaction.</p>
-                <p className="italic mt-2">Set both to 0 if your app doesn't have blockchain functionality.</p>
+                <p className="italic mt-2">Unlike payments (user purchases only), transactions include all on-chain activity. Set both to 0 if your app doesn't have blockchain functionality.</p>
               </div>
             </div>
           </div>
