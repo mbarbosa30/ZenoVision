@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { 
   Users, TrendingUp, TrendingDown, DollarSign, Zap, Activity, 
@@ -383,6 +383,7 @@ function DashboardContent() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [growthTimeframe, setGrowthTimeframe] = useState<GrowthTimeframe>('daily');
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   const { data: projectsData } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
@@ -417,6 +418,14 @@ function DashboardContent() {
   const snapshots = (latestMetrics?.snapshots || []).filter(s => 
     connectedProjects.some(p => p.id === s.projectId)
   );
+
+  // Set timestamp on initial successful data load
+  useEffect(() => {
+    if (latestMetrics?.success && !initialLoadDone) {
+      setLastRefreshTime(new Date());
+      setInitialLoadDone(true);
+    }
+  }, [latestMetrics?.success, initialLoadDone]);
   const historicalSnapshots = (historicalMetrics?.snapshots || []).filter(s =>
     connectedProjects.some(p => p.id === s.projectId)
   );
