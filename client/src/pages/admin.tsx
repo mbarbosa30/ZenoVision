@@ -356,10 +356,6 @@ export default function Admin() {
   const [fetchingMetrics, setFetchingMetrics] = useState<string | null>(null);
   const [selectedProjectForMetrics, setSelectedProjectForMetrics] = useState<string | null>(null);
 
-  if (!isAuthenticated) {
-    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
-  }
-
   const { data: inquiriesData, isLoading: inquiriesLoading } = useQuery<{ success: boolean; inquiries: Inquiry[] }>({
     queryKey: ["/api/inquiries"],
     queryFn: async () => {
@@ -367,6 +363,7 @@ export default function Admin() {
       if (!res.ok) throw new Error("Failed to fetch inquiries");
       return res.json();
     },
+    enabled: isAuthenticated,
   });
 
   const { data: projectsData, isLoading: projectsLoading } = useQuery<{ success: boolean; projects: Project[] }>({
@@ -376,6 +373,7 @@ export default function Admin() {
       if (!res.ok) throw new Error("Failed to fetch projects");
       return res.json();
     },
+    enabled: isAuthenticated,
   });
 
   const createProjectMutation = useMutation({
@@ -436,6 +434,10 @@ export default function Admin() {
 
   const inquiries = inquiriesData?.inquiries || [];
   const projects = projectsData?.projects || [];
+
+  if (!isAuthenticated) {
+    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+  }
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
