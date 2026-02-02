@@ -114,16 +114,16 @@ const StatCard = ({
   };
 
   return (
-    <Block delay={delay} className="relative overflow-hidden min-h-[120px] p-5">
-      <div className={`absolute top-4 right-4 p-2 ${colors[color]}`}>
-        <Icon className="w-5 h-5" />
+    <Block delay={delay} className="relative overflow-hidden min-h-[100px] p-4">
+      <div className={`absolute top-3 right-3 p-1.5 ${colors[color]}`}>
+        <Icon className="w-4 h-4" />
       </div>
-      <div className="pr-10">
-        <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-2 font-medium">{label}</div>
-        <div className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 leading-tight" data-testid={testId}>{value}</div>
+      <div className="pr-8">
+        <div className="text-[10px] text-[#a0aec0] uppercase tracking-wider mb-1.5 font-medium">{label}</div>
+        <div className="text-lg sm:text-xl md:text-2xl font-bold mb-1.5 leading-tight" data-testid={testId}>{value}</div>
         {change !== undefined && (
-          <div className={`flex items-center gap-1 text-xs font-medium ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
-            {change >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+          <div className={`flex items-center gap-1 text-[10px] font-medium ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
+            {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
             {Math.abs(change).toFixed(1)}%
           </div>
         )}
@@ -1043,7 +1043,7 @@ function DashboardContent() {
               <DollarSign className="w-6 h-6 text-[#10b981]" />
               <h2 className="text-2xl font-semibold">Activity & Engagement</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {metricVisibility.revenue && (
                 <StatCard 
                   label="Net Revenue" 
@@ -1110,14 +1110,6 @@ function DashboardContent() {
                   testId="stat-volume"
                 />
               )}
-              <StatCard 
-                label="Apps" 
-                value={aggregatedStats.connectedApps.toString()} 
-                icon={Box} 
-                color="purple"
-                delay={0.3}
-                testId="stat-connected-apps"
-              />
             </div>
           </div>
         </section>
