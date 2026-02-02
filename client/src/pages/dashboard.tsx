@@ -1356,62 +1356,83 @@ function DashboardContent() {
         {metricVisibility.users && (
           <section className="border-b border-[#2d2d2d]">
             <div className="max-w-7xl mx-auto p-8 md:p-12">
-              <div className="flex items-center gap-3 mb-8">
-                <Target className="w-6 h-6 text-[#8b5cf6]" />
-                <h2 className="text-2xl font-semibold">Engagement Funnel</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Users to Payers - Absolute totals */}
+                <Block delay={0.1}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <Target className="w-5 h-5 text-[#3b82f6]" />
+                    <h3 className="text-lg font-semibold">Users → Payers</h3>
+                    <span className="text-xs text-[#666] ml-auto">Cumulative totals</span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 py-4">
+                    <div className="text-center p-4 bg-[#3b82f6]/10 border border-[#3b82f6]/30 min-w-[120px]">
+                      <div className="text-2xl font-bold text-[#3b82f6]">{formatNum(aggregatedStats.totalUsers)}</div>
+                      <div className="text-xs text-[#a0aec0]">Total Users</div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                      <div className="text-xs text-[#666]">
+                        {aggregatedStats.totalUsers > 0 
+                          ? ((aggregatedStats.payingUsers / aggregatedStats.totalUsers) * 100).toFixed(2) 
+                          : "0.00"}%
+                      </div>
+                    </div>
+                    <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[120px]">
+                      <div className="text-2xl font-bold text-[#10b981]">{formatNum(aggregatedStats.payingUsers)}</div>
+                      <div className="text-xs text-[#a0aec0]">Paying Users</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-[#2d2d2d]">
+                    <div className="text-center">
+                      <div className="text-lg font-semibold text-[#f59e0b]">
+                        {dailyPayersEstimate.hasData ? formatNum(dailyPayersEstimate.value) : "—"}
+                      </div>
+                      <div className="text-xs text-[#a0aec0]">
+                        DPU{dailyPayersEstimate.isEstimate ? "*" : ""} (est. daily)
+                      </div>
+                    </div>
+                  </div>
+                  {dailyPayersEstimate.isEstimate && (
+                    <div className="text-xs text-[#666] text-center mt-2">
+                      *Estimated, needs 24h+ data for accuracy
+                    </div>
+                  )}
+                </Block>
+
+                {/* Active Users - Rolling metrics */}
+                <Block delay={0.2}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <Activity className="w-5 h-5 text-[#8b5cf6]" />
+                    <h3 className="text-lg font-semibold">Active Users</h3>
+                    <span className="text-xs text-[#666] ml-auto">Rolling windows</span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 py-4">
+                    <div className="text-center p-4 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 min-w-[100px]">
+                      <div className="text-2xl font-bold text-[#8b5cf6]">{formatNum(aggregatedStats.mau)}</div>
+                      <div className="text-xs text-[#a0aec0]">MAU</div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                      <div className="text-xs text-[#666]">{financialMetrics.wauToMau.toFixed(1)}%</div>
+                    </div>
+                    <div className="text-center p-4 bg-[#06b6d4]/10 border border-[#06b6d4]/30 min-w-[100px]">
+                      <div className="text-2xl font-bold text-[#06b6d4]">{formatNum(aggregatedStats.wau)}</div>
+                      <div className="text-xs text-[#a0aec0]">WAU</div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                      <div className="text-xs text-[#666]">{financialMetrics.dauToWau.toFixed(1)}%</div>
+                    </div>
+                    <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[100px]">
+                      <div className="text-2xl font-bold text-[#10b981]">{formatNum(aggregatedStats.dau)}</div>
+                      <div className="text-xs text-[#a0aec0]">DAU</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-[#666] text-center mt-4">
+                    Retention: MAU → WAU → DAU shows user engagement over 30d/7d/1d windows
+                  </div>
+                </Block>
               </div>
-              
-              <Block delay={0.1}>
-                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 py-6">
-                  <div className="text-center p-4 bg-[#3b82f6]/10 border border-[#3b82f6]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#3b82f6]">{formatNum(aggregatedStats.totalUsers)}</div>
-                    <div className="text-xs text-[#a0aec0]">Total</div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                    <div className="text-xs text-[#666]">{financialMetrics.mauToTotal.toFixed(1)}%</div>
-                  </div>
-                  <div className="text-center p-4 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#8b5cf6]">{formatNum(aggregatedStats.mau)}</div>
-                    <div className="text-xs text-[#a0aec0]">MAU</div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                    <div className="text-xs text-[#666]">{financialMetrics.wauToMau.toFixed(1)}%</div>
-                  </div>
-                  <div className="text-center p-4 bg-[#06b6d4]/10 border border-[#06b6d4]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#06b6d4]">{formatNum(aggregatedStats.wau)}</div>
-                    <div className="text-xs text-[#a0aec0]">WAU</div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                    <div className="text-xs text-[#666]">{financialMetrics.dauToWau.toFixed(1)}%</div>
-                  </div>
-                  <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#10b981]">{formatNum(aggregatedStats.dau)}</div>
-                    <div className="text-xs text-[#a0aec0]">DAU</div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                    <div className="text-xs text-[#666]">
-                      {aggregatedStats.dau > 0 && dailyPayersEstimate.hasData 
-                        ? ((dailyPayersEstimate.value / aggregatedStats.dau) * 100).toFixed(1) 
-                        : "0.0"}%
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#f59e0b]">
-                      {dailyPayersEstimate.hasData ? formatNum(dailyPayersEstimate.value) : "—"}
-                    </div>
-                    <div className="text-xs text-[#a0aec0]">
-                      DPU{dailyPayersEstimate.isEstimate ? "*" : ""}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs text-[#666] text-center mt-2">
-                  Conversion rates between stages. DPU = Daily Paying Users{dailyPayersEstimate.isEstimate ? " (*estimated, needs 24h+ data)" : ""}
-                </div>
-              </Block>
             </div>
           </section>
         )}
