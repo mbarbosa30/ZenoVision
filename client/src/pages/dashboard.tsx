@@ -1382,21 +1382,9 @@ function DashboardContent() {
                       <div className="text-xs text-[#a0aec0]">Paying Users</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-[#2d2d2d]">
-                    <div className="text-center">
-                      <div className="text-lg font-semibold text-[#f59e0b]">
-                        {dailyPayersEstimate.hasData ? formatNum(dailyPayersEstimate.value) : "—"}
-                      </div>
-                      <div className="text-xs text-[#a0aec0]">
-                        DPU{dailyPayersEstimate.isEstimate ? "*" : ""} (est. daily)
-                      </div>
-                    </div>
+                  <div className="text-xs text-[#666] text-center mt-4">
+                    Conversion: Users who completed their first payment action
                   </div>
-                  {dailyPayersEstimate.isEstimate && (
-                    <div className="text-xs text-[#666] text-center mt-2">
-                      *Estimated, needs 24h+ data for accuracy
-                    </div>
-                  )}
                 </Block>
 
                 {/* Active Users - Rolling metrics */}
