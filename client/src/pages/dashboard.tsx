@@ -694,13 +694,13 @@ function DashboardContent() {
                 testId="stat-total-users"
               />
               <StatCard 
-                label="Daily Active" 
-                value={aggregatedStats.dau.toLocaleString()} 
-                change={aggregatedStats.dau > 0 && historicalData.length >= 2 ? financialMetrics.dauGrowthRate : undefined}
-                icon={Activity} 
-                color="green"
+                label="Monthly Active" 
+                value={aggregatedStats.mau.toLocaleString()} 
+                change={aggregatedStats.mau > 0 && historicalData.length >= 2 ? financialMetrics.mauGrowthRate : undefined}
+                icon={TrendingUp} 
+                color="purple"
                 delay={0.12}
-                testId="stat-dau"
+                testId="stat-mau"
               />
               <StatCard 
                 label="Weekly Active" 
@@ -712,13 +712,13 @@ function DashboardContent() {
                 testId="stat-wau"
               />
               <StatCard 
-                label="Monthly Active" 
-                value={aggregatedStats.mau.toLocaleString()} 
-                change={aggregatedStats.mau > 0 && historicalData.length >= 2 ? financialMetrics.mauGrowthRate : undefined}
-                icon={TrendingUp} 
-                color="purple"
+                label="Daily Active" 
+                value={aggregatedStats.dau.toLocaleString()} 
+                change={aggregatedStats.dau > 0 && historicalData.length >= 2 ? financialMetrics.dauGrowthRate : undefined}
+                icon={Activity} 
+                color="green"
                 delay={0.16}
-                testId="stat-mau"
+                testId="stat-dau"
               />
               <StatCard 
                 label="Paying Users" 
