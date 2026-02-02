@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
-import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X, Lock } from "lucide-react";
+import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X, Lock, RefreshCw, Activity, Users, DollarSign, Zap, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface Inquiry {
   id: string;
@@ -32,6 +33,40 @@ interface Project {
   highlight: string;
   url: string;
   sortOrder: number;
+  metricsEndpoint: string | null;
+  metricsApiKey: string | null;
+}
+
+interface Metrics {
+  app: string;
+  timestamp: string;
+  users: {
+    total: number;
+    daily_active: number;
+    weekly_active: number;
+    monthly_active: number;
+    paying: number;
+  };
+  engagement: {
+    key_actions: number;
+    sessions_today: number;
+  };
+  revenue: {
+    total_payments: number;
+    net_income: number;
+    currency: string;
+  };
+  onchain: {
+    transactions: number;
+    volume: number;
+  };
+}
+
+interface MetricsSnapshot {
+  id: string;
+  projectId: string;
+  timestamp: string;
+  metrics: Metrics;
 }
 
 function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
@@ -100,13 +135,226 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: ReturnType<typeof useToast>["toast"] }) {
+  const [fetching, setFetching] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: latestMetrics, isLoading: metricsLoading } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
+    queryKey: ["/api/metrics/latest"],
+    queryFn: async () => {
+      const res = await fetch("/api/metrics/latest");
+      if (!res.ok) throw new Error("Failed to fetch metrics");
+      return res.json();
+    },
+  });
+
+  const { data: projectMetrics } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
+    queryKey: ["/api/projects", selectedProject, "metrics"],
+    queryFn: async () => {
+      if (!selectedProject) return { success: true, snapshots: [] };
+      const res = await fetch(`/api/projects/${selectedProject}/metrics?limit=30`);
+      if (!res.ok) throw new Error("Failed to fetch project metrics");
+      return res.json();
+    },
+    enabled: !!selectedProject,
+  });
+
+  const fetchAllMetrics = async () => {
+    setFetching(true);
+    try {
+      const res = await fetch("/api/metrics/fetch-all", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        const successCount = data.results.filter((r: any) => r.success).length;
+        toast({ title: "Metrics fetched", description: `Successfully fetched ${successCount} of ${data.results.length} projects` });
+        queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to fetch metrics", variant: "destructive" });
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  const snapshots = latestMetrics?.snapshots || [];
+  const projectsWithMetrics = projects.filter(p => p.metricsEndpoint);
+  
+  const chartData = (projectMetrics?.snapshots || [])
+    .slice()
+    .reverse()
+    .map(s => ({
+      date: format(new Date(s.timestamp), "MMM d"),
+      DAU: s.metrics.users.daily_active,
+      WAU: s.metrics.users.weekly_active,
+      MAU: s.metrics.users.monthly_active,
+      Transactions: s.metrics.onchain.transactions,
+      Revenue: s.metrics.revenue.net_income,
+    }));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-semibold">Portfolio Metrics</h2>
+          <p className="text-sm text-muted-foreground">{projectsWithMetrics.length} project{projectsWithMetrics.length !== 1 ? "s" : ""} with metrics configured</p>
+        </div>
+        <Button onClick={fetchAllMetrics} disabled={fetching} data-testid="button-fetch-all-metrics">
+          <RefreshCw className={`w-4 h-4 mr-2 ${fetching ? "animate-spin" : ""}`} />
+          {fetching ? "Fetching..." : "Fetch All Metrics"}
+        </Button>
+      </div>
+
+      {metricsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => <Card key={i}><CardContent className="pt-6"><Skeleton className="h-24 w-full" /></CardContent></Card>)}
+        </div>
+      ) : snapshots.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No metrics data yet. Configure metrics endpoints on your projects and click "Fetch All Metrics".</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {snapshots.map(snapshot => {
+              const project = projects.find(p => p.id === snapshot.projectId);
+              if (!project) return null;
+              const m = snapshot.metrics;
+              return (
+                <Card 
+                  key={snapshot.id} 
+                  className={`cursor-pointer transition-colors ${selectedProject === snapshot.projectId ? "border-primary" : "hover:border-primary/50"}`}
+                  onClick={() => setSelectedProject(snapshot.projectId)}
+                  data-testid={`metrics-card-${snapshot.projectId}`}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <Badge variant="outline" className="text-xs">{format(new Date(snapshot.timestamp), "MMM d, h:mm a")}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-blue-500" />
+                        <div>
+                          <div className="font-medium">{m.users.total.toLocaleString()}</div>
+                          <div className="text-xs text-muted-foreground">Total Users</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                        <div>
+                          <div className="font-medium">{m.users.daily_active.toLocaleString()}</div>
+                          <div className="text-xs text-muted-foreground">DAU</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-yellow-500" />
+                        <div>
+                          <div className="font-medium">{m.onchain.transactions.toLocaleString()}</div>
+                          <div className="text-xs text-muted-foreground">Transactions</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-emerald-500" />
+                        <div>
+                          <div className="font-medium">${m.revenue.net_income.toLocaleString()}</div>
+                          <div className="text-xs text-muted-foreground">Revenue</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {selectedProject && chartData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {projects.find(p => p.id === selectedProject)?.name} - Historical Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                      <XAxis dataKey="date" stroke="#666" />
+                      <YAxis yAxisId="left" stroke="#666" />
+                      <YAxis yAxisId="right" orientation="right" stroke="#666" />
+                      <Tooltip contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #333" }} />
+                      <Legend />
+                      <Line yAxisId="left" type="monotone" dataKey="DAU" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="WAU" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="MAU" stroke="#06b6d4" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="Transactions" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                      <Line yAxisId="right" type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Metrics API Template</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">Use this prompt on your other apps to create a compatible metrics endpoint:</p>
+          <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap">
+{`Create a /api/metrics endpoint that returns:
+{
+  "app": "App Name",
+  "timestamp": "ISO 8601 timestamp",
+  "users": {
+    "total": number,
+    "daily_active": number,
+    "weekly_active": number,
+    "monthly_active": number,
+    "paying": number
+  },
+  "engagement": {
+    "key_actions": number,
+    "sessions_today": number
+  },
+  "revenue": {
+    "total_payments": number,
+    "net_income": number,
+    "currency": "USD"
+  },
+  "onchain": {
+    "transactions": number,
+    "volume": number
+  }
+}
+
+Secure it with an API key via Authorization header.
+Store the key as METRICS_API_KEY secret.`}
+          </pre>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("adminAuth") === "true");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0 });
+  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "" });
+  const [fetchingMetrics, setFetchingMetrics] = useState<string | null>(null);
+  const [selectedProjectForMetrics, setSelectedProjectForMetrics] = useState<string | null>(null);
 
   if (!isAuthenticated) {
     return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
@@ -143,7 +391,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setIsAddDialogOpen(false);
-      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0 });
+      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "" });
       toast({ title: "Project added", description: "The project has been added successfully." });
     },
     onError: () => {
@@ -211,11 +459,16 @@ export default function Admin() {
           </div>
         </div>
 
-        <Tabs defaultValue="inquiries" className="space-y-6">
+        <Tabs defaultValue="metrics" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="metrics" data-testid="tab-metrics"><Activity className="w-4 h-4 mr-2" />Metrics</TabsTrigger>
             <TabsTrigger value="inquiries" data-testid="tab-inquiries">Inquiries ({inquiries.length})</TabsTrigger>
             <TabsTrigger value="projects" data-testid="tab-projects">Projects ({projects.length})</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="metrics" className="space-y-6">
+            <MetricsDashboard projects={projects} toast={toast} />
+          </TabsContent>
 
           <TabsContent value="inquiries" className="space-y-4">
             {inquiriesLoading && (
@@ -311,6 +564,17 @@ export default function Admin() {
                       <Label htmlFor="sortOrder">Sort Order</Label>
                       <Input id="sortOrder" type="number" value={newProject.sortOrder} onChange={(e) => setNewProject({ ...newProject, sortOrder: parseInt(e.target.value) || 0 })} data-testid="input-project-order" />
                     </div>
+                    <div className="border-t pt-4 mt-4">
+                      <p className="text-sm text-muted-foreground mb-3">Metrics API (optional)</p>
+                      <div className="space-y-2">
+                        <Label htmlFor="metricsEndpoint">Metrics Endpoint</Label>
+                        <Input id="metricsEndpoint" value={newProject.metricsEndpoint} onChange={(e) => setNewProject({ ...newProject, metricsEndpoint: e.target.value })} placeholder="https://app.com/api/metrics" data-testid="input-project-metrics-endpoint" />
+                      </div>
+                      <div className="space-y-2 mt-2">
+                        <Label htmlFor="metricsApiKey">API Key</Label>
+                        <Input id="metricsApiKey" type="password" value={newProject.metricsApiKey} onChange={(e) => setNewProject({ ...newProject, metricsApiKey: e.target.value })} placeholder="Bearer token" data-testid="input-project-metrics-key" />
+                      </div>
+                    </div>
                     <Button className="w-full" onClick={() => createProjectMutation.mutate(newProject)} disabled={createProjectMutation.isPending} data-testid="button-save-project">
                       {createProjectMutation.isPending ? "Adding..." : "Add Project"}
                     </Button>
@@ -350,6 +614,10 @@ export default function Admin() {
                             <Input value={editingProject.highlight} onChange={(e) => setEditingProject({ ...editingProject, highlight: e.target.value })} placeholder="Highlight" data-testid="input-edit-highlight" />
                             <Input value={editingProject.url} onChange={(e) => setEditingProject({ ...editingProject, url: e.target.value })} placeholder="URL" data-testid="input-edit-url" />
                             <Input type="number" value={editingProject.sortOrder} onChange={(e) => setEditingProject({ ...editingProject, sortOrder: parseInt(e.target.value) || 0 })} placeholder="Order" className="w-20" data-testid="input-edit-order" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Input value={editingProject.metricsEndpoint || ""} onChange={(e) => setEditingProject({ ...editingProject, metricsEndpoint: e.target.value })} placeholder="Metrics Endpoint" data-testid="input-edit-metrics-endpoint" />
+                            <Input type="password" value={editingProject.metricsApiKey || ""} onChange={(e) => setEditingProject({ ...editingProject, metricsApiKey: e.target.value })} placeholder="API Key" data-testid="input-edit-metrics-key" />
                           </div>
                           <div className="flex gap-2 justify-end">
                             <Button variant="outline" size="sm" onClick={() => setEditingProject(null)} data-testid="button-cancel-edit"><X className="w-4 h-4" /></Button>

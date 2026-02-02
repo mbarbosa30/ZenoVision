@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -10,6 +10,8 @@ export const projects = pgTable("projects", {
   highlight: text("highlight").notNull(),
   url: text("url").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
+  metricsEndpoint: text("metrics_endpoint"),
+  metricsApiKey: text("metrics_api_key"),
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
@@ -18,6 +20,48 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+
+export const metricsSnapshots = pgTable("metrics_snapshots", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  metrics: jsonb("metrics").notNull(),
+});
+
+export const insertMetricsSnapshotSchema = createInsertSchema(metricsSnapshots).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type InsertMetricsSnapshot = z.infer<typeof insertMetricsSnapshotSchema>;
+export type MetricsSnapshot = typeof metricsSnapshots.$inferSelect;
+
+export const metricsSchema = z.object({
+  app: z.string(),
+  timestamp: z.string(),
+  users: z.object({
+    total: z.number(),
+    daily_active: z.number(),
+    weekly_active: z.number(),
+    monthly_active: z.number(),
+    paying: z.number(),
+  }),
+  engagement: z.object({
+    key_actions: z.number(),
+    sessions_today: z.number(),
+  }),
+  revenue: z.object({
+    total_payments: z.number(),
+    net_income: z.number(),
+    currency: z.string(),
+  }),
+  onchain: z.object({
+    transactions: z.number(),
+    volume: z.number(),
+  }),
+});
+
+export type Metrics = z.infer<typeof metricsSchema>;
 
 export const inquiries = pgTable("inquiries", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

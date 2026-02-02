@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInquirySchema, insertProjectSchema } from "@shared/schema";
+import { insertInquirySchema, insertProjectSchema, metricsSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
 const DEFAULT_PROJECTS = [
@@ -135,6 +135,129 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting project:", error);
       res.status(500).json({ success: false, error: "Failed to delete project" });
+    }
+  });
+
+  // Fetch metrics from a project's external API and store snapshot
+  app.post("/api/projects/:id/fetch-metrics", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const projects = await storage.getAllProjects();
+      const project = projects.find(p => p.id === id);
+      
+      if (!project) {
+        return res.status(404).json({ success: false, error: "Project not found" });
+      }
+      
+      if (!project.metricsEndpoint) {
+        return res.status(400).json({ success: false, error: "No metrics endpoint configured for this project" });
+      }
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      
+      if (project.metricsApiKey) {
+        headers["Authorization"] = `Bearer ${project.metricsApiKey}`;
+      }
+
+      const response = await fetch(project.metricsEndpoint, { headers });
+      
+      if (!response.ok) {
+        return res.status(502).json({ success: false, error: `Failed to fetch metrics: ${response.status}` });
+      }
+
+      const data = await response.json();
+      const validated = metricsSchema.safeParse(data);
+      
+      if (!validated.success) {
+        return res.status(400).json({ success: false, error: "Invalid metrics format from external API", details: validated.error.issues });
+      }
+
+      const snapshot = await storage.createMetricsSnapshot({
+        projectId: id,
+        metrics: validated.data,
+      });
+
+      res.json({ success: true, snapshot });
+    } catch (error: any) {
+      console.error("Error fetching metrics:", error);
+      res.status(500).json({ success: false, error: error.message || "Failed to fetch metrics" });
+    }
+  });
+
+  // Get metrics history for a project
+  app.get("/api/projects/:id/metrics", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const limit = parseInt(req.query.limit as string) || 100;
+      const snapshots = await storage.getMetricsSnapshots(id, limit);
+      res.json({ success: true, snapshots });
+    } catch (error) {
+      console.error("Error fetching metrics history:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch metrics history" });
+    }
+  });
+
+  // Get latest metrics for all projects
+  app.get("/api/metrics/latest", async (req, res) => {
+    try {
+      const snapshots = await storage.getAllLatestMetrics();
+      res.json({ success: true, snapshots });
+    } catch (error) {
+      console.error("Error fetching latest metrics:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch latest metrics" });
+    }
+  });
+
+  // Fetch metrics for all projects with configured endpoints
+  app.post("/api/metrics/fetch-all", async (req, res) => {
+    try {
+      const projects = await storage.getAllProjects();
+      const results: { projectId: string; success: boolean; error?: string }[] = [];
+
+      for (const project of projects) {
+        if (!project.metricsEndpoint) continue;
+
+        try {
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
+          
+          if (project.metricsApiKey) {
+            headers["Authorization"] = `Bearer ${project.metricsApiKey}`;
+          }
+
+          const response = await fetch(project.metricsEndpoint, { headers });
+          
+          if (!response.ok) {
+            results.push({ projectId: project.id, success: false, error: `HTTP ${response.status}` });
+            continue;
+          }
+
+          const data = await response.json();
+          const validated = metricsSchema.safeParse(data);
+          
+          if (!validated.success) {
+            results.push({ projectId: project.id, success: false, error: "Invalid format" });
+            continue;
+          }
+
+          await storage.createMetricsSnapshot({
+            projectId: project.id,
+            metrics: validated.data,
+          });
+
+          results.push({ projectId: project.id, success: true });
+        } catch (err: any) {
+          results.push({ projectId: project.id, success: false, error: err.message });
+        }
+      }
+
+      res.json({ success: true, results });
+    } catch (error) {
+      console.error("Error fetching all metrics:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch metrics" });
     }
   });
 
