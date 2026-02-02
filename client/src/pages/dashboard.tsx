@@ -1106,7 +1106,7 @@ function DashboardContent() {
               )}
               {metricVisibility.onchain && (
                 <StatCard 
-                  label="All Transactions" 
+                  label="All Transfers" 
                   value={formatNum(aggregatedStats.totalTransactions)} 
                   change={aggregatedStats.totalTransactions > 0 && historicalData.length >= 2 ? financialMetrics.txGrowthRate : undefined}
                   icon={Zap} 
