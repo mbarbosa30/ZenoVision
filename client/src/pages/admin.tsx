@@ -137,6 +137,7 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 
 function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: ReturnType<typeof useToast>["toast"] }) {
   const [fetching, setFetching] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -177,6 +178,24 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
     }
   };
 
+  const resetMetrics = async () => {
+    if (!confirm("Are you sure you want to delete all metrics data? This cannot be undone.")) return;
+    setResetting(true);
+    try {
+      const res = await fetch("/api/metrics", { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Metrics reset", description: `Deleted ${data.deleted} snapshots` });
+        queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
+        setSelectedProject(null);
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to reset metrics", variant: "destructive" });
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const snapshots = latestMetrics?.snapshots || [];
   const projectsWithMetrics = projects.filter(p => p.metricsEndpoint);
   
@@ -199,10 +218,16 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
           <h2 className="text-xl font-semibold">Portfolio Metrics</h2>
           <p className="text-sm text-muted-foreground">{projectsWithMetrics.length} project{projectsWithMetrics.length !== 1 ? "s" : ""} with metrics configured</p>
         </div>
-        <Button onClick={fetchAllMetrics} disabled={fetching} data-testid="button-fetch-all-metrics">
-          <RefreshCw className={`w-4 h-4 mr-2 ${fetching ? "animate-spin" : ""}`} />
-          {fetching ? "Fetching..." : "Fetch All Metrics"}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={fetchAllMetrics} disabled={fetching || resetting} data-testid="button-fetch-all-metrics">
+            <RefreshCw className={`w-4 h-4 mr-2 ${fetching ? "animate-spin" : ""}`} />
+            {fetching ? "Fetching..." : "Fetch All Metrics"}
+          </Button>
+          <Button variant="destructive" onClick={resetMetrics} disabled={fetching || resetting} data-testid="button-reset-metrics">
+            <Trash2 className="w-4 h-4 mr-2" />
+            {resetting ? "Resetting..." : "Reset All"}
+          </Button>
+        </div>
       </div>
 
       {metricsLoading ? (
