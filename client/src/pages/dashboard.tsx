@@ -110,15 +110,15 @@ const StatCard = ({
   };
 
   return (
-    <Block delay={delay} className="relative overflow-hidden min-h-[120px]">
-      <div className={`absolute top-4 right-4 p-2 ${colors[color]}`}>
-        <Icon className="w-5 h-5" />
+    <Block delay={delay} className="relative overflow-hidden min-h-[100px] p-4">
+      <div className={`absolute top-3 right-3 p-1.5 ${colors[color]}`}>
+        <Icon className="w-4 h-4" />
       </div>
-      <div className="pr-12">
-        <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-2 truncate">{label}</div>
-        <div className="text-2xl md:text-3xl font-semibold mb-2" data-testid={testId}>{value}</div>
+      <div className="pr-8">
+        <div className="text-[10px] text-[#a0aec0] uppercase tracking-wider mb-1">{label}</div>
+        <div className="text-lg sm:text-xl md:text-2xl font-semibold mb-1" data-testid={testId}>{value}</div>
         {change !== undefined && (
-          <div className={`flex items-center gap-1 text-xs ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
+          <div className={`flex items-center gap-1 text-[10px] ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
             {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
             {Math.abs(change).toFixed(1)}%
           </div>
@@ -682,7 +682,7 @@ function DashboardContent() {
               <Users className="w-6 h-6 text-[#3b82f6]" />
               <h2 className="text-2xl font-semibold">User Metrics</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-8">
               <StatCard 
                 label="Total Users" 
                 value={aggregatedStats.totalUsers.toLocaleString()} 
@@ -734,7 +734,7 @@ function DashboardContent() {
               <DollarSign className="w-6 h-6 text-[#10b981]" />
               <h2 className="text-2xl font-semibold">Revenue & Engagement</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               <StatCard 
                 label="Net Revenue" 
                 value={`$${aggregatedStats.totalRevenue.toLocaleString()}`} 
