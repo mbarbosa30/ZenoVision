@@ -222,7 +222,9 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
   });
 }
 
-function calculateTimeWeightedGrowth(historical: any[]) {
+type GrowthTimeframe = 'daily' | 'weekly' | 'monthly';
+
+function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'weekly') {
   const defaultRates = { 
     userGrowthRate: 0, dauGrowthRate: 0, wauGrowthRate: 0, mauGrowthRate: 0, 
     payingGrowthRate: 0, revenueGrowthRate: 0, paymentsGrowthRate: 0,
@@ -237,53 +239,49 @@ function calculateTimeWeightedGrowth(historical: any[]) {
   const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
   const daysElapsed = hoursElapsed / 24;
   
-  // Linear regression to find trend across ALL data points
-  // Returns weekly percentage change based on the slope
-  const calculateTrendGrowth = (dataKey: string): number => {
-    const points = historical.map(h => ({
-      t: (h.timestamp - first.timestamp) / (1000 * 60 * 60 * 24), // days from start
-      v: h[dataKey] || 0
-    })).filter(p => p.v > 0);
+  // Target periods in days for extrapolation
+  const targetDays = timeframe === 'daily' ? 1 : timeframe === 'weekly' ? 7 : 30;
+  
+  // Calculate growth rate using proper financial formulas
+  // Compound growth rate: (final/initial)^(targetPeriods/elapsedPeriods) - 1
+  const calculateGrowth = (dataKey: string): number => {
+    const firstVal = first[dataKey] || 0;
+    const lastVal = last[dataKey] || 0;
     
-    if (points.length < 2) return 0;
+    // Handle edge cases
+    if (daysElapsed <= 0) return 0;
+    if (firstVal <= 0 && lastVal <= 0) return 0;
+    if (firstVal <= 0 && lastVal > 0) return 100; // Growth from 0 = +100% (capped)
+    if (firstVal > 0 && lastVal <= 0) return -100; // Decline to 0 = -100%
     
-    // Calculate means
-    const n = points.length;
-    const sumT = points.reduce((s, p) => s + p.t, 0);
-    const sumV = points.reduce((s, p) => s + p.v, 0);
-    const meanT = sumT / n;
-    const meanV = sumV / n;
+    // Compound growth rate formula: (final/initial)^(target/elapsed) - 1
+    const ratio = lastVal / firstVal;
     
-    // Calculate slope using least squares
-    let numerator = 0;
-    let denominator = 0;
-    for (const p of points) {
-      numerator += (p.t - meanT) * (p.v - meanV);
-      denominator += (p.t - meanT) * (p.t - meanT);
+    // Guard against extreme extrapolation with very short windows
+    // If elapsed time < 10% of target period, show simple % change instead
+    if (daysElapsed < targetDays * 0.1) {
+      const simpleChange = ((lastVal - firstVal) / firstVal) * 100;
+      return Math.max(-100, Math.min(500, simpleChange));
     }
     
-    if (denominator === 0 || meanV === 0) return 0;
+    const growthRate = Math.pow(ratio, targetDays / daysElapsed) - 1;
     
-    const slope = numerator / denominator; // change per day
-    const weeklyChange = slope * 7; // projected weekly change
-    const weeklyRate = (weeklyChange / meanV) * 100; // as percentage of mean value
-    
-    // Clamp extreme values for short time windows
-    return Math.max(-100, Math.min(1000, weeklyRate));
+    // Clamp to reasonable bounds (-100% to +500%)
+    return Math.max(-100, Math.min(500, growthRate * 100));
   };
   
   return {
-    userGrowthRate: calculateTrendGrowth('totalUsers'),
-    dauGrowthRate: calculateTrendGrowth('totalDAU'),
-    wauGrowthRate: calculateTrendGrowth('totalWAU'),
-    mauGrowthRate: calculateTrendGrowth('totalMAU'),
-    payingGrowthRate: calculateTrendGrowth('totalPaying'),
-    revenueGrowthRate: calculateTrendGrowth('totalRevenue'),
-    paymentsGrowthRate: calculateTrendGrowth('totalPayments'),
-    txGrowthRate: calculateTrendGrowth('totalTransactions'),
-    volumeGrowthRate: calculateTrendGrowth('totalVolume'),
-    actionsGrowthRate: calculateTrendGrowth('totalKeyActions'),
-    sessionsGrowthRate: calculateTrendGrowth('totalSessions'),
+    userGrowthRate: calculateGrowth('totalUsers'),
+    dauGrowthRate: calculateGrowth('totalDAU'),
+    wauGrowthRate: calculateGrowth('totalWAU'),
+    mauGrowthRate: calculateGrowth('totalMAU'),
+    payingGrowthRate: calculateGrowth('totalPaying'),
+    revenueGrowthRate: calculateGrowth('totalRevenue'),
+    paymentsGrowthRate: calculateGrowth('totalPayments'),
+    txGrowthRate: calculateGrowth('totalTransactions'),
+    volumeGrowthRate: calculateGrowth('totalVolume'),
+    actionsGrowthRate: calculateGrowth('totalKeyActions'),
+    sessionsGrowthRate: calculateGrowth('totalSessions'),
     hoursElapsed,
     daysElapsed,
   };
@@ -295,6 +293,7 @@ function DashboardContent() {
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<string>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [growthTimeframe, setGrowthTimeframe] = useState<GrowthTimeframe>('weekly');
 
   const { data: projectsData } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
@@ -475,7 +474,7 @@ function DashboardContent() {
     const ltvCacRatio = estimatedCac > 0 ? ltv / estimatedCac : 0;
     const paybackMonths = arpu > 0 ? estimatedCac / arpu : 0;
     
-    const timeWeightedGrowth = calculateTimeWeightedGrowth(historical);
+    const timeWeightedGrowth = calculateGrowthRates(historical, growthTimeframe);
     const { 
       userGrowthRate, dauGrowthRate, wauGrowthRate, mauGrowthRate, payingGrowthRate,
       revenueGrowthRate, paymentsGrowthRate, txGrowthRate, volumeGrowthRate,
@@ -576,7 +575,7 @@ function DashboardContent() {
       hoursElapsed: hoursElapsed || 0,
       daysElapsed: daysElapsed || 0,
     };
-  }, [aggregatedStats, historicalData]);
+  }, [aggregatedStats, historicalData, growthTimeframe]);
 
   const projections = useMemo(() => {
     const growthRate = Math.max(0.02, Math.min(0.15, financialMetrics.monthlyGrowthRate || 0.05));
@@ -683,7 +682,7 @@ function DashboardContent() {
                 Aggregated performance data across all Zeno products
               </p>
               
-              <div className="flex items-center gap-4 text-sm text-[#a0aec0]">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-[#a0aec0]">
                 <span>{connectedProjects.length} of {allProjects.length} apps connected</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
                 <span>{snapshots.length} with live metrics</span>
@@ -693,6 +692,20 @@ function DashboardContent() {
                   : `${financialMetrics.hoursElapsed.toFixed(1)} hours`}</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
                 <span>Updated: {new Date().toLocaleTimeString()}</span>
+                <span className="w-1 h-1 bg-[#3b82f6]" />
+                <div className="flex items-center gap-2">
+                  <span>Growth view:</span>
+                  <select 
+                    value={growthTimeframe} 
+                    onChange={(e) => setGrowthTimeframe(e.target.value as GrowthTimeframe)}
+                    className="bg-[#1a1a1a] border border-[#2d2d2d] text-white px-2 py-1 text-sm"
+                    data-testid="select-growth-timeframe"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
               </div>
               {connectedProjects.length === 0 && (
                 <div className="mt-4 p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] text-sm">
@@ -858,11 +871,17 @@ function DashboardContent() {
               </Block>
             </div>
 
-            <div className="text-xs text-[#666] mb-4 italic">* Growth rates are time-weighted: normalized to weekly rates based on actual time elapsed between snapshots.</div>
+            <div className="text-xs text-[#666] mb-4 italic">
+              * Growth rates calculated using compound growth formula based on {financialMetrics.daysElapsed > 1 
+                ? `${financialMetrics.daysElapsed.toFixed(1)} days` 
+                : `${financialMetrics.hoursElapsed.toFixed(1)} hours`} of data, projected to {growthTimeframe} rate.
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Block delay={0.25}>
-                <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">Growth Rates (WoW)</h3>
+                <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">
+                  Growth Rates ({growthTimeframe === 'daily' ? 'Daily' : growthTimeframe === 'weekly' ? 'Weekly' : 'Monthly'})
+                </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">DAU Growth</span>
