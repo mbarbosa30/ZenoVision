@@ -126,23 +126,26 @@ const StatCard = ({
 };
 
 function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Project[]) {
-  const snapshotsByDate = new Map<string, MetricsSnapshot[]>();
+  // Group snapshots by timestamp (each fetch = individual point)
+  const snapshotsByTime = new Map<string, MetricsSnapshot[]>();
   
   snapshots.forEach(snapshot => {
-    const dateKey = format(new Date(snapshot.timestamp), "yyyy-MM-dd");
-    if (!snapshotsByDate.has(dateKey)) {
-      snapshotsByDate.set(dateKey, []);
+    const timeKey = new Date(snapshot.timestamp).toISOString();
+    if (!snapshotsByTime.has(timeKey)) {
+      snapshotsByTime.set(timeKey, []);
     }
-    snapshotsByDate.get(dateKey)!.push(snapshot);
+    snapshotsByTime.get(timeKey)!.push(snapshot);
   });
   
-  const sortedDates = Array.from(snapshotsByDate.keys()).sort();
+  const sortedTimes = Array.from(snapshotsByTime.keys()).sort();
   
-  return sortedDates.map(dateKey => {
-    const daySnapshots = snapshotsByDate.get(dateKey)!;
-    const dayData: any = {
-      date: format(new Date(dateKey), "MMM d"),
-      fullDate: dateKey,
+  return sortedTimes.map(timeKey => {
+    const timeSnapshots = snapshotsByTime.get(timeKey)!;
+    const timestamp = new Date(timeKey);
+    const pointData: any = {
+      date: format(timestamp, "MMM d HH:mm"),
+      fullDate: timeKey,
+      timestamp: timestamp.getTime(),
     };
     
     let totalDAU = 0;
@@ -151,7 +154,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     let totalTransactions = 0;
     let totalVolume = 0;
     
-    daySnapshots.forEach(snapshot => {
+    timeSnapshots.forEach(snapshot => {
       const project = projects.find(p => p.id === snapshot.projectId);
       if (!project) return;
       
@@ -161,18 +164,50 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
       totalTransactions += snapshot.metrics.onchain.transactions;
       totalVolume += snapshot.metrics.onchain.volume;
       
-      dayData[`${project.name}_DAU`] = snapshot.metrics.users.daily_active;
-      dayData[`${project.name}_Revenue`] = snapshot.metrics.revenue.net_income;
+      const safeKey = project.id.slice(0, 8);
+      pointData[`${safeKey}_DAU`] = snapshot.metrics.users.daily_active;
+      pointData[`${safeKey}_Revenue`] = snapshot.metrics.revenue.net_income;
+      pointData[`${safeKey}_name`] = project.name;
     });
     
-    dayData.totalDAU = totalDAU;
-    dayData.totalMAU = totalMAU;
-    dayData.totalRevenue = totalRevenue;
-    dayData.totalTransactions = totalTransactions;
-    dayData.totalVolume = totalVolume;
+    pointData.totalDAU = totalDAU;
+    pointData.totalMAU = totalMAU;
+    pointData.totalRevenue = totalRevenue;
+    pointData.totalTransactions = totalTransactions;
+    pointData.totalVolume = totalVolume;
     
-    return dayData;
+    return pointData;
   });
+}
+
+function calculateTimeWeightedGrowth(historical: any[]) {
+  if (historical.length < 2) {
+    return { dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, hoursElapsed: 0, daysElapsed: 0 };
+  }
+  
+  const first = historical[0];
+  const last = historical[historical.length - 1];
+  const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
+  const daysElapsed = hoursElapsed / 24;
+  
+  if (daysElapsed < 0.5) {
+    return { dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, hoursElapsed, daysElapsed };
+  }
+  
+  const calculateWeeklyRate = (firstVal: number, lastVal: number): number => {
+    if (firstVal <= 0 || lastVal <= 0) return 0;
+    const ratio = lastVal / firstVal;
+    const weeklyRate = Math.pow(ratio, 7 / daysElapsed) - 1;
+    return weeklyRate * 100;
+  };
+  
+  return {
+    dauGrowthRate: calculateWeeklyRate(first.totalDAU, last.totalDAU),
+    revenueGrowthRate: calculateWeeklyRate(first.totalRevenue, last.totalRevenue),
+    mauGrowthRate: calculateWeeklyRate(first.totalMAU, last.totalMAU),
+    hoursElapsed,
+    daysElapsed,
+  };
 }
 
 function DashboardContent() {
@@ -299,33 +334,8 @@ function DashboardContent() {
     const ltvCacRatio = estimatedCac > 0 ? ltv / estimatedCac : 0;
     const paybackMonths = arpu > 0 ? estimatedCac / arpu : 0;
     
-    let dauGrowthRate = 0;
-    let revenueGrowthRate = 0;
-    let mauGrowthRate = 0;
-    
-    if (historical.length >= 14) {
-      const recentWeek = historical.slice(-7);
-      const previousWeek = historical.slice(-14, -7);
-      
-      const recentDAU = recentWeek.reduce((sum: number, d: any) => sum + (d.totalDAU || 0), 0) / 7;
-      const previousDAU = previousWeek.reduce((sum: number, d: any) => sum + (d.totalDAU || 0), 0) / 7;
-      dauGrowthRate = previousDAU > 0 ? ((recentDAU - previousDAU) / previousDAU) * 100 : 0;
-      
-      const recentRev = recentWeek.reduce((sum: number, d: any) => sum + (d.totalRevenue || 0), 0) / 7;
-      const previousRev = previousWeek.reduce((sum: number, d: any) => sum + (d.totalRevenue || 0), 0) / 7;
-      revenueGrowthRate = previousRev > 0 ? ((recentRev - previousRev) / previousRev) * 100 : 0;
-      
-      const recentMAU = recentWeek.reduce((sum: number, d: any) => sum + (d.totalMAU || 0), 0) / 7;
-      const previousMAU = previousWeek.reduce((sum: number, d: any) => sum + (d.totalMAU || 0), 0) / 7;
-      mauGrowthRate = previousMAU > 0 ? ((recentMAU - previousMAU) / previousMAU) * 100 : 0;
-    } else if (historical.length >= 2) {
-      const recent = historical[historical.length - 1];
-      const previous = historical[0];
-      
-      dauGrowthRate = previous.totalDAU > 0 ? ((recent.totalDAU - previous.totalDAU) / previous.totalDAU) * 100 : 0;
-      revenueGrowthRate = previous.totalRevenue > 0 ? ((recent.totalRevenue - previous.totalRevenue) / previous.totalRevenue) * 100 : 0;
-      mauGrowthRate = previous.totalMAU > 0 ? ((recent.totalMAU - previous.totalMAU) / previous.totalMAU) * 100 : 0;
-    }
+    const timeWeightedGrowth = calculateTimeWeightedGrowth(historical);
+    const { dauGrowthRate, revenueGrowthRate, mauGrowthRate, hoursElapsed, daysElapsed } = timeWeightedGrowth;
     
     const monthlyGrowthRate = revenueGrowthRate / 100;
     
@@ -385,6 +395,8 @@ function DashboardContent() {
       nrr,
       monthlyGrowthRate,
       annualizedVolume,
+      hoursElapsed: hoursElapsed || 0,
+      daysElapsed: daysElapsed || 0,
     };
   }, [aggregatedStats, historicalData]);
 
@@ -498,7 +510,9 @@ function DashboardContent() {
                 <span className="w-1 h-1 bg-[#3b82f6]" />
                 <span>{snapshots.length} with live metrics</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
-                <span>{historicalData.length} historical snapshots</span>
+                <span>{historicalData.length} snapshots over {financialMetrics.daysElapsed > 1 
+                  ? `${financialMetrics.daysElapsed.toFixed(1)} days` 
+                  : `${financialMetrics.hoursElapsed.toFixed(1)} hours`}</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
                 <span>Updated: {new Date().toLocaleTimeString()}</span>
               </div>
@@ -588,7 +602,7 @@ function DashboardContent() {
               </Block>
             </div>
 
-            <div className="text-xs text-[#666] mb-4 italic">* Estimates based on simulated historical data. Connect real metrics APIs for accurate calculations.</div>
+            <div className="text-xs text-[#666] mb-4 italic">* Growth rates are time-weighted: normalized to weekly rates based on actual time elapsed between snapshots.</div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Block delay={0.25}>
