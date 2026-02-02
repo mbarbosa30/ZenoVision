@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,6 +12,10 @@ export const projects = pgTable("projects", {
   sortOrder: integer("sort_order").notNull().default(0),
   metricsEndpoint: text("metrics_endpoint"),
   metricsApiKey: text("metrics_api_key"),
+  showUsersMetrics: boolean("show_users_metrics").notNull().default(true),
+  showEngagementMetrics: boolean("show_engagement_metrics").notNull().default(true),
+  showRevenueMetrics: boolean("show_revenue_metrics").notNull().default(true),
+  showOnchainMetrics: boolean("show_onchain_metrics").notNull().default(true),
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +36,10 @@ interface Project {
   sortOrder: number;
   metricsEndpoint: string | null;
   metricsApiKey: string | null;
+  showUsersMetrics: boolean;
+  showEngagementMetrics: boolean;
+  showRevenueMetrics: boolean;
+  showOnchainMetrics: boolean;
 }
 
 interface Metrics {
@@ -367,6 +372,79 @@ Store the key as METRICS_API_KEY secret.`}
           </pre>
         </CardContent>
       </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-lg">Metric Definitions Guide</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-sm text-muted-foreground">Use these standardized definitions so all apps report metrics consistently:</p>
+          
+          <div className="space-y-4">
+            <div className="border-l-2 border-blue-500 pl-4">
+              <h4 className="font-medium flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4" /> Users
+              </h4>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p><strong>total</strong> — All registered accounts, including inactive ones</p>
+                <p><strong>daily_active (DAU)</strong> — Unique users who performed any meaningful action in the last 24 hours (not just page views)</p>
+                <p><strong>weekly_active (WAU)</strong> — Unique users active in the last 7 days</p>
+                <p><strong>monthly_active (MAU)</strong> — Unique users active in the last 30 days</p>
+                <p><strong>paying</strong> — Users with at least one completed payment or active subscription</p>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-green-500 pl-4">
+              <h4 className="font-medium flex items-center gap-2 mb-2">
+                <Activity className="w-4 h-4" /> Engagement
+              </h4>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p><strong>sessions_today</strong> — Distinct user visits in the last 24h. A session starts when the user opens the app and ends after 30 minutes of inactivity or explicit logout. One user can have multiple sessions.</p>
+                <p><strong>key_actions</strong> — Core value-generating interactions that show real engagement. Define based on your app's purpose:</p>
+                <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                  <li><em>Trading app:</em> Trades executed</li>
+                  <li><em>AI tool:</em> Prompts/queries submitted</li>
+                  <li><em>Content app:</em> Posts created, articles read to completion</li>
+                  <li><em>Social app:</em> Messages sent, connections made</li>
+                  <li><em>Game:</em> Levels completed, matches played</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-yellow-500 pl-4">
+              <h4 className="font-medium flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4" /> Revenue
+              </h4>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p><strong>total_payments</strong> — Cumulative count of completed payment transactions (lifetime)</p>
+                <p><strong>net_income</strong> — Cumulative revenue after platform fees and refunds (lifetime, in USD). This is the actual money received.</p>
+                <p><strong>currency</strong> — Always report as "USD". Convert other currencies at time of transaction.</p>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-purple-500 pl-4">
+              <h4 className="font-medium flex items-center gap-2 mb-2">
+                <Zap className="w-4 h-4" /> On-chain (Web3 apps only)
+              </h4>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p><strong>transactions</strong> — Cumulative count of blockchain transactions initiated through the app (lifetime)</p>
+                <p><strong>volume</strong> — Cumulative USD value of on-chain transactions (lifetime). Use price at time of transaction.</p>
+                <p className="italic mt-2">Set both to 0 if your app doesn't have blockchain functionality.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-muted/50 p-4 rounded-lg mt-4">
+            <h4 className="font-medium text-sm mb-2">Important Notes</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• <strong>Cumulative metrics</strong> (total, payments, transactions, volume, net_income) should always increase over time</li>
+              <li>• <strong>Active metrics</strong> (DAU, WAU, MAU, sessions, key_actions) are rolling windows and can fluctuate</li>
+              <li>• <strong>Timestamp</strong> should be the exact time the metrics were computed (ISO 8601 format)</li>
+              <li>• Report real data only — the dashboard calculates growth rates from changes over time</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -377,7 +455,7 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("adminAuth") === "true");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "" });
+  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true });
   const [fetchingMetrics, setFetchingMetrics] = useState<string | null>(null);
   const [selectedProjectForMetrics, setSelectedProjectForMetrics] = useState<string | null>(null);
 
@@ -414,7 +492,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setIsAddDialogOpen(false);
-      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "" });
+      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true });
       toast({ title: "Project added", description: "The project has been added successfully." });
     },
     onError: () => {
@@ -601,6 +679,27 @@ export default function Admin() {
                         <Label htmlFor="metricsApiKey">API Key</Label>
                         <Input id="metricsApiKey" type="password" value={newProject.metricsApiKey} onChange={(e) => setNewProject({ ...newProject, metricsApiKey: e.target.value })} placeholder="Bearer token" data-testid="input-project-metrics-key" />
                       </div>
+                      <div className="border-t pt-4 mt-4">
+                        <p className="text-sm text-muted-foreground mb-3">Dashboard Visibility (choose which metrics to show)</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showUsers" className="text-sm">Users</Label>
+                            <Switch id="showUsers" checked={newProject.showUsersMetrics} onCheckedChange={(checked) => setNewProject({ ...newProject, showUsersMetrics: checked })} data-testid="switch-show-users" />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showEngagement" className="text-sm">Engagement</Label>
+                            <Switch id="showEngagement" checked={newProject.showEngagementMetrics} onCheckedChange={(checked) => setNewProject({ ...newProject, showEngagementMetrics: checked })} data-testid="switch-show-engagement" />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showRevenue" className="text-sm">Revenue</Label>
+                            <Switch id="showRevenue" checked={newProject.showRevenueMetrics} onCheckedChange={(checked) => setNewProject({ ...newProject, showRevenueMetrics: checked })} data-testid="switch-show-revenue" />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showOnchain" className="text-sm">On-chain</Label>
+                            <Switch id="showOnchain" checked={newProject.showOnchainMetrics} onCheckedChange={(checked) => setNewProject({ ...newProject, showOnchainMetrics: checked })} data-testid="switch-show-onchain" />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <Button className="w-full" onClick={() => createProjectMutation.mutate(newProject)} disabled={createProjectMutation.isPending} data-testid="button-save-project">
                       {createProjectMutation.isPending ? "Adding..." : "Add Project"}
@@ -645,6 +744,24 @@ export default function Admin() {
                           <div className="flex gap-2">
                             <Input value={editingProject.metricsEndpoint || ""} onChange={(e) => setEditingProject({ ...editingProject, metricsEndpoint: e.target.value })} placeholder="Metrics Endpoint" data-testid="input-edit-metrics-endpoint" />
                             <Input type="password" value={editingProject.metricsApiKey || ""} onChange={(e) => setEditingProject({ ...editingProject, metricsApiKey: e.target.value })} placeholder="API Key" data-testid="input-edit-metrics-key" />
+                          </div>
+                          <div className="flex gap-4 flex-wrap text-sm">
+                            <div className="flex items-center gap-2">
+                              <Switch id="editShowUsers" checked={editingProject.showUsersMetrics} onCheckedChange={(checked) => setEditingProject({ ...editingProject, showUsersMetrics: checked })} data-testid="switch-edit-show-users" />
+                              <Label htmlFor="editShowUsers" className="text-xs">Users</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch id="editShowEngagement" checked={editingProject.showEngagementMetrics} onCheckedChange={(checked) => setEditingProject({ ...editingProject, showEngagementMetrics: checked })} data-testid="switch-edit-show-engagement" />
+                              <Label htmlFor="editShowEngagement" className="text-xs">Engagement</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch id="editShowRevenue" checked={editingProject.showRevenueMetrics} onCheckedChange={(checked) => setEditingProject({ ...editingProject, showRevenueMetrics: checked })} data-testid="switch-edit-show-revenue" />
+                              <Label htmlFor="editShowRevenue" className="text-xs">Revenue</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch id="editShowOnchain" checked={editingProject.showOnchainMetrics} onCheckedChange={(checked) => setEditingProject({ ...editingProject, showOnchainMetrics: checked })} data-testid="switch-edit-show-onchain" />
+                              <Label htmlFor="editShowOnchain" className="text-xs">On-chain</Label>
+                            </div>
                           </div>
                           <div className="flex gap-2 justify-end">
                             <Button variant="outline" size="sm" onClick={() => setEditingProject(null)} data-testid="button-cancel-edit"><X className="w-4 h-4" /></Button>
