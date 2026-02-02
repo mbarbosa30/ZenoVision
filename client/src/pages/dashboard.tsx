@@ -382,6 +382,7 @@ function DashboardContent() {
   const [sortField, setSortField] = useState<string>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [growthTimeframe, setGrowthTimeframe] = useState<GrowthTimeframe>('daily');
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
 
   const { data: projectsData } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
@@ -439,6 +440,7 @@ function DashboardContent() {
     try {
       await fetch("/api/metrics/fetch-all", { method: "POST" });
       queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
+      setLastRefreshTime(new Date());
     } finally {
       setFetching(false);
     }
@@ -975,7 +977,7 @@ function DashboardContent() {
                   ? `${financialMetrics.daysElapsed.toFixed(1)} days` 
                   : `${financialMetrics.hoursElapsed.toFixed(1)} hours`}</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
-                <span>Updated: {new Date().toLocaleTimeString()}</span>
+                <span>Updated: {lastRefreshTime ? format(lastRefreshTime, "MMM d, HH:mm:ss") : "—"}</span>
                 <span className="w-1 h-1 bg-[#3b82f6]" />
                 <div className="flex items-center gap-2">
                   <span>Growth view:</span>
