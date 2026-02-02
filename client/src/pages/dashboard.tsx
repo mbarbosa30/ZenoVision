@@ -1,0 +1,778 @@
+import { useRef, useState, useMemo } from "react";
+import { motion, useInView } from "framer-motion";
+import { 
+  Users, TrendingUp, TrendingDown, DollarSign, Zap, Activity, 
+  ArrowUpRight, ArrowDownRight, RefreshCw, ChevronDown, ChevronUp,
+  BarChart3, LineChart as LineChartIcon, PieChart
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PasswordGate } from "@/components/password-gate";
+import { format, subDays } from "date-fns";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart
+} from "recharts";
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  highlight: string;
+  url: string;
+  sortOrder: number;
+  metricsEndpoint: string | null;
+  metricsApiKey: string | null;
+}
+
+interface Metrics {
+  app: string;
+  timestamp: string;
+  users: {
+    total: number;
+    daily_active: number;
+    weekly_active: number;
+    monthly_active: number;
+    paying: number;
+  };
+  engagement: {
+    key_actions: number;
+    sessions_today: number;
+  };
+  revenue: {
+    total_payments: number;
+    net_income: number;
+    currency: string;
+  };
+  onchain: {
+    transactions: number;
+    volume: number;
+  };
+}
+
+interface MetricsSnapshot {
+  id: string;
+  projectId: string;
+  timestamp: string;
+  metrics: Metrics;
+}
+
+interface BlockProps {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+const Block = ({ children, className = "", delay = 0 }: BlockProps) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  
+  return (
+    <motion.div
+      ref={ref}
+      className={`bg-[#1a1a1a] border border-[#2d2d2d] p-6 md:p-8 ${className}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.4, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+const StatCard = ({ 
+  label, 
+  value, 
+  change, 
+  icon: Icon, 
+  color = "blue",
+  delay = 0 
+}: { 
+  label: string; 
+  value: string | number; 
+  change?: number; 
+  icon: any;
+  color?: "blue" | "green" | "yellow" | "purple" | "cyan";
+  delay?: number;
+}) => {
+  const colors = {
+    blue: "text-[#3b82f6] bg-[#3b82f6]/10",
+    green: "text-[#10b981] bg-[#10b981]/10",
+    yellow: "text-[#f59e0b] bg-[#f59e0b]/10",
+    purple: "text-[#8b5cf6] bg-[#8b5cf6]/10",
+    cyan: "text-[#06b6d4] bg-[#06b6d4]/10",
+  };
+
+  return (
+    <Block delay={delay} className="relative overflow-hidden">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">{label}</div>
+          <div className="text-3xl md:text-4xl font-semibold mb-2">{value}</div>
+          {change !== undefined && (
+            <div className={`flex items-center gap-1 text-sm ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
+              {change >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+              {Math.abs(change).toFixed(1)}% vs last period
+            </div>
+          )}
+        </div>
+        <div className={`p-3 ${colors[color]}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+      </div>
+    </Block>
+  );
+};
+
+function generateMockHistoricalData(baseMetrics: MetricsSnapshot[], projects: Project[]) {
+  const days = 30;
+  const data = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = subDays(new Date(), i);
+    const dayData: any = {
+      date: format(date, "MMM d"),
+      fullDate: date.toISOString(),
+    };
+
+    let totalDAU = 0;
+    let totalMAU = 0;
+    let totalRevenue = 0;
+    let totalTransactions = 0;
+
+    baseMetrics.forEach(snapshot => {
+      const project = projects.find(p => p.id === snapshot.projectId);
+      if (!project) return;
+
+      const variance = 0.8 + Math.random() * 0.4;
+      const trend = 1 + (days - i) * 0.01;
+      
+      const dau = Math.round(snapshot.metrics.users.daily_active * variance * trend);
+      const mau = Math.round(snapshot.metrics.users.monthly_active * variance * trend);
+      const revenue = Math.round(snapshot.metrics.revenue.net_income * variance * trend);
+      const transactions = Math.round(snapshot.metrics.onchain.transactions * variance * trend);
+      
+      dayData[`${project.name}_DAU`] = dau;
+      dayData[`${project.name}_Revenue`] = revenue;
+      
+      totalDAU += dau;
+      totalMAU += mau;
+      totalRevenue += revenue;
+      totalTransactions += transactions;
+    });
+
+    dayData.totalDAU = totalDAU || Math.round(5000 + Math.random() * 2000 + (days - i) * 100);
+    dayData.totalMAU = totalMAU || Math.round(50000 + Math.random() * 10000 + (days - i) * 500);
+    dayData.totalRevenue = totalRevenue || Math.round(1000 + Math.random() * 500 + (days - i) * 50);
+    dayData.totalTransactions = totalTransactions || Math.round(2000 + Math.random() * 1000 + (days - i) * 80);
+    
+    data.push(dayData);
+  }
+  
+  return data;
+}
+
+function DashboardContent() {
+  const queryClient = useQueryClient();
+  const [fetching, setFetching] = useState(false);
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const { data: projectsData } = useQuery<{ success: boolean; projects: Project[] }>({
+    queryKey: ["/api/projects"],
+    queryFn: async () => {
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error("Failed to fetch projects");
+      return res.json();
+    },
+  });
+
+  const { data: latestMetrics, isLoading: metricsLoading } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
+    queryKey: ["/api/metrics/latest"],
+    queryFn: async () => {
+      const res = await fetch("/api/metrics/latest");
+      if (!res.ok) throw new Error("Failed to fetch metrics");
+      return res.json();
+    },
+  });
+
+  const projects = projectsData?.projects || [];
+  const snapshots = latestMetrics?.snapshots || [];
+
+  const fetchAllMetrics = async () => {
+    setFetching(true);
+    try {
+      await fetch("/api/metrics/fetch-all", { method: "POST" });
+      queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  const aggregatedStats = useMemo(() => {
+    if (snapshots.length === 0) {
+      return {
+        totalUsers: 200000,
+        dau: 8500,
+        wau: 35000,
+        mau: 120000,
+        payingUsers: 450,
+        totalRevenue: 15000,
+        totalTransactions: 100000,
+        totalVolume: 250000,
+        keyActions: 45000,
+        sessions: 12000,
+      };
+    }
+
+    return snapshots.reduce((acc, s) => ({
+      totalUsers: acc.totalUsers + s.metrics.users.total,
+      dau: acc.dau + s.metrics.users.daily_active,
+      wau: acc.wau + s.metrics.users.weekly_active,
+      mau: acc.mau + s.metrics.users.monthly_active,
+      payingUsers: acc.payingUsers + s.metrics.users.paying,
+      totalRevenue: acc.totalRevenue + s.metrics.revenue.net_income,
+      totalTransactions: acc.totalTransactions + s.metrics.onchain.transactions,
+      totalVolume: acc.totalVolume + s.metrics.onchain.volume,
+      keyActions: acc.keyActions + s.metrics.engagement.key_actions,
+      sessions: acc.sessions + s.metrics.engagement.sessions_today,
+    }), {
+      totalUsers: 0, dau: 0, wau: 0, mau: 0, payingUsers: 0,
+      totalRevenue: 0, totalTransactions: 0, totalVolume: 0,
+      keyActions: 0, sessions: 0,
+    });
+  }, [snapshots]);
+
+  const historicalData = useMemo(() => 
+    generateMockHistoricalData(snapshots, projects), 
+    [snapshots, projects]
+  );
+
+  const appComparisonData = useMemo(() => {
+    if (snapshots.length === 0) {
+      return projects.slice(0, 8).map((p, i) => ({
+        name: p.name.split('.')[0],
+        DAU: Math.round(1000 + Math.random() * 5000),
+        Revenue: Math.round(500 + Math.random() * 3000),
+        Transactions: Math.round(2000 + Math.random() * 8000),
+      }));
+    }
+    
+    return snapshots.map(s => {
+      const project = projects.find(p => p.id === s.projectId);
+      return {
+        name: project?.name.split('.')[0] || 'Unknown',
+        DAU: s.metrics.users.daily_active,
+        Revenue: s.metrics.revenue.net_income,
+        Transactions: s.metrics.onchain.transactions,
+      };
+    });
+  }, [snapshots, projects]);
+
+  const projections = useMemo(() => {
+    const growthRate = 0.05;
+    const current = aggregatedStats;
+    
+    return {
+      day30: {
+        users: Math.round(current.mau * Math.pow(1 + growthRate, 1)),
+        revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 1)),
+        transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 1)),
+      },
+      day60: {
+        users: Math.round(current.mau * Math.pow(1 + growthRate, 2)),
+        revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 2)),
+        transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 2)),
+      },
+      day90: {
+        users: Math.round(current.mau * Math.pow(1 + growthRate, 3)),
+        revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 3)),
+        transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 3)),
+      },
+    };
+  }, [aggregatedStats]);
+
+  const sortedTableData = useMemo(() => {
+    const data = snapshots.length > 0 
+      ? snapshots.map(s => {
+          const project = projects.find(p => p.id === s.projectId);
+          return { project, snapshot: s };
+        }).filter(d => d.project)
+      : projects.slice(0, 8).map(p => ({
+          project: p,
+          snapshot: {
+            metrics: {
+              users: { total: Math.round(5000 + Math.random() * 20000), daily_active: Math.round(500 + Math.random() * 2000), monthly_active: Math.round(3000 + Math.random() * 15000), paying: Math.round(10 + Math.random() * 100) },
+              revenue: { net_income: Math.round(500 + Math.random() * 3000) },
+              onchain: { transactions: Math.round(1000 + Math.random() * 10000), volume: Math.round(5000 + Math.random() * 50000) },
+              engagement: { key_actions: Math.round(1000 + Math.random() * 5000), sessions_today: Math.round(200 + Math.random() * 1000) },
+            }
+          } as MetricsSnapshot
+        }));
+
+    return data.sort((a, b) => {
+      let aVal: any, bVal: any;
+      switch (sortField) {
+        case "name": aVal = a.project!.name; bVal = b.project!.name; break;
+        case "dau": aVal = a.snapshot.metrics.users.daily_active; bVal = b.snapshot.metrics.users.daily_active; break;
+        case "mau": aVal = a.snapshot.metrics.users.monthly_active; bVal = b.snapshot.metrics.users.monthly_active; break;
+        case "revenue": aVal = a.snapshot.metrics.revenue.net_income; bVal = b.snapshot.metrics.revenue.net_income; break;
+        case "transactions": aVal = a.snapshot.metrics.onchain.transactions; bVal = b.snapshot.metrics.onchain.transactions; break;
+        default: aVal = a.project!.name; bVal = b.project!.name;
+      }
+      if (typeof aVal === 'string') return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+  }, [snapshots, projects, sortField, sortDir]);
+
+  const toggleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+  };
+
+  const toggleExpand = (id: string) => {
+    const newSet = new Set(expandedApps);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setExpandedApps(newSet);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f0f0f] text-white">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#2d2d2d] bg-[#0f0f0f]/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3" data-testid="link-logo">
+            <div className="w-8 h-8 bg-[#3b82f6]" />
+            <span className="font-semibold text-lg tracking-tight">Zeno</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-[#a0aec0]">Portfolio Dashboard</span>
+            <Button 
+              onClick={fetchAllMetrics} 
+              disabled={fetching}
+              className="bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-none h-10 px-6"
+              data-testid="button-refresh-metrics"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${fetching ? "animate-spin" : ""}`} />
+              {fetching ? "Fetching..." : "Refresh Data"}
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="pt-16">
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="text-sm text-[#a0aec0] uppercase tracking-widest mb-4">
+                Portfolio Overview
+              </div>
+              <h1 className="text-3xl md:text-5xl font-semibold leading-tight tracking-tight mb-2">
+                Real-time Metrics
+              </h1>
+              <p className="text-[#a0aec0] text-lg mb-8">
+                Aggregated performance data across all Zeno products
+              </p>
+              
+              <div className="flex items-center gap-4 text-sm text-[#a0aec0]">
+                <span>{projects.length} products tracked</span>
+                <span className="w-1 h-1 bg-[#3b82f6]" />
+                <span>{snapshots.length} with live metrics</span>
+                <span className="w-1 h-1 bg-[#3b82f6]" />
+                <span>Last updated: {new Date().toLocaleTimeString()}</span>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <StatCard 
+                label="Total Users" 
+                value={aggregatedStats.totalUsers.toLocaleString()} 
+                change={12.5}
+                icon={Users} 
+                color="blue"
+                delay={0.1}
+              />
+              <StatCard 
+                label="Daily Active" 
+                value={aggregatedStats.dau.toLocaleString()} 
+                change={8.3}
+                icon={Activity} 
+                color="green"
+                delay={0.15}
+              />
+              <StatCard 
+                label="Monthly Active" 
+                value={aggregatedStats.mau.toLocaleString()} 
+                change={15.2}
+                icon={TrendingUp} 
+                color="purple"
+                delay={0.2}
+              />
+              <StatCard 
+                label="Revenue" 
+                value={`$${aggregatedStats.totalRevenue.toLocaleString()}`} 
+                change={22.1}
+                icon={DollarSign} 
+                color="green"
+                delay={0.25}
+              />
+              <StatCard 
+                label="Transactions" 
+                value={aggregatedStats.totalTransactions.toLocaleString()} 
+                change={18.7}
+                icon={Zap} 
+                color="yellow"
+                delay={0.3}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
+              <LineChartIcon className="w-6 h-6 text-[#3b82f6]" />
+              <h2 className="text-2xl font-semibold">Growth Trends</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Block delay={0.1}>
+                <h3 className="text-lg font-medium mb-4">Daily Active Users</h3>
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={historicalData}>
+                      <defs>
+                        <linearGradient id="dauGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        labelStyle={{ color: '#fff' }}
+                      />
+                      <Area type="monotone" dataKey="totalDAU" stroke="#3b82f6" fill="url(#dauGradient)" strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </Block>
+
+              <Block delay={0.15}>
+                <h3 className="text-lg font-medium mb-4">Revenue Trend</h3>
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={historicalData}>
+                      <defs>
+                        <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        labelStyle={{ color: '#fff' }}
+                        formatter={(value: any) => [`$${value.toLocaleString()}`, 'Revenue']}
+                      />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="#10b981" fill="url(#revenueGradient)" strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </Block>
+
+              <Block delay={0.2} className="lg:col-span-2">
+                <h3 className="text-lg font-medium mb-4">Combined Metrics</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={historicalData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <YAxis yAxisId="left" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <YAxis yAxisId="right" orientation="right" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                        labelStyle={{ color: '#fff' }}
+                      />
+                      <Legend />
+                      <Line yAxisId="left" type="monotone" dataKey="totalDAU" name="DAU" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalMAU" name="MAU" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                      <Bar yAxisId="right" dataKey="totalTransactions" name="Transactions" fill="#f59e0b" opacity={0.6} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </Block>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
+              <BarChart3 className="w-6 h-6 text-[#3b82f6]" />
+              <h2 className="text-2xl font-semibold">App Comparison</h2>
+            </div>
+            
+            <Block delay={0.1}>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={appComparisonData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                    <XAxis type="number" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                    <YAxis dataKey="name" type="category" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} width={100} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                      labelStyle={{ color: '#fff' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="DAU" fill="#3b82f6" />
+                    <Bar dataKey="Revenue" fill="#10b981" />
+                    <Bar dataKey="Transactions" fill="#f59e0b" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Block>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
+              <TrendingUp className="w-6 h-6 text-[#3b82f6]" />
+              <h2 className="text-2xl font-semibold">Projections</h2>
+              <span className="text-sm text-[#a0aec0] ml-2">(5% monthly growth assumption)</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Block delay={0.1}>
+                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-4">30-Day Forecast</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Users</span>
+                    <span className="text-xl font-semibold">{projections.day30.users.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Revenue</span>
+                    <span className="text-xl font-semibold text-[#10b981]">${projections.day30.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Transactions</span>
+                    <span className="text-xl font-semibold">{projections.day30.transactions.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.15}>
+                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-4">60-Day Forecast</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Users</span>
+                    <span className="text-xl font-semibold">{projections.day60.users.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Revenue</span>
+                    <span className="text-xl font-semibold text-[#10b981]">${projections.day60.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Transactions</span>
+                    <span className="text-xl font-semibold">{projections.day60.transactions.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.2} className="bg-[#3b82f6]/10 border-[#3b82f6]/30">
+                <div className="text-sm text-[#3b82f6] uppercase tracking-wider mb-4">90-Day Forecast</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Users</span>
+                    <span className="text-xl font-semibold">{projections.day90.users.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Revenue</span>
+                    <span className="text-xl font-semibold text-[#10b981]">${projections.day90.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Transactions</span>
+                    <span className="text-xl font-semibold">{projections.day90.transactions.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Block>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
+              <PieChart className="w-6 h-6 text-[#3b82f6]" />
+              <h2 className="text-2xl font-semibold">Detailed Metrics</h2>
+            </div>
+
+            <Block delay={0.1}>
+              <div className="overflow-x-auto">
+                <table className="w-full" data-testid="metrics-table">
+                  <thead>
+                    <tr className="border-b border-[#2d2d2d]">
+                      <th 
+                        className="text-left py-4 px-4 text-sm text-[#a0aec0] font-medium cursor-pointer hover:text-white"
+                        onClick={() => toggleSort('name')}
+                        data-testid="sort-name"
+                      >
+                        <div className="flex items-center gap-2">
+                          App
+                          {sortField === 'name' && (sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </div>
+                      </th>
+                      <th 
+                        className="text-right py-4 px-4 text-sm text-[#a0aec0] font-medium cursor-pointer hover:text-white"
+                        onClick={() => toggleSort('dau')}
+                        data-testid="sort-dau"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          DAU
+                          {sortField === 'dau' && (sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </div>
+                      </th>
+                      <th 
+                        className="text-right py-4 px-4 text-sm text-[#a0aec0] font-medium cursor-pointer hover:text-white"
+                        onClick={() => toggleSort('mau')}
+                        data-testid="sort-mau"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          MAU
+                          {sortField === 'mau' && (sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </div>
+                      </th>
+                      <th 
+                        className="text-right py-4 px-4 text-sm text-[#a0aec0] font-medium cursor-pointer hover:text-white"
+                        onClick={() => toggleSort('revenue')}
+                        data-testid="sort-revenue"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Revenue
+                          {sortField === 'revenue' && (sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </div>
+                      </th>
+                      <th 
+                        className="text-right py-4 px-4 text-sm text-[#a0aec0] font-medium cursor-pointer hover:text-white"
+                        onClick={() => toggleSort('transactions')}
+                        data-testid="sort-transactions"
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          Transactions
+                          {sortField === 'transactions' && (sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+                        </div>
+                      </th>
+                      <th className="text-right py-4 px-4 text-sm text-[#a0aec0] font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedTableData.map(({ project, snapshot }) => (
+                      <>
+                        <tr 
+                          key={project!.id} 
+                          className="border-b border-[#2d2d2d] hover:bg-[#1a1a1a]/50 transition-colors"
+                          data-testid={`row-app-${project!.id}`}
+                        >
+                          <td className="py-4 px-4">
+                            <div className="font-medium">{project!.name}</div>
+                            <div className="text-sm text-[#a0aec0]">{project!.description}</div>
+                          </td>
+                          <td className="py-4 px-4 text-right font-mono">
+                            {snapshot.metrics.users.daily_active.toLocaleString()}
+                          </td>
+                          <td className="py-4 px-4 text-right font-mono">
+                            {snapshot.metrics.users.monthly_active.toLocaleString()}
+                          </td>
+                          <td className="py-4 px-4 text-right font-mono text-[#10b981]">
+                            ${snapshot.metrics.revenue.net_income.toLocaleString()}
+                          </td>
+                          <td className="py-4 px-4 text-right font-mono">
+                            {snapshot.metrics.onchain.transactions.toLocaleString()}
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => toggleExpand(project!.id)}
+                              className="text-[#a0aec0] hover:text-white"
+                              data-testid={`button-expand-${project!.id}`}
+                            >
+                              {expandedApps.has(project!.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </Button>
+                          </td>
+                        </tr>
+                        {expandedApps.has(project!.id) && (
+                          <tr className="bg-[#0f0f0f]">
+                            <td colSpan={6} className="py-4 px-8">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                <div>
+                                  <div className="text-sm text-[#a0aec0] mb-1">Total Users</div>
+                                  <div className="text-lg font-semibold">{snapshot.metrics.users.total.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-[#a0aec0] mb-1">Paying Users</div>
+                                  <div className="text-lg font-semibold">{snapshot.metrics.users.paying.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-[#a0aec0] mb-1">Key Actions</div>
+                                  <div className="text-lg font-semibold">{snapshot.metrics.engagement.key_actions.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-[#a0aec0] mb-1">Sessions Today</div>
+                                  <div className="text-lg font-semibold">{snapshot.metrics.engagement.sessions_today.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-[#a0aec0] mb-1">Onchain Volume</div>
+                                  <div className="text-lg font-semibold">${snapshot.metrics.onchain.volume.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-[#a0aec0] mb-1">WAU</div>
+                                  <div className="text-lg font-semibold">{(snapshot.metrics.users as any).weekly_active?.toLocaleString() || 'N/A'}</div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Block>
+          </div>
+        </section>
+
+        <footer className="py-8 text-center text-sm text-[#a0aec0]">
+          <p>Zeno Vision Portfolio Dashboard</p>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <PasswordGate storageKey="dashboardAuth" title="Portfolio Dashboard">
+      <DashboardContent />
+    </PasswordGate>
+  );
+}

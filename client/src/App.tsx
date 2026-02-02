@@ -10,6 +10,7 @@ import About from "@/pages/about";
 import Memo from "@/pages/memo";
 import Proposal from "@/pages/proposal";
 import ProposalMarco from "@/pages/proposal-marco";
+import Dashboard from "@/pages/dashboard";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/memo" component={Memo} />
       <Route path="/proposal" component={Proposal} />
       <Route path="/proposal/marco" component={ProposalMarco} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
