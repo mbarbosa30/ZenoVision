@@ -229,7 +229,7 @@ function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'w
     userGrowthRate: 0, dauGrowthRate: 0, wauGrowthRate: 0, mauGrowthRate: 0, 
     payingGrowthRate: 0, revenueGrowthRate: 0, paymentsGrowthRate: 0,
     txGrowthRate: 0, volumeGrowthRate: 0, actionsGrowthRate: 0, sessionsGrowthRate: 0,
-    hoursElapsed: 0, daysElapsed: 0 
+    hoursElapsed: 0, daysElapsed: 0, rSquared: 0, dataPoints: 0
   };
   
   if (historical.length < 2) return defaultRates;
@@ -239,51 +239,106 @@ function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'w
   const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
   const daysElapsed = hoursElapsed / 24;
   
-  // Target periods in days for extrapolation
-  const targetDays = timeframe === 'daily' ? 1 : timeframe === 'weekly' ? 7 : 30;
+  // Target periods in hours for extrapolation
+  const targetHours = timeframe === 'daily' ? 24 : timeframe === 'weekly' ? 168 : 720;
   
-  // Calculate growth rate using proper financial formulas
-  // Compound growth rate: (final/initial)^(targetPeriods/elapsedPeriods) - 1
-  const calculateGrowth = (dataKey: string): number => {
-    const firstVal = first[dataKey] || 0;
-    const lastVal = last[dataKey] || 0;
+  // Log-linear regression: ln(Y) = a + b*t
+  // Uses ALL data points for more accurate trend estimation
+  // Growth rate = (e^(slope * targetHours) - 1) * 100
+  const calculateLogLinearGrowth = (dataKey: string): { rate: number; rSquared: number } => {
+    // Extract valid data points (positive values only for log)
+    const points: { t: number; lnY: number; y: number }[] = [];
+    const baseTime = historical[0].timestamp;
     
-    // Handle edge cases
-    if (daysElapsed <= 0) return 0;
-    if (firstVal <= 0 && lastVal <= 0) return 0;
-    if (firstVal <= 0 && lastVal > 0) return 100; // Growth from 0 = +100% (capped)
-    if (firstVal > 0 && lastVal <= 0) return -100; // Decline to 0 = -100%
-    
-    // Compound growth rate formula: (final/initial)^(target/elapsed) - 1
-    const ratio = lastVal / firstVal;
-    
-    // Guard against extreme extrapolation with very short windows
-    // If elapsed time < 10% of target period, show simple % change instead
-    if (daysElapsed < targetDays * 0.1) {
-      const simpleChange = ((lastVal - firstVal) / firstVal) * 100;
-      return Math.max(-100, Math.min(500, simpleChange));
+    for (const h of historical) {
+      const val = h[dataKey] || 0;
+      if (val > 0) {
+        const t = (h.timestamp - baseTime) / (1000 * 60 * 60); // hours from start
+        points.push({ t, lnY: Math.log(val), y: val });
+      }
     }
     
-    const growthRate = Math.pow(ratio, targetDays / daysElapsed) - 1;
+    // Need at least 2 valid points
+    if (points.length < 2) {
+      // Fallback: simple % change if we have first and last
+      const firstVal = first[dataKey] || 0;
+      const lastVal = last[dataKey] || 0;
+      if (firstVal <= 0 && lastVal <= 0) return { rate: 0, rSquared: 0 };
+      if (firstVal <= 0 && lastVal > 0) return { rate: 100, rSquared: 0 };
+      if (firstVal > 0 && lastVal <= 0) return { rate: -100, rSquared: 0 };
+      if (hoursElapsed <= 0) return { rate: 0, rSquared: 0 };
+      const simpleRate = ((lastVal - firstVal) / firstVal) * (targetHours / hoursElapsed) * 100;
+      return { rate: Math.max(-100, Math.min(500, simpleRate)), rSquared: 0 };
+    }
     
-    // Clamp to reasonable bounds (-100% to +500%)
-    return Math.max(-100, Math.min(500, growthRate * 100));
+    // Calculate linear regression on log values: ln(Y) = a + b*t
+    const n = points.length;
+    const sumT = points.reduce((s, p) => s + p.t, 0);
+    const sumLnY = points.reduce((s, p) => s + p.lnY, 0);
+    const sumTLnY = points.reduce((s, p) => s + p.t * p.lnY, 0);
+    const sumT2 = points.reduce((s, p) => s + p.t * p.t, 0);
+    
+    const meanT = sumT / n;
+    const meanLnY = sumLnY / n;
+    
+    // Slope b = (n*sum(t*lnY) - sum(t)*sum(lnY)) / (n*sum(t^2) - sum(t)^2)
+    const denominator = n * sumT2 - sumT * sumT;
+    if (Math.abs(denominator) < 1e-10) {
+      return { rate: 0, rSquared: 0 };
+    }
+    
+    const slope = (n * sumTLnY - sumT * sumLnY) / denominator;
+    
+    // Calculate R-squared for confidence measure
+    const intercept = meanLnY - slope * meanT;
+    const ssRes = points.reduce((s, p) => {
+      const predicted = intercept + slope * p.t;
+      return s + Math.pow(p.lnY - predicted, 2);
+    }, 0);
+    const ssTot = points.reduce((s, p) => s + Math.pow(p.lnY - meanLnY, 2), 0);
+    const rSquared = ssTot > 0 ? 1 - ssRes / ssTot : 0;
+    
+    // Growth rate over target period: (e^(slope * targetHours) - 1) * 100
+    const growthRate = (Math.exp(slope * targetHours) - 1) * 100;
+    
+    // Clamp to reasonable bounds
+    return { 
+      rate: Math.max(-100, Math.min(500, growthRate)), 
+      rSquared: Math.max(0, Math.min(1, rSquared))
+    };
   };
   
+  const userGrowth = calculateLogLinearGrowth('totalUsers');
+  const dauGrowth = calculateLogLinearGrowth('totalDAU');
+  const wauGrowth = calculateLogLinearGrowth('totalWAU');
+  const mauGrowth = calculateLogLinearGrowth('totalMAU');
+  const payingGrowth = calculateLogLinearGrowth('totalPaying');
+  const revenueGrowth = calculateLogLinearGrowth('totalRevenue');
+  const paymentsGrowth = calculateLogLinearGrowth('totalPayments');
+  const txGrowth = calculateLogLinearGrowth('totalTransactions');
+  const volumeGrowth = calculateLogLinearGrowth('totalVolume');
+  const actionsGrowth = calculateLogLinearGrowth('totalKeyActions');
+  const sessionsGrowth = calculateLogLinearGrowth('totalSessions');
+  
+  // Average R² across key metrics for overall confidence
+  const avgRSquared = (dauGrowth.rSquared + revenueGrowth.rSquared + userGrowth.rSquared) / 3;
+  
   return {
-    userGrowthRate: calculateGrowth('totalUsers'),
-    dauGrowthRate: calculateGrowth('totalDAU'),
-    wauGrowthRate: calculateGrowth('totalWAU'),
-    mauGrowthRate: calculateGrowth('totalMAU'),
-    payingGrowthRate: calculateGrowth('totalPaying'),
-    revenueGrowthRate: calculateGrowth('totalRevenue'),
-    paymentsGrowthRate: calculateGrowth('totalPayments'),
-    txGrowthRate: calculateGrowth('totalTransactions'),
-    volumeGrowthRate: calculateGrowth('totalVolume'),
-    actionsGrowthRate: calculateGrowth('totalKeyActions'),
-    sessionsGrowthRate: calculateGrowth('totalSessions'),
+    userGrowthRate: userGrowth.rate,
+    dauGrowthRate: dauGrowth.rate,
+    wauGrowthRate: wauGrowth.rate,
+    mauGrowthRate: mauGrowth.rate,
+    payingGrowthRate: payingGrowth.rate,
+    revenueGrowthRate: revenueGrowth.rate,
+    paymentsGrowthRate: paymentsGrowth.rate,
+    txGrowthRate: txGrowth.rate,
+    volumeGrowthRate: volumeGrowth.rate,
+    actionsGrowthRate: actionsGrowth.rate,
+    sessionsGrowthRate: sessionsGrowth.rate,
     hoursElapsed,
     daysElapsed,
+    rSquared: avgRSquared,
+    dataPoints: historical.length,
   };
 }
 
@@ -478,7 +533,8 @@ function DashboardContent() {
     const { 
       userGrowthRate, dauGrowthRate, wauGrowthRate, mauGrowthRate, payingGrowthRate,
       revenueGrowthRate, paymentsGrowthRate, txGrowthRate, volumeGrowthRate,
-      actionsGrowthRate, sessionsGrowthRate, hoursElapsed, daysElapsed 
+      actionsGrowthRate, sessionsGrowthRate, hoursElapsed, daysElapsed,
+      rSquared, dataPoints
     } = timeWeightedGrowth;
     
     const monthlyGrowthRate = revenueGrowthRate / 100;
@@ -574,6 +630,8 @@ function DashboardContent() {
       annualizedVolume,
       hoursElapsed: hoursElapsed || 0,
       daysElapsed: daysElapsed || 0,
+      rSquared: rSquared || 0,
+      dataPoints: dataPoints || 0,
     };
   }, [aggregatedStats, historicalData, growthTimeframe]);
 
@@ -872,9 +930,10 @@ function DashboardContent() {
             </div>
 
             <div className="text-xs text-[#666] mb-4 italic">
-              * Growth rates calculated using compound growth formula based on {financialMetrics.daysElapsed > 1 
+              * Growth rates calculated using log-linear regression on {financialMetrics.dataPoints} data points over {financialMetrics.daysElapsed > 1 
                 ? `${financialMetrics.daysElapsed.toFixed(1)} days` 
-                : `${financialMetrics.hoursElapsed.toFixed(1)} hours`} of data, projected to {growthTimeframe} rate.
+                : `${financialMetrics.hoursElapsed.toFixed(1)} hours`}, projected to {growthTimeframe} rate. 
+              Trend confidence (R²): {(financialMetrics.rSquared * 100).toFixed(0)}%
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
