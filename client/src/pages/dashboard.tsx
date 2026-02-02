@@ -514,6 +514,54 @@ function DashboardContent() {
     return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
   }, [historicalData, projects]);
 
+  // Estimated Daily Revenue Rate per app - extrapolates each data point to 24h based on rate of change
+  const estimatedDailyRevenueData = useMemo(() => {
+    if (historicalData.length < 2 || !perAppTimeSeries.hasPerAppData) {
+      return { data: [], apps: perAppTimeSeries.apps, hasData: false };
+    }
+    
+    const rateData: any[] = [];
+    
+    for (let i = 1; i < historicalData.length; i++) {
+      const prev = historicalData[i - 1];
+      const curr = historicalData[i];
+      const hoursElapsed = (curr.timestamp - prev.timestamp) / (1000 * 60 * 60);
+      
+      if (hoursElapsed <= 0) continue;
+      
+      const point: any = { timestamp: curr.timestamp };
+      let hasAnyRate = false;
+      
+      // Calculate 24h extrapolated rate for each app
+      for (const app of perAppTimeSeries.apps) {
+        const prevRev = prev[app.revenueKey] ?? 0;
+        const currRev = curr[app.revenueKey] ?? 0;
+        const revChange = currRev - prevRev;
+        
+        // Extrapolate to 24h: (change / hours) * 24
+        const dailyRate = (revChange / hoursElapsed) * 24;
+        point[`${app.key}_DailyRate`] = Math.max(0, dailyRate); // No negative rates
+        hasAnyRate = true;
+      }
+      
+      // Also calculate total daily rate
+      const prevTotal = prev.totalRevenue ?? 0;
+      const currTotal = curr.totalRevenue ?? 0;
+      const totalChange = currTotal - prevTotal;
+      point.totalDailyRate = Math.max(0, (totalChange / hoursElapsed) * 24);
+      
+      if (hasAnyRate) {
+        rateData.push(point);
+      }
+    }
+    
+    return { 
+      data: rateData, 
+      apps: perAppTimeSeries.apps,
+      hasData: rateData.length > 0 
+    };
+  }, [historicalData, perAppTimeSeries]);
+
   const financialMetrics = useMemo(() => {
     const stats = aggregatedStats;
     const historical = historicalData;
@@ -1411,8 +1459,55 @@ function DashboardContent() {
                 </div>
               </Block>
 
-              <Block delay={0.2} className="lg:col-span-2">
-                <h3 className="text-lg font-medium mb-4">Combined Metrics</h3>
+              {estimatedDailyRevenueData.hasData && (
+                <Block delay={0.2}>
+                  <h3 className="text-lg font-medium mb-4">Estimated Daily Revenue Rate</h3>
+                  <p className="text-xs text-[#6b7280] mb-3">24h extrapolation based on rate between data points</p>
+                  <div className="h-72" data-testid="chart-daily-revenue-rate">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={estimatedDailyRevenueData.data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                        <XAxis 
+                          dataKey="timestamp" 
+                          type="number"
+                          scale="time"
+                          domain={['dataMin', 'dataMax']}
+                          stroke="#666" 
+                          tick={{ fill: '#a0aec0', fontSize: 10 }} 
+                          tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                        />
+                        <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v.toFixed(0)}`} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
+                          labelStyle={{ color: '#fff' }}
+                          labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                          formatter={(value: any) => [`$${Number(value).toFixed(2)}/day`, '']}
+                        />
+                        <Legend />
+                        {estimatedDailyRevenueData.apps.map((app, idx) => {
+                          const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                          return (
+                            <Line 
+                              key={app.key}
+                              type="monotone" 
+                              dataKey={`${app.key}_DailyRate`} 
+                              name={app.name}
+                              stroke={colors[idx % colors.length]} 
+                              strokeWidth={2}
+                              dot={true}
+                              connectNulls
+                            />
+                          );
+                        })}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Block>
+              )}
+
+              <Block delay={0.25} className="lg:col-span-2">
+                <h3 className="text-lg font-medium mb-4">Daily Activity Comparison</h3>
+                <p className="text-xs text-[#6b7280] mb-3">All metrics shown as daily values for consistent comparison</p>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={historicalData}>
@@ -1434,9 +1529,9 @@ function DashboardContent() {
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                       />
                       <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="totalDAU" name="DAU" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                      <Line yAxisId="left" type="monotone" dataKey="totalMAU" name="MAU" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-                      <Bar yAxisId="right" dataKey="totalTransactions" name="Transactions" fill="#f59e0b" opacity={0.6} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalDAU" name="Daily Active Users" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalSessions" name="Daily Sessions" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                      <Bar yAxisId="right" dataKey="totalKeyActions" name="Daily Key Actions" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
