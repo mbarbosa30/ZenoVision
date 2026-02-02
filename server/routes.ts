@@ -210,6 +210,18 @@ export async function registerRoutes(
     }
   });
 
+  // Get all historical metrics (for dashboard charts)
+  app.get("/api/metrics/history", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 30;
+      const snapshots = await storage.getAllMetricsHistory(limit);
+      res.json({ success: true, snapshots });
+    } catch (error) {
+      console.error("Error fetching metrics history:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch metrics history" });
+    }
+  });
+
   // Fetch metrics for all projects with configured endpoints
   app.post("/api/metrics/fetch-all", async (req, res) => {
     try {

@@ -125,52 +125,54 @@ const StatCard = ({
   );
 };
 
-function generateMockHistoricalData(baseMetrics: MetricsSnapshot[], projects: Project[]) {
-  const days = 30;
-  const data = [];
+function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Project[]) {
+  const snapshotsByDate = new Map<string, MetricsSnapshot[]>();
   
-  for (let i = days - 1; i >= 0; i--) {
-    const date = subDays(new Date(), i);
+  snapshots.forEach(snapshot => {
+    const dateKey = format(new Date(snapshot.timestamp), "yyyy-MM-dd");
+    if (!snapshotsByDate.has(dateKey)) {
+      snapshotsByDate.set(dateKey, []);
+    }
+    snapshotsByDate.get(dateKey)!.push(snapshot);
+  });
+  
+  const sortedDates = Array.from(snapshotsByDate.keys()).sort();
+  
+  return sortedDates.map(dateKey => {
+    const daySnapshots = snapshotsByDate.get(dateKey)!;
     const dayData: any = {
-      date: format(date, "MMM d"),
-      fullDate: date.toISOString(),
+      date: format(new Date(dateKey), "MMM d"),
+      fullDate: dateKey,
     };
-
+    
     let totalDAU = 0;
     let totalMAU = 0;
     let totalRevenue = 0;
     let totalTransactions = 0;
-
-    baseMetrics.forEach(snapshot => {
+    let totalVolume = 0;
+    
+    daySnapshots.forEach(snapshot => {
       const project = projects.find(p => p.id === snapshot.projectId);
       if (!project) return;
-
-      const variance = 0.8 + Math.random() * 0.4;
-      const trend = 1 + (days - i) * 0.01;
       
-      const dau = Math.round(snapshot.metrics.users.daily_active * variance * trend);
-      const mau = Math.round(snapshot.metrics.users.monthly_active * variance * trend);
-      const revenue = Math.round(snapshot.metrics.revenue.net_income * variance * trend);
-      const transactions = Math.round(snapshot.metrics.onchain.transactions * variance * trend);
+      totalDAU += snapshot.metrics.users.daily_active;
+      totalMAU += snapshot.metrics.users.monthly_active;
+      totalRevenue += snapshot.metrics.revenue.net_income;
+      totalTransactions += snapshot.metrics.onchain.transactions;
+      totalVolume += snapshot.metrics.onchain.volume;
       
-      dayData[`${project.name}_DAU`] = dau;
-      dayData[`${project.name}_Revenue`] = revenue;
-      
-      totalDAU += dau;
-      totalMAU += mau;
-      totalRevenue += revenue;
-      totalTransactions += transactions;
+      dayData[`${project.name}_DAU`] = snapshot.metrics.users.daily_active;
+      dayData[`${project.name}_Revenue`] = snapshot.metrics.revenue.net_income;
     });
-
-    dayData.totalDAU = totalDAU || Math.round(5000 + Math.random() * 2000 + (days - i) * 100);
-    dayData.totalMAU = totalMAU || Math.round(50000 + Math.random() * 10000 + (days - i) * 500);
-    dayData.totalRevenue = totalRevenue || Math.round(1000 + Math.random() * 500 + (days - i) * 50);
-    dayData.totalTransactions = totalTransactions || Math.round(2000 + Math.random() * 1000 + (days - i) * 80);
     
-    data.push(dayData);
-  }
-  
-  return data;
+    dayData.totalDAU = totalDAU;
+    dayData.totalMAU = totalMAU;
+    dayData.totalRevenue = totalRevenue;
+    dayData.totalTransactions = totalTransactions;
+    dayData.totalVolume = totalVolume;
+    
+    return dayData;
+  });
 }
 
 function DashboardContent() {
@@ -198,8 +200,24 @@ function DashboardContent() {
     },
   });
 
-  const projects = projectsData?.projects || [];
-  const snapshots = latestMetrics?.snapshots || [];
+  const { data: historicalMetrics } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
+    queryKey: ["/api/metrics/history"],
+    queryFn: async () => {
+      const res = await fetch("/api/metrics/history?limit=30");
+      if (!res.ok) throw new Error("Failed to fetch history");
+      return res.json();
+    },
+  });
+
+  const allProjects = projectsData?.projects || [];
+  const connectedProjects = allProjects.filter(p => p.metricsEndpoint);
+  const projects = connectedProjects;
+  const snapshots = (latestMetrics?.snapshots || []).filter(s => 
+    connectedProjects.some(p => p.id === s.projectId)
+  );
+  const historicalSnapshots = (historicalMetrics?.snapshots || []).filter(s =>
+    connectedProjects.some(p => p.id === s.projectId)
+  );
 
   const fetchAllMetrics = async () => {
     setFetching(true);
@@ -214,20 +232,13 @@ function DashboardContent() {
   const aggregatedStats = useMemo(() => {
     if (snapshots.length === 0) {
       return {
-        totalUsers: 200000,
-        dau: 8500,
-        wau: 35000,
-        mau: 120000,
-        payingUsers: 450,
-        totalRevenue: 15000,
-        totalTransactions: 100000,
-        totalVolume: 250000,
-        keyActions: 45000,
-        sessions: 12000,
+        totalUsers: 0, dau: 0, wau: 0, mau: 0, payingUsers: 0,
+        totalRevenue: 0, totalTransactions: 0, totalVolume: 0,
+        keyActions: 0, sessions: 0, connectedApps: 0,
       };
     }
 
-    return snapshots.reduce((acc, s) => ({
+    const stats = snapshots.reduce((acc, s) => ({
       totalUsers: acc.totalUsers + s.metrics.users.total,
       dau: acc.dau + s.metrics.users.daily_active,
       wau: acc.wau + s.metrics.users.weekly_active,
@@ -243,6 +254,8 @@ function DashboardContent() {
       totalRevenue: 0, totalTransactions: 0, totalVolume: 0,
       keyActions: 0, sessions: 0,
     });
+    
+    return { ...stats, connectedApps: snapshots.length };
   }, [snapshots]);
 
   const historicalData = useMemo(() => 
