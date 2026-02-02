@@ -110,21 +110,19 @@ const StatCard = ({
   };
 
   return (
-    <Block delay={delay} className="relative overflow-hidden">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">{label}</div>
-          <div className="text-3xl md:text-4xl font-semibold mb-2" data-testid={testId}>{value}</div>
-          {change !== undefined && (
-            <div className={`flex items-center gap-1 text-sm ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
-              {change >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-              {Math.abs(change).toFixed(1)}% vs last period
-            </div>
-          )}
-        </div>
-        <div className={`p-3 ${colors[color]}`}>
-          <Icon className="w-6 h-6" />
-        </div>
+    <Block delay={delay} className="relative overflow-hidden min-h-[120px]">
+      <div className={`absolute top-4 right-4 p-2 ${colors[color]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="pr-12">
+        <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-2 truncate">{label}</div>
+        <div className="text-2xl md:text-3xl font-semibold mb-2" data-testid={testId}>{value}</div>
+        {change !== undefined && (
+          <div className={`flex items-center gap-1 text-xs ${change >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`} data-testid={testId ? `${testId}-change` : undefined}>
+            {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+            {Math.abs(change).toFixed(1)}%
+          </div>
+        )}
       </div>
     </Block>
   );
@@ -495,11 +493,11 @@ function DashboardContent() {
     const volumePerTx = stats.totalTransactions > 0 ? stats.totalVolume / stats.totalTransactions : 0;
     const volumePerActiveUser = stats.dau > 0 ? stats.totalVolume / stats.dau : 0;
     
-    // Engagement funnel conversion rates
-    const dauToTotal = stats.totalUsers > 0 ? (stats.dau / stats.totalUsers) * 100 : 0;
-    const wauToDau = stats.dau > 0 ? (stats.wau / stats.dau) * 100 : 0;
-    const mauToWau = stats.wau > 0 ? (stats.mau / stats.wau) * 100 : 0;
-    const payingToMau = stats.mau > 0 ? (stats.payingUsers / stats.mau) * 100 : 0;
+    // Engagement funnel conversion rates (Total → MAU → WAU → DAU → Paying)
+    const mauToTotal = stats.totalUsers > 0 ? (stats.mau / stats.totalUsers) * 100 : 0;
+    const wauToMau = stats.mau > 0 ? (stats.wau / stats.mau) * 100 : 0;
+    const dauToWau = stats.wau > 0 ? (stats.dau / stats.wau) * 100 : 0;
+    const payingToDau = stats.dau > 0 ? (stats.payingUsers / stats.dau) * 100 : 0;
     
     return {
       mrr, arr,
@@ -517,7 +515,7 @@ function DashboardContent() {
       dauWauRatio, wauMauRatio, payingMauRatio,
       actionsPerSession, actionsPerDAU, sessionsPerDAU,
       txPerUser, volumePerTx, volumePerActiveUser,
-      dauToTotal, wauToDau, mauToWau, payingToMau,
+      mauToTotal, wauToMau, dauToWau, payingToDau,
       nrr,
       monthlyGrowthRate,
       annualizedVolume,
@@ -720,7 +718,7 @@ function DashboardContent() {
                 testId="stat-net-revenue"
               />
               <StatCard 
-                label="Total Payments" 
+                label="Payments" 
                 value={aggregatedStats.totalPayments.toLocaleString()} 
                 change={aggregatedStats.totalPayments > 0 && historicalData.length >= 2 ? financialMetrics.paymentsGrowthRate : undefined}
                 icon={CreditCard} 
@@ -756,7 +754,7 @@ function DashboardContent() {
                 testId="stat-transactions"
               />
               <StatCard 
-                label="On-chain Volume" 
+                label="Volume" 
                 value={`$${aggregatedStats.totalVolume.toLocaleString()}`} 
                 change={aggregatedStats.totalVolume > 0 && historicalData.length >= 2 ? financialMetrics.volumeGrowthRate : undefined}
                 icon={Wallet} 
@@ -765,7 +763,7 @@ function DashboardContent() {
                 testId="stat-volume"
               />
               <StatCard 
-                label="Connected Apps" 
+                label="Apps" 
                 value={aggregatedStats.connectedApps.toString()} 
                 icon={Box} 
                 color="purple"
@@ -970,45 +968,45 @@ function DashboardContent() {
             
             <Block delay={0.1}>
               <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 py-6">
-                <div className="text-center p-4 bg-[#3b82f6]/10 border border-[#3b82f6]/30 min-w-[120px]">
+                <div className="text-center p-4 bg-[#3b82f6]/10 border border-[#3b82f6]/30 min-w-[100px]">
                   <div className="text-2xl font-bold text-[#3b82f6]">{aggregatedStats.totalUsers.toLocaleString()}</div>
-                  <div className="text-xs text-[#a0aec0]">Total Users</div>
+                  <div className="text-xs text-[#a0aec0]">Total</div>
                 </div>
                 <div className="flex flex-col items-center">
                   <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                  <div className="text-xs text-[#666]">{financialMetrics.dauToTotal.toFixed(1)}%</div>
+                  <div className="text-xs text-[#666]">{financialMetrics.mauToTotal.toFixed(1)}%</div>
                 </div>
-                <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[120px]">
-                  <div className="text-2xl font-bold text-[#10b981]">{aggregatedStats.dau.toLocaleString()}</div>
-                  <div className="text-xs text-[#a0aec0]">DAU</div>
-                </div>
-                <div className="flex flex-col items-center">
-                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                  <div className="text-xs text-[#666]">{financialMetrics.dauWauRatio.toFixed(1)}%</div>
-                </div>
-                <div className="text-center p-4 bg-[#06b6d4]/10 border border-[#06b6d4]/30 min-w-[120px]">
-                  <div className="text-2xl font-bold text-[#06b6d4]">{aggregatedStats.wau.toLocaleString()}</div>
-                  <div className="text-xs text-[#a0aec0]">WAU</div>
-                </div>
-                <div className="flex flex-col items-center">
-                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                  <div className="text-xs text-[#666]">{financialMetrics.wauMauRatio.toFixed(1)}%</div>
-                </div>
-                <div className="text-center p-4 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 min-w-[120px]">
+                <div className="text-center p-4 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 min-w-[100px]">
                   <div className="text-2xl font-bold text-[#8b5cf6]">{aggregatedStats.mau.toLocaleString()}</div>
                   <div className="text-xs text-[#a0aec0]">MAU</div>
                 </div>
                 <div className="flex flex-col items-center">
                   <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
-                  <div className="text-xs text-[#666]">{financialMetrics.payingToMau.toFixed(1)}%</div>
+                  <div className="text-xs text-[#666]">{financialMetrics.wauToMau.toFixed(1)}%</div>
                 </div>
-                <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[120px]">
+                <div className="text-center p-4 bg-[#06b6d4]/10 border border-[#06b6d4]/30 min-w-[100px]">
+                  <div className="text-2xl font-bold text-[#06b6d4]">{aggregatedStats.wau.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">WAU</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                  <div className="text-xs text-[#666]">{financialMetrics.dauToWau.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[100px]">
+                  <div className="text-2xl font-bold text-[#10b981]">{aggregatedStats.dau.toLocaleString()}</div>
+                  <div className="text-xs text-[#a0aec0]">DAU</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
+                  <div className="text-xs text-[#666]">{financialMetrics.payingToDau.toFixed(1)}%</div>
+                </div>
+                <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[100px]">
                   <div className="text-2xl font-bold text-[#f59e0b]">{aggregatedStats.payingUsers.toLocaleString()}</div>
                   <div className="text-xs text-[#a0aec0]">Paying</div>
                 </div>
               </div>
               <div className="text-xs text-[#666] text-center mt-2">
-                Conversion rates shown between each stage
+                Conversion rates shown between each stage (largest → smallest audience)
               </div>
             </Block>
           </div>
@@ -1224,7 +1222,7 @@ function DashboardContent() {
                         labelStyle={{ color: '#fff' }}
                       />
                       <Legend />
-                      <Bar dataKey="DAU" fill="#3b82f6" />
+                      <Bar dataKey="MAU" fill="#8b5cf6" />
                       <Bar dataKey="Revenue" fill="#10b981" />
                       <Bar dataKey="Transactions" fill="#f59e0b" />
                     </BarChart>
