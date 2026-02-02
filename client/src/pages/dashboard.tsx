@@ -90,13 +90,16 @@ const Block = ({ children, className = "", delay = 0 }: BlockProps) => {
 
 const formatNum = (num: number, prefix = ""): string => {
   if (num >= 1000000) {
-    return `${prefix}${(num / 1000000).toFixed(1)}M`;
+    return `${prefix}${(num / 1000000).toFixed(2)}M`;
   }
-  if (num >= 10000) {
+  if (num >= 100000) {
     return `${prefix}${(num / 1000).toFixed(0)}K`;
   }
-  if (num >= 1000) {
+  if (num >= 10000) {
     return `${prefix}${(num / 1000).toFixed(1)}K`;
+  }
+  if (num >= 1000) {
+    return `${prefix}${(num / 1000).toFixed(2)}K`;
   }
   if (num < 10000 && num !== Math.floor(num)) {
     return `${prefix}${num.toFixed(2)}`;
@@ -660,8 +663,8 @@ function DashboardContent() {
     return result;
   }, [historicalData]);
 
-  // Estimated Daily Payments (DP) - calculated from cumulative payments difference over time
-  const dailyPaymentsEstimate = useMemo(() => {
+  // Estimated Daily Payers - calculated from cumulative paying users difference over time
+  const dailyPayersEstimate = useMemo(() => {
     if (historicalData.length < 2) {
       return { value: 0, hasData: false, isEstimate: true };
     }
@@ -683,10 +686,10 @@ function DashboardContent() {
         return { value: 0, hasData: false, isEstimate: true };
       }
 
-      const paymentsChange = (last.totalPayments ?? 0) - (first.totalPayments ?? 0);
-      const dailyPayments = Math.max(0, (paymentsChange / hoursElapsed) * 24);
+      const payersChange = (last.payingUsers ?? 0) - (first.payingUsers ?? 0);
+      const dailyPayers = Math.max(0, (payersChange / hoursElapsed) * 24);
       
-      return { value: Math.round(dailyPayments), hasData: true, isEstimate: true };
+      return { value: Math.round(dailyPayers), hasData: true, isEstimate: true };
     }
 
     // Use 24h window data
@@ -698,12 +701,12 @@ function DashboardContent() {
       return { value: 0, hasData: false, isEstimate: true };
     }
 
-    const paymentsChange = (last.totalPayments ?? 0) - (first.totalPayments ?? 0);
-    const dailyPayments = Math.max(0, (paymentsChange / hoursElapsed) * 24);
+    const payersChange = (last.payingUsers ?? 0) - (first.payingUsers ?? 0);
+    const dailyPayers = Math.max(0, (payersChange / hoursElapsed) * 24);
     const has24hData = hoursElapsed >= 20; // Consider "enough" if at least 20h of data
 
     return { 
-      value: Math.round(dailyPayments), 
+      value: Math.round(dailyPayers), 
       hasData: true, 
       isEstimate: !has24hData
     };
@@ -1380,22 +1383,22 @@ function DashboardContent() {
                   <div className="flex flex-col items-center">
                     <ArrowUpRight className="w-5 h-5 text-[#666] rotate-90" />
                     <div className="text-xs text-[#666]">
-                      {aggregatedStats.dau > 0 && dailyPaymentsEstimate.hasData 
-                        ? ((dailyPaymentsEstimate.value / aggregatedStats.dau) * 100).toFixed(1) 
+                      {aggregatedStats.dau > 0 && dailyPayersEstimate.hasData 
+                        ? ((dailyPayersEstimate.value / aggregatedStats.dau) * 100).toFixed(1) 
                         : "0.0"}%
                     </div>
                   </div>
                   <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[100px]">
                     <div className="text-2xl font-bold text-[#f59e0b]">
-                      {dailyPaymentsEstimate.hasData ? formatNum(dailyPaymentsEstimate.value) : "—"}
+                      {dailyPayersEstimate.hasData ? formatNum(dailyPayersEstimate.value) : "—"}
                     </div>
                     <div className="text-xs text-[#a0aec0]">
-                      DP{dailyPaymentsEstimate.isEstimate ? "*" : ""}
+                      DPU{dailyPayersEstimate.isEstimate ? "*" : ""}
                     </div>
                   </div>
                 </div>
                 <div className="text-xs text-[#666] text-center mt-2">
-                  Conversion rates between stages. DP = Daily Payments{dailyPaymentsEstimate.isEstimate ? " (*estimated, needs 24h+ data)" : ""}
+                  Conversion rates between stages. DPU = Daily Paying Users{dailyPayersEstimate.isEstimate ? " (*estimated, needs 24h+ data)" : ""}
                 </div>
               </Block>
             </div>
