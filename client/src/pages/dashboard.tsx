@@ -1008,7 +1008,7 @@ function DashboardContent() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
                   <StatCard 
                     label="Total Users" 
-                    value={aggregatedStats.totalUsers.toLocaleString()} 
+                    value={formatNum(aggregatedStats.totalUsers)} 
                     change={aggregatedStats.totalUsers > 0 && historicalData.length >= 2 ? financialMetrics.userGrowthRate : undefined}
                     icon={Users} 
                     color="blue"
@@ -1017,7 +1017,7 @@ function DashboardContent() {
                   />
                   <StatCard 
                     label="Monthly Active" 
-                    value={aggregatedStats.mau.toLocaleString()} 
+                    value={formatNum(aggregatedStats.mau)} 
                     change={aggregatedStats.mau > 0 && historicalData.length >= 2 ? financialMetrics.mauGrowthRate : undefined}
                     icon={TrendingUp} 
                     color="purple"
@@ -1026,7 +1026,7 @@ function DashboardContent() {
                   />
                   <StatCard 
                     label="Weekly Active" 
-                    value={aggregatedStats.wau.toLocaleString()} 
+                    value={formatNum(aggregatedStats.wau)} 
                     change={aggregatedStats.wau > 0 && historicalData.length >= 2 ? financialMetrics.wauGrowthRate : undefined}
                     icon={Calendar} 
                     color="cyan"
@@ -1035,7 +1035,7 @@ function DashboardContent() {
                   />
                   <StatCard 
                     label="Daily Active" 
-                    value={aggregatedStats.dau.toLocaleString()} 
+                    value={formatNum(aggregatedStats.dau)} 
                     change={aggregatedStats.dau > 0 && historicalData.length >= 2 ? financialMetrics.dauGrowthRate : undefined}
                     icon={Activity} 
                     color="green"
@@ -1044,7 +1044,7 @@ function DashboardContent() {
                   />
                   <StatCard 
                     label="Paying Users" 
-                    value={aggregatedStats.payingUsers.toLocaleString()} 
+                    value={formatNum(aggregatedStats.payingUsers)} 
                     change={aggregatedStats.payingUsers > 0 && historicalData.length >= 2 ? financialMetrics.payingGrowthRate : undefined}
                     icon={CreditCard} 
                     color="green"
@@ -1140,12 +1140,12 @@ function DashboardContent() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <Block delay={0.05} className="min-h-[130px]">
                 <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">MRR</div>
-                <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-mrr">${financialMetrics.mrr.toLocaleString()}</div>
+                <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-mrr">{formatNum(financialMetrics.mrr, "$")}</div>
                 <div className="text-xs text-[#666] mt-2">Net Revenue (Current)</div>
               </Block>
               <Block delay={0.1} className="min-h-[130px]">
                 <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">ARR</div>
-                <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-arr">${financialMetrics.arr.toLocaleString()}</div>
+                <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-arr">{formatNum(financialMetrics.arr, "$")}</div>
                 <div className="text-xs text-[#666] mt-2">Annualized Run Rate</div>
               </Block>
               <Block delay={0.15} className="min-h-[130px]">
@@ -1350,7 +1350,7 @@ function DashboardContent() {
               <Block delay={0.1}>
                 <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 py-6">
                   <div className="text-center p-4 bg-[#3b82f6]/10 border border-[#3b82f6]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#3b82f6]">{aggregatedStats.totalUsers.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-[#3b82f6]">{formatNum(aggregatedStats.totalUsers)}</div>
                     <div className="text-xs text-[#a0aec0]">Total</div>
                   </div>
                   <div className="flex flex-col items-center">
@@ -1358,7 +1358,7 @@ function DashboardContent() {
                     <div className="text-xs text-[#666]">{financialMetrics.mauToTotal.toFixed(1)}%</div>
                   </div>
                   <div className="text-center p-4 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#8b5cf6]">{aggregatedStats.mau.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-[#8b5cf6]">{formatNum(aggregatedStats.mau)}</div>
                     <div className="text-xs text-[#a0aec0]">MAU</div>
                   </div>
                   <div className="flex flex-col items-center">
@@ -1366,7 +1366,7 @@ function DashboardContent() {
                     <div className="text-xs text-[#666]">{financialMetrics.wauToMau.toFixed(1)}%</div>
                   </div>
                   <div className="text-center p-4 bg-[#06b6d4]/10 border border-[#06b6d4]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#06b6d4]">{aggregatedStats.wau.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-[#06b6d4]">{formatNum(aggregatedStats.wau)}</div>
                     <div className="text-xs text-[#a0aec0]">WAU</div>
                   </div>
                   <div className="flex flex-col items-center">
@@ -1374,7 +1374,7 @@ function DashboardContent() {
                     <div className="text-xs text-[#666]">{financialMetrics.dauToWau.toFixed(1)}%</div>
                   </div>
                   <div className="text-center p-4 bg-[#10b981]/10 border border-[#10b981]/30 min-w-[100px]">
-                    <div className="text-2xl font-bold text-[#10b981]">{aggregatedStats.dau.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-[#10b981]">{formatNum(aggregatedStats.dau)}</div>
                     <div className="text-xs text-[#a0aec0]">DAU</div>
                   </div>
                   <div className="flex flex-col items-center">
@@ -1387,7 +1387,7 @@ function DashboardContent() {
                   </div>
                   <div className="text-center p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/30 min-w-[100px]">
                     <div className="text-2xl font-bold text-[#f59e0b]">
-                      {dailyPaymentsEstimate.hasData ? dailyPaymentsEstimate.value.toLocaleString() : "—"}
+                      {dailyPaymentsEstimate.hasData ? formatNum(dailyPaymentsEstimate.value) : "—"}
                     </div>
                     <div className="text-xs text-[#a0aec0]">
                       DP{dailyPaymentsEstimate.isEstimate ? "*" : ""}
@@ -1484,7 +1484,7 @@ function DashboardContent() {
                     </div>
                     <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
                       <span className="text-[#a0aec0]">Total Volume</span>
-                      <span className="font-semibold">${aggregatedStats.totalVolume.toLocaleString()}</span>
+                      <span className="font-semibold">{formatNum(aggregatedStats.totalVolume, "$")}</span>
                     </div>
                   </div>
                 </Block>
@@ -1508,7 +1508,7 @@ function DashboardContent() {
                     </div>
                     <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
                       <span className="text-[#a0aec0]">Total Sessions</span>
-                      <span className="font-semibold">{aggregatedStats.sessions.toLocaleString()}</span>
+                      <span className="font-semibold">{formatNum(aggregatedStats.sessions)}</span>
                     </div>
                   </div>
                 </Block>
@@ -1657,7 +1657,7 @@ function DashboardContent() {
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
-                        formatter={(value: any) => [`$${Number(value).toLocaleString()}`, '']}
+                        formatter={(value: any) => [formatNum(Number(value), "$"), '']}
                       />
                       <Legend />
                       {perAppTimeSeries.hasPerAppData ? (
@@ -1866,7 +1866,7 @@ function DashboardContent() {
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         cursor={{ strokeDasharray: '3 3' }}
-                        formatter={(value: any, name: string) => [value.toLocaleString(), name]}
+                        formatter={(value: any, name: string) => [formatNum(Number(value)), name]}
                       />
                       <Scatter 
                         name="Apps" 
@@ -1905,7 +1905,7 @@ function DashboardContent() {
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         cursor={{ strokeDasharray: '3 3' }}
-                        formatter={(value: any, name: string) => [typeof value === 'number' ? value.toLocaleString() : value, name]}
+                        formatter={(value: any, name: string) => [typeof value === 'number' ? formatNum(value) : value, name]}
                       />
                       <Scatter 
                         name="Apps" 
@@ -1935,19 +1935,19 @@ function DashboardContent() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">MAU</span>
-                    <span className="text-xl font-semibold" data-testid="value-30d-mau">{projections.day30.users.toLocaleString()}</span>
+                    <span className="text-xl font-semibold" data-testid="value-30d-mau">{formatNum(projections.day30.users)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">MRR</span>
-                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-mrr">${projections.day30.revenue.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-mrr">{formatNum(projections.day30.revenue, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">ARR</span>
-                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-arr">${projections.day30.arr.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-arr">{formatNum(projections.day30.arr, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
                     <span className="text-[#a0aec0]">Transactions</span>
-                    <span className="font-semibold" data-testid="value-30d-txns">{projections.day30.transactions.toLocaleString()}</span>
+                    <span className="font-semibold" data-testid="value-30d-txns">{formatNum(projections.day30.transactions)}</span>
                   </div>
                 </div>
               </Block>
@@ -1957,19 +1957,19 @@ function DashboardContent() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">MAU</span>
-                    <span className="text-xl font-semibold" data-testid="value-60d-mau">{projections.day60.users.toLocaleString()}</span>
+                    <span className="text-xl font-semibold" data-testid="value-60d-mau">{formatNum(projections.day60.users)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">MRR</span>
-                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-mrr">${projections.day60.revenue.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-mrr">{formatNum(projections.day60.revenue, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">ARR</span>
-                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-arr">${projections.day60.arr.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-arr">{formatNum(projections.day60.arr, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
                     <span className="text-[#a0aec0]">Transactions</span>
-                    <span className="font-semibold" data-testid="value-60d-txns">{projections.day60.transactions.toLocaleString()}</span>
+                    <span className="font-semibold" data-testid="value-60d-txns">{formatNum(projections.day60.transactions)}</span>
                   </div>
                 </div>
               </Block>
@@ -1979,19 +1979,19 @@ function DashboardContent() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">MAU</span>
-                    <span className="text-xl font-semibold" data-testid="value-90d-mau">{projections.day90.users.toLocaleString()}</span>
+                    <span className="text-xl font-semibold" data-testid="value-90d-mau">{formatNum(projections.day90.users)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">MRR</span>
-                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-mrr">${projections.day90.revenue.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-mrr">{formatNum(projections.day90.revenue, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">ARR</span>
-                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-arr">${projections.day90.arr.toLocaleString()}</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-arr">{formatNum(projections.day90.arr, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">Transactions</span>
-                    <span className="text-xl font-semibold">{projections.day90.transactions.toLocaleString()}</span>
+                    <span className="text-xl font-semibold">{formatNum(projections.day90.transactions)}</span>
                   </div>
                 </div>
               </Block>
@@ -2076,16 +2076,16 @@ function DashboardContent() {
                             <div className="text-sm text-[#a0aec0]">{project!.description}</div>
                           </td>
                           <td className="py-4 px-4 text-right font-mono">
-                            {snapshot.metrics.users.daily_active.toLocaleString()}
+                            {formatNum(snapshot.metrics.users.daily_active)}
                           </td>
                           <td className="py-4 px-4 text-right font-mono">
-                            {snapshot.metrics.users.monthly_active.toLocaleString()}
+                            {formatNum(snapshot.metrics.users.monthly_active)}
                           </td>
                           <td className="py-4 px-4 text-right font-mono text-[#10b981]">
-                            ${snapshot.metrics.revenue.net_income.toLocaleString()}
+                            {formatNum(snapshot.metrics.revenue.net_income, "$")}
                           </td>
                           <td className="py-4 px-4 text-right font-mono">
-                            {snapshot.metrics.onchain.transactions.toLocaleString()}
+                            {formatNum(snapshot.metrics.onchain.transactions)}
                           </td>
                           <td className="py-4 px-4 text-right">
                             <Button 
@@ -2105,27 +2105,27 @@ function DashboardContent() {
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">Total Users</div>
-                                  <div className="text-lg font-semibold">{snapshot.metrics.users.total.toLocaleString()}</div>
+                                  <div className="text-lg font-semibold">{formatNum(snapshot.metrics.users.total)}</div>
                                 </div>
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">Paying Users</div>
-                                  <div className="text-lg font-semibold">{snapshot.metrics.users.paying.toLocaleString()}</div>
+                                  <div className="text-lg font-semibold">{formatNum(snapshot.metrics.users.paying)}</div>
                                 </div>
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">Key Actions</div>
-                                  <div className="text-lg font-semibold">{snapshot.metrics.engagement.key_actions.toLocaleString()}</div>
+                                  <div className="text-lg font-semibold">{formatNum(snapshot.metrics.engagement.key_actions)}</div>
                                 </div>
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">Sessions Today</div>
-                                  <div className="text-lg font-semibold">{snapshot.metrics.engagement.sessions_today.toLocaleString()}</div>
+                                  <div className="text-lg font-semibold">{formatNum(snapshot.metrics.engagement.sessions_today)}</div>
                                 </div>
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">Onchain Volume</div>
-                                  <div className="text-lg font-semibold">${snapshot.metrics.onchain.volume.toLocaleString()}</div>
+                                  <div className="text-lg font-semibold">{formatNum(snapshot.metrics.onchain.volume, "$")}</div>
                                 </div>
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">WAU</div>
-                                  <div className="text-lg font-semibold">{(snapshot.metrics.users as any).weekly_active?.toLocaleString() || 'N/A'}</div>
+                                  <div className="text-lg font-semibold">{(snapshot.metrics.users as any).weekly_active ? formatNum((snapshot.metrics.users as any).weekly_active) : 'N/A'}</div>
                                 </div>
                               </div>
                             </td>
@@ -2183,22 +2183,22 @@ function DashboardContent() {
                               {project?.name.split('.')[0] || snapshot.metrics.app || 'Unknown'}
                             </td>
                             <td className="py-2 px-3 text-right font-mono">
-                              {snapshot.metrics.users.daily_active.toLocaleString()}
+                              {formatNum(snapshot.metrics.users.daily_active)}
                             </td>
                             <td className="py-2 px-3 text-right font-mono">
-                              {snapshot.metrics.users.monthly_active.toLocaleString()}
+                              {formatNum(snapshot.metrics.users.monthly_active)}
                             </td>
                             <td className="py-2 px-3 text-right font-mono">
-                              {snapshot.metrics.users.paying.toLocaleString()}
+                              {formatNum(snapshot.metrics.users.paying)}
                             </td>
                             <td className="py-2 px-3 text-right font-mono text-[#10b981]">
-                              ${snapshot.metrics.revenue.net_income.toFixed(2)}
+                              {formatNum(snapshot.metrics.revenue.net_income, "$")}
                             </td>
                             <td className="py-2 px-3 text-right font-mono">
-                              {snapshot.metrics.onchain.transactions.toLocaleString()}
+                              {formatNum(snapshot.metrics.onchain.transactions)}
                             </td>
                             <td className="py-2 px-3 text-right font-mono text-[#f59e0b]">
-                              ${snapshot.metrics.onchain.volume.toLocaleString()}
+                              {formatNum(snapshot.metrics.onchain.volume, "$")}
                             </td>
                           </tr>
                         );
