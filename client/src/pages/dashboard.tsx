@@ -168,6 +168,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
       timestamp: sessionTime,
     };
     
+    let totalUsers = 0;
     let totalDAU = 0;
     let totalMAU = 0;
     let totalRevenue = 0;
@@ -178,6 +179,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
       const project = projects.find(p => p.id === snapshot.projectId);
       if (!project) return;
       
+      totalUsers += snapshot.metrics.users.total;
       totalDAU += snapshot.metrics.users.daily_active;
       totalMAU += snapshot.metrics.users.monthly_active;
       totalRevenue += snapshot.metrics.revenue.net_income;
@@ -190,6 +192,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
       pointData[`${safeKey}_name`] = project.name;
     });
     
+    pointData.totalUsers = totalUsers;
     pointData.totalDAU = totalDAU;
     pointData.totalMAU = totalMAU;
     pointData.totalRevenue = totalRevenue;
@@ -203,7 +206,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
 
 function calculateTimeWeightedGrowth(historical: any[]) {
   if (historical.length < 2) {
-    return { dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, hoursElapsed: 0, daysElapsed: 0 };
+    return { userGrowthRate: 0, dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, txGrowthRate: 0, hoursElapsed: 0, daysElapsed: 0 };
   }
   
   const first = historical[0];
@@ -212,7 +215,7 @@ function calculateTimeWeightedGrowth(historical: any[]) {
   const daysElapsed = hoursElapsed / 24;
   
   if (daysElapsed < 0.5) {
-    return { dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, hoursElapsed, daysElapsed };
+    return { userGrowthRate: 0, dauGrowthRate: 0, revenueGrowthRate: 0, mauGrowthRate: 0, txGrowthRate: 0, hoursElapsed, daysElapsed };
   }
   
   const calculateWeeklyRate = (firstVal: number, lastVal: number): number => {
@@ -223,9 +226,11 @@ function calculateTimeWeightedGrowth(historical: any[]) {
   };
   
   return {
+    userGrowthRate: calculateWeeklyRate(first.totalUsers || 0, last.totalUsers || 0),
     dauGrowthRate: calculateWeeklyRate(first.totalDAU, last.totalDAU),
     revenueGrowthRate: calculateWeeklyRate(first.totalRevenue, last.totalRevenue),
     mauGrowthRate: calculateWeeklyRate(first.totalMAU, last.totalMAU),
+    txGrowthRate: calculateWeeklyRate(first.totalTransactions, last.totalTransactions),
     hoursElapsed,
     daysElapsed,
   };
@@ -356,7 +361,7 @@ function DashboardContent() {
     const paybackMonths = arpu > 0 ? estimatedCac / arpu : 0;
     
     const timeWeightedGrowth = calculateTimeWeightedGrowth(historical);
-    const { dauGrowthRate, revenueGrowthRate, mauGrowthRate, hoursElapsed, daysElapsed } = timeWeightedGrowth;
+    const { userGrowthRate, dauGrowthRate, revenueGrowthRate, mauGrowthRate, txGrowthRate, hoursElapsed, daysElapsed } = timeWeightedGrowth;
     
     const monthlyGrowthRate = revenueGrowthRate / 100;
     
@@ -409,7 +414,7 @@ function DashboardContent() {
       conversionRate,
       stickiness,
       ltv, estimatedCac, ltvCacRatio, paybackMonths,
-      dauGrowthRate, revenueGrowthRate, mauGrowthRate,
+      userGrowthRate, dauGrowthRate, revenueGrowthRate, mauGrowthRate, txGrowthRate,
       web3Valuation,
       blendedValuation,
       revenuePerUser, transactionsPerUser, engagementPerUser,
@@ -552,7 +557,7 @@ function DashboardContent() {
               <StatCard 
                 label="Total Users" 
                 value={aggregatedStats.totalUsers.toLocaleString()} 
-                change={12.5}
+                change={aggregatedStats.totalUsers > 0 && historicalData.length >= 2 ? financialMetrics.userGrowthRate : undefined}
                 icon={Users} 
                 color="blue"
                 delay={0.1}
@@ -560,7 +565,7 @@ function DashboardContent() {
               <StatCard 
                 label="Daily Active" 
                 value={aggregatedStats.dau.toLocaleString()} 
-                change={8.3}
+                change={aggregatedStats.dau > 0 && historicalData.length >= 2 ? financialMetrics.dauGrowthRate : undefined}
                 icon={Activity} 
                 color="green"
                 delay={0.15}
@@ -568,7 +573,7 @@ function DashboardContent() {
               <StatCard 
                 label="Monthly Active" 
                 value={aggregatedStats.mau.toLocaleString()} 
-                change={15.2}
+                change={aggregatedStats.mau > 0 && historicalData.length >= 2 ? financialMetrics.mauGrowthRate : undefined}
                 icon={TrendingUp} 
                 color="purple"
                 delay={0.2}
@@ -576,7 +581,7 @@ function DashboardContent() {
               <StatCard 
                 label="Revenue" 
                 value={`$${aggregatedStats.totalRevenue.toLocaleString()}`} 
-                change={22.1}
+                change={aggregatedStats.totalRevenue > 0 && historicalData.length >= 2 ? financialMetrics.revenueGrowthRate : undefined}
                 icon={DollarSign} 
                 color="green"
                 delay={0.25}
@@ -584,7 +589,7 @@ function DashboardContent() {
               <StatCard 
                 label="Transactions" 
                 value={aggregatedStats.totalTransactions.toLocaleString()} 
-                change={18.7}
+                change={aggregatedStats.totalTransactions > 0 && historicalData.length >= 2 ? financialMetrics.txGrowthRate : undefined}
                 icon={Zap} 
                 color="yellow"
                 delay={0.3}
