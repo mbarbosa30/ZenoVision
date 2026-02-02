@@ -1161,11 +1161,20 @@ function DashboardContent() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={perAppTimeSeries.data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-                      <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <XAxis 
+                        dataKey="timestamp" 
+                        type="number"
+                        scale="time"
+                        domain={['dataMin', 'dataMax']}
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 10 }} 
+                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                      />
                       <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                       />
                       <Legend />
                       {perAppTimeSeries.hasPerAppData ? (
@@ -1205,11 +1214,20 @@ function DashboardContent() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={perAppTimeSeries.data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-                      <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <XAxis 
+                        dataKey="timestamp" 
+                        type="number"
+                        scale="time"
+                        domain={['dataMin', 'dataMax']}
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 10 }} 
+                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                      />
                       <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                         formatter={(value: any) => [`$${Number(value).toLocaleString()}`, '']}
                       />
                       <Legend />
@@ -1250,12 +1268,21 @@ function DashboardContent() {
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={historicalData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-                      <XAxis dataKey="date" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
+                      <XAxis 
+                        dataKey="timestamp" 
+                        type="number"
+                        scale="time"
+                        domain={['dataMin', 'dataMax']}
+                        stroke="#666" 
+                        tick={{ fill: '#a0aec0', fontSize: 10 }} 
+                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                      />
                       <YAxis yAxisId="left" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <YAxis yAxisId="right" orientation="right" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                       />
                       <Legend />
                       <Line yAxisId="left" type="monotone" dataKey="totalDAU" name="DAU" stroke="#3b82f6" strokeWidth={2} dot={false} />
