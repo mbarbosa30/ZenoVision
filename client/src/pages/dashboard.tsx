@@ -271,8 +271,78 @@ function DashboardContent() {
     });
   }, [snapshots, projects]);
 
+  const financialMetrics = useMemo(() => {
+    const stats = aggregatedStats;
+    const historical = historicalData;
+    
+    const mrr = stats.totalRevenue;
+    const arr = mrr * 12;
+    
+    const arpu = stats.payingUsers > 0 ? stats.totalRevenue / stats.payingUsers : 0;
+    const arpuAll = stats.totalUsers > 0 ? stats.totalRevenue / stats.totalUsers : 0;
+    
+    const conversionRate = stats.totalUsers > 0 ? (stats.payingUsers / stats.totalUsers) * 100 : 0;
+    
+    const stickiness = stats.mau > 0 ? (stats.dau / stats.mau) * 100 : 0;
+    
+    const avgLifetimeMonths = 12;
+    const ltv = arpu * avgLifetimeMonths;
+    
+    const estimatedCac = arpu * 3;
+    const ltvCacRatio = estimatedCac > 0 ? ltv / estimatedCac : 0;
+    const paybackMonths = arpu > 0 ? estimatedCac / arpu : 0;
+    
+    let dauGrowthRate = 0;
+    let revenueGrowthRate = 0;
+    let mauGrowthRate = 0;
+    
+    if (historical.length >= 14) {
+      const recentWeek = historical.slice(-7);
+      const previousWeek = historical.slice(-14, -7);
+      
+      const recentDAU = recentWeek.reduce((sum, d) => sum + (d.totalDAU || 0), 0) / 7;
+      const previousDAU = previousWeek.reduce((sum, d) => sum + (d.totalDAU || 0), 0) / 7;
+      dauGrowthRate = previousDAU > 0 ? ((recentDAU - previousDAU) / previousDAU) * 100 : 0;
+      
+      const recentRev = recentWeek.reduce((sum, d) => sum + (d.totalRevenue || 0), 0) / 7;
+      const previousRev = previousWeek.reduce((sum, d) => sum + (d.totalRevenue || 0), 0) / 7;
+      revenueGrowthRate = previousRev > 0 ? ((recentRev - previousRev) / previousRev) * 100 : 0;
+      
+      const recentMAU = recentWeek.reduce((sum, d) => sum + (d.totalMAU || 0), 0) / 7;
+      const previousMAU = previousWeek.reduce((sum, d) => sum + (d.totalMAU || 0), 0) / 7;
+      mauGrowthRate = previousMAU > 0 ? ((recentMAU - previousMAU) / previousMAU) * 100 : 0;
+    }
+    
+    const monthlyGrowthRate = revenueGrowthRate / 100;
+    const arrMultiples = { conservative: 5, moderate: 10, aggressive: 20 };
+    const valuation = {
+      conservative: arr * arrMultiples.conservative,
+      moderate: arr * arrMultiples.moderate,
+      aggressive: arr * arrMultiples.aggressive,
+    };
+    
+    const revenuePerUser = stats.totalUsers > 0 ? stats.totalRevenue / stats.totalUsers : 0;
+    const transactionsPerUser = stats.totalUsers > 0 ? stats.totalTransactions / stats.totalUsers : 0;
+    const engagementPerUser = stats.totalUsers > 0 ? stats.keyActions / stats.totalUsers : 0;
+    
+    const nrr = 100 + (revenueGrowthRate * 0.5);
+    
+    return {
+      mrr, arr,
+      arpu, arpuAll,
+      conversionRate,
+      stickiness,
+      ltv, estimatedCac, ltvCacRatio, paybackMonths,
+      dauGrowthRate, revenueGrowthRate, mauGrowthRate,
+      valuation,
+      revenuePerUser, transactionsPerUser, engagementPerUser,
+      nrr,
+      monthlyGrowthRate,
+    };
+  }, [aggregatedStats, historicalData]);
+
   const projections = useMemo(() => {
-    const growthRate = 0.05;
+    const growthRate = Math.max(0.02, Math.min(0.15, financialMetrics.monthlyGrowthRate || 0.05));
     const current = aggregatedStats;
     
     return {
@@ -280,19 +350,23 @@ function DashboardContent() {
         users: Math.round(current.mau * Math.pow(1 + growthRate, 1)),
         revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 1)),
         transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 1)),
+        arr: Math.round(financialMetrics.arr * Math.pow(1 + growthRate, 1)),
       },
       day60: {
         users: Math.round(current.mau * Math.pow(1 + growthRate, 2)),
         revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 2)),
         transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 2)),
+        arr: Math.round(financialMetrics.arr * Math.pow(1 + growthRate, 2)),
       },
       day90: {
         users: Math.round(current.mau * Math.pow(1 + growthRate, 3)),
         revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 3)),
         transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 3)),
+        arr: Math.round(financialMetrics.arr * Math.pow(1 + growthRate, 3)),
       },
+      growthRate: growthRate * 100,
     };
-  }, [aggregatedStats]);
+  }, [aggregatedStats, financialMetrics]);
 
   const sortedTableData = useMemo(() => {
     const data = snapshots.length > 0 
@@ -445,6 +519,136 @@ function DashboardContent() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto p-8 md:p-12">
             <div className="flex items-center gap-3 mb-8">
+              <DollarSign className="w-6 h-6 text-[#10b981]" />
+              <h2 className="text-2xl font-semibold">Financial KPIs</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <Block delay={0.05}>
+                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">MRR</div>
+                <div className="text-3xl font-semibold text-[#10b981]" data-testid="value-mrr">${financialMetrics.mrr.toLocaleString()}</div>
+                <div className="text-sm text-[#a0aec0] mt-1">Net Revenue (Current Period)</div>
+              </Block>
+              <Block delay={0.1}>
+                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">ARR</div>
+                <div className="text-3xl font-semibold text-[#10b981]" data-testid="value-arr">${financialMetrics.arr.toLocaleString()}</div>
+                <div className="text-sm text-[#a0aec0] mt-1">Annualized Run Rate</div>
+              </Block>
+              <Block delay={0.15}>
+                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">ARPU</div>
+                <div className="text-3xl font-semibold" data-testid="value-arpu">${financialMetrics.arpu.toFixed(2)}</div>
+                <div className="text-sm text-[#a0aec0] mt-1">Per Paying User</div>
+              </Block>
+              <Block delay={0.2}>
+                <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-2">Conversion</div>
+                <div className="text-3xl font-semibold" data-testid="value-conversion">{financialMetrics.conversionRate.toFixed(2)}%</div>
+                <div className="text-sm text-[#a0aec0] mt-1">Paid / Total Users</div>
+              </Block>
+            </div>
+
+            <div className="text-xs text-[#666] mb-4 italic">* Estimates based on simulated historical data. Connect real metrics APIs for accurate calculations.</div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <Block delay={0.25}>
+                <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">Growth Rates (WoW)</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">DAU Growth</span>
+                    <span data-testid="value-dau-growth" className={`font-semibold ${financialMetrics.dauGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
+                      {financialMetrics.dauGrowthRate >= 0 ? "+" : ""}{financialMetrics.dauGrowthRate.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">MAU Growth</span>
+                    <span data-testid="value-mau-growth" className={`font-semibold ${financialMetrics.mauGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
+                      {financialMetrics.mauGrowthRate >= 0 ? "+" : ""}{financialMetrics.mauGrowthRate.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Revenue Growth</span>
+                    <span data-testid="value-revenue-growth" className={`font-semibold ${financialMetrics.revenueGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
+                      {financialMetrics.revenueGrowthRate >= 0 ? "+" : ""}{financialMetrics.revenueGrowthRate.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">NRR (Est.)</span>
+                    <span data-testid="value-nrr" className="font-semibold text-[#8b5cf6]">{financialMetrics.nrr.toFixed(0)}%</span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.3}>
+                <h3 className="text-lg font-medium mb-4 text-[#f59e0b]">Unit Economics</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">LTV (Est.)</span>
+                    <span data-testid="value-ltv" className="font-semibold">${financialMetrics.ltv.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">CAC (Est.)</span>
+                    <span data-testid="value-cac" className="font-semibold">${financialMetrics.estimatedCac.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">LTV:CAC</span>
+                    <span data-testid="value-ltv-cac" className={`font-semibold ${financialMetrics.ltvCacRatio >= 3 ? "text-[#10b981]" : financialMetrics.ltvCacRatio >= 2 ? "text-[#f59e0b]" : "text-[#ef4444]"}`}>
+                      {financialMetrics.ltvCacRatio.toFixed(1)}x
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">Payback Period</span>
+                    <span data-testid="value-payback" className="font-semibold">{financialMetrics.paybackMonths.toFixed(1)} mo</span>
+                  </div>
+                </div>
+              </Block>
+
+              <Block delay={0.35}>
+                <h3 className="text-lg font-medium mb-4 text-[#06b6d4]">Engagement Metrics</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">DAU/MAU Ratio</span>
+                    <span data-testid="value-stickiness" className={`font-semibold ${financialMetrics.stickiness >= 20 ? "text-[#10b981]" : financialMetrics.stickiness >= 10 ? "text-[#f59e0b]" : "text-white"}`}>
+                      {financialMetrics.stickiness.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Revenue/User</span>
+                    <span data-testid="value-rev-per-user" className="font-semibold">${financialMetrics.revenuePerUser.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">Txns/User</span>
+                    <span data-testid="value-txns-per-user" className="font-semibold">{financialMetrics.transactionsPerUser.toFixed(1)}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
+                    <span className="text-[#a0aec0]">Actions/User</span>
+                    <span data-testid="value-actions-per-user" className="font-semibold">{financialMetrics.engagementPerUser.toFixed(1)}</span>
+                  </div>
+                </div>
+              </Block>
+            </div>
+
+            <Block delay={0.4} className="bg-gradient-to-r from-[#10b981]/10 to-[#3b82f6]/10 border-[#10b981]/30">
+              <h3 className="text-lg font-medium mb-4">Valuation Estimates (ARR Multiple)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-sm text-[#a0aec0] mb-2">Conservative (5x ARR)</div>
+                  <div className="text-2xl font-semibold" data-testid="value-valuation-5x">${(financialMetrics.valuation.conservative / 1000).toFixed(0)}K</div>
+                </div>
+                <div className="text-center border-x border-[#2d2d2d]">
+                  <div className="text-sm text-[#a0aec0] mb-2">Moderate (10x ARR)</div>
+                  <div className="text-2xl font-semibold text-[#10b981]" data-testid="value-valuation-10x">${(financialMetrics.valuation.moderate / 1000).toFixed(0)}K</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-[#a0aec0] mb-2">Aggressive (20x ARR)</div>
+                  <div className="text-2xl font-semibold text-[#3b82f6]" data-testid="value-valuation-20x">${(financialMetrics.valuation.aggressive / 1000).toFixed(0)}K</div>
+                </div>
+              </div>
+            </Block>
+          </div>
+        </section>
+
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-8">
               <LineChartIcon className="w-6 h-6 text-[#3b82f6]" />
               <h2 className="text-2xl font-semibold">Growth Trends</h2>
             </div>
@@ -558,7 +762,7 @@ function DashboardContent() {
             <div className="flex items-center gap-3 mb-8">
               <TrendingUp className="w-6 h-6 text-[#3b82f6]" />
               <h2 className="text-2xl font-semibold">Projections</h2>
-              <span className="text-sm text-[#a0aec0] ml-2">(5% monthly growth assumption)</span>
+              <span className="text-sm text-[#a0aec0] ml-2">({projections.growthRate.toFixed(1)}% monthly growth based on trends)</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -566,16 +770,20 @@ function DashboardContent() {
                 <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-4">30-Day Forecast</div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Users</span>
-                    <span className="text-xl font-semibold">{projections.day30.users.toLocaleString()}</span>
+                    <span className="text-[#a0aec0]">MAU</span>
+                    <span className="text-xl font-semibold" data-testid="value-30d-mau">{projections.day30.users.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Revenue</span>
-                    <span className="text-xl font-semibold text-[#10b981]">${projections.day30.revenue.toLocaleString()}</span>
+                    <span className="text-[#a0aec0]">MRR</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-mrr">${projections.day30.revenue.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">ARR</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-arr">${projections.day30.arr.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
                     <span className="text-[#a0aec0]">Transactions</span>
-                    <span className="text-xl font-semibold">{projections.day30.transactions.toLocaleString()}</span>
+                    <span className="font-semibold" data-testid="value-30d-txns">{projections.day30.transactions.toLocaleString()}</span>
                   </div>
                 </div>
               </Block>
@@ -584,16 +792,20 @@ function DashboardContent() {
                 <div className="text-sm text-[#a0aec0] uppercase tracking-wider mb-4">60-Day Forecast</div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Users</span>
-                    <span className="text-xl font-semibold">{projections.day60.users.toLocaleString()}</span>
+                    <span className="text-[#a0aec0]">MAU</span>
+                    <span className="text-xl font-semibold" data-testid="value-60d-mau">{projections.day60.users.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Revenue</span>
-                    <span className="text-xl font-semibold text-[#10b981]">${projections.day60.revenue.toLocaleString()}</span>
+                    <span className="text-[#a0aec0]">MRR</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-mrr">${projections.day60.revenue.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">ARR</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-arr">${projections.day60.arr.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
                     <span className="text-[#a0aec0]">Transactions</span>
-                    <span className="text-xl font-semibold">{projections.day60.transactions.toLocaleString()}</span>
+                    <span className="font-semibold" data-testid="value-60d-txns">{projections.day60.transactions.toLocaleString()}</span>
                   </div>
                 </div>
               </Block>
@@ -602,12 +814,16 @@ function DashboardContent() {
                 <div className="text-sm text-[#3b82f6] uppercase tracking-wider mb-4">90-Day Forecast</div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Users</span>
-                    <span className="text-xl font-semibold">{projections.day90.users.toLocaleString()}</span>
+                    <span className="text-[#a0aec0]">MAU</span>
+                    <span className="text-xl font-semibold" data-testid="value-90d-mau">{projections.day90.users.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Revenue</span>
-                    <span className="text-xl font-semibold text-[#10b981]">${projections.day90.revenue.toLocaleString()}</span>
+                    <span className="text-[#a0aec0]">MRR</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-mrr">${projections.day90.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#a0aec0]">ARR</span>
+                    <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-arr">${projections.day90.arr.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[#a0aec0]">Transactions</span>
