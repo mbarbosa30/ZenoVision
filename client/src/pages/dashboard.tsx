@@ -237,27 +237,53 @@ function calculateTimeWeightedGrowth(historical: any[]) {
   const hoursElapsed = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
   const daysElapsed = hoursElapsed / 24;
   
-  if (daysElapsed < 0.5) return { ...defaultRates, hoursElapsed, daysElapsed };
-  
-  const calculateWeeklyRate = (firstVal: number, lastVal: number): number => {
-    if (firstVal <= 0 || lastVal <= 0) return 0;
-    const ratio = lastVal / firstVal;
-    const weeklyRate = Math.pow(ratio, 7 / daysElapsed) - 1;
-    return weeklyRate * 100;
+  // Linear regression to find trend across ALL data points
+  // Returns weekly percentage change based on the slope
+  const calculateTrendGrowth = (dataKey: string): number => {
+    const points = historical.map(h => ({
+      t: (h.timestamp - first.timestamp) / (1000 * 60 * 60 * 24), // days from start
+      v: h[dataKey] || 0
+    })).filter(p => p.v > 0);
+    
+    if (points.length < 2) return 0;
+    
+    // Calculate means
+    const n = points.length;
+    const sumT = points.reduce((s, p) => s + p.t, 0);
+    const sumV = points.reduce((s, p) => s + p.v, 0);
+    const meanT = sumT / n;
+    const meanV = sumV / n;
+    
+    // Calculate slope using least squares
+    let numerator = 0;
+    let denominator = 0;
+    for (const p of points) {
+      numerator += (p.t - meanT) * (p.v - meanV);
+      denominator += (p.t - meanT) * (p.t - meanT);
+    }
+    
+    if (denominator === 0 || meanV === 0) return 0;
+    
+    const slope = numerator / denominator; // change per day
+    const weeklyChange = slope * 7; // projected weekly change
+    const weeklyRate = (weeklyChange / meanV) * 100; // as percentage of mean value
+    
+    // Clamp extreme values for short time windows
+    return Math.max(-100, Math.min(1000, weeklyRate));
   };
   
   return {
-    userGrowthRate: calculateWeeklyRate(first.totalUsers || 0, last.totalUsers || 0),
-    dauGrowthRate: calculateWeeklyRate(first.totalDAU || 0, last.totalDAU || 0),
-    wauGrowthRate: calculateWeeklyRate(first.totalWAU || 0, last.totalWAU || 0),
-    mauGrowthRate: calculateWeeklyRate(first.totalMAU || 0, last.totalMAU || 0),
-    payingGrowthRate: calculateWeeklyRate(first.totalPaying || 0, last.totalPaying || 0),
-    revenueGrowthRate: calculateWeeklyRate(first.totalRevenue || 0, last.totalRevenue || 0),
-    paymentsGrowthRate: calculateWeeklyRate(first.totalPayments || 0, last.totalPayments || 0),
-    txGrowthRate: calculateWeeklyRate(first.totalTransactions || 0, last.totalTransactions || 0),
-    volumeGrowthRate: calculateWeeklyRate(first.totalVolume || 0, last.totalVolume || 0),
-    actionsGrowthRate: calculateWeeklyRate(first.totalKeyActions || 0, last.totalKeyActions || 0),
-    sessionsGrowthRate: calculateWeeklyRate(first.totalSessions || 0, last.totalSessions || 0),
+    userGrowthRate: calculateTrendGrowth('totalUsers'),
+    dauGrowthRate: calculateTrendGrowth('totalDAU'),
+    wauGrowthRate: calculateTrendGrowth('totalWAU'),
+    mauGrowthRate: calculateTrendGrowth('totalMAU'),
+    payingGrowthRate: calculateTrendGrowth('totalPaying'),
+    revenueGrowthRate: calculateTrendGrowth('totalRevenue'),
+    paymentsGrowthRate: calculateTrendGrowth('totalPayments'),
+    txGrowthRate: calculateTrendGrowth('totalTransactions'),
+    volumeGrowthRate: calculateTrendGrowth('totalVolume'),
+    actionsGrowthRate: calculateTrendGrowth('totalKeyActions'),
+    sessionsGrowthRate: calculateTrendGrowth('totalSessions'),
     hoursElapsed,
     daysElapsed,
   };
