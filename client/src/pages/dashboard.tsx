@@ -564,6 +564,10 @@ function DashboardContent() {
         payingKey: `${key}_Paying`,
         txnsKey: `${key}_Txns`,
         volumeKey: `${key}_Volume`,
+        showUsers: project?.showUsersMetrics !== false,
+        showEngagement: project?.showEngagementMetrics !== false,
+        showRevenue: project?.showRevenueMetrics !== false,
+        showOnchain: project?.showOnchainMetrics !== false,
       };
     }).filter(app => app.name !== app.key || appKeys.size > 0);
     
@@ -1572,7 +1576,7 @@ function DashboardContent() {
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
                         {perAppTimeSeries.hasPerAppData ? (
-                          perAppTimeSeries.apps.map((app, idx) => {
+                          perAppTimeSeries.apps.filter(app => app.showUsers).map((app, idx) => {
                             const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
                             return (
                               <Line 
@@ -1627,7 +1631,7 @@ function DashboardContent() {
                       />
                       <Legend />
                       {perAppTimeSeries.hasPerAppData ? (
-                        perAppTimeSeries.apps.map((app, idx) => {
+                        perAppTimeSeries.apps.filter(app => app.showUsers).map((app, idx) => {
                           const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#ef4444'];
                           return (
                             <Line 
@@ -1684,7 +1688,7 @@ function DashboardContent() {
                       />
                       <Legend />
                       {perAppTimeSeries.hasPerAppData ? (
-                        perAppTimeSeries.apps.map((app, idx) => {
+                        perAppTimeSeries.apps.filter(app => app.showRevenue).map((app, idx) => {
                           const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
                           return (
                             <Line 
@@ -1740,7 +1744,7 @@ function DashboardContent() {
                           formatter={(value: any) => [`$${Number(value).toFixed(2)}/day`, '']}
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
-                        {estimatedDailyRevenueData.apps.map((app, idx) => {
+                        {estimatedDailyRevenueData.apps.filter(app => app.showRevenue).map((app, idx) => {
                           const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
                           return (
                             <Line 
@@ -1750,7 +1754,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={true}
+                              dot={false}
                               connectNulls
                             />
                           );
