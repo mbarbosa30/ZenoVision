@@ -63,11 +63,11 @@ export default function ProposalCeloSelf() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="text-sm text-[#a0aec0] uppercase tracking-widest mb-4">Infrastructure Initiative</div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.05] tracking-tight mb-6">
+              <div className="text-sm text-[#a0aec0] uppercase tracking-widest mb-4" data-testid="text-initiative-label">Infrastructure Initiative</div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.05] tracking-tight mb-6" data-testid="text-hero-title">
                 The Real Human Economy Stack
               </h1>
-              <p className="text-xl md:text-2xl text-[#3b82f6] font-medium mb-8">
+              <p className="text-xl md:text-2xl text-[#3b82f6] font-medium mb-8" data-testid="text-hero-subtitle">
                 Identity + Context + Routing for Celo
               </p>
               <div className="flex flex-wrap gap-4 text-sm text-[#a0aec0]">
@@ -85,7 +85,7 @@ export default function ProposalCeloSelf() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="accent" className="border-b border-[#2563eb]" delay={0.1}>
-              <h2 className="text-2xl font-semibold mb-4">Executive Summary: The Vertical Thesis</h2>
+              <h2 className="text-2xl font-semibold mb-4" data-testid="text-exec-summary">Executive Summary: The Vertical Thesis</h2>
               <div className="space-y-4 text-white/90 leading-relaxed">
                 <p>
                   <strong>The Pivot Point:</strong> L2s are currently competing on horizontal throughput (TPS). Celo does not need to run this race. Celo's winning vertical is <span className="text-white font-semibold">Real-World Identity & Mobile Distribution</span>.
@@ -129,7 +129,7 @@ export default function ProposalCeloSelf() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">The Architecture: The Triangle</h2>
+              <h2 className="text-3xl font-semibold mb-2" data-testid="text-architecture-title">The Architecture: The Triangle</h2>
               <p className="text-[#a0aec0]">Identity qualifies you, Context tiers you, ProsperON rewards you</p>
             </Block>
             
@@ -168,14 +168,14 @@ export default function ProposalCeloSelf() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Component A: Consentful Human Signals (CHS)</h2>
+              <h2 className="text-3xl font-semibold mb-2" data-testid="text-chs-title">Component A: Consentful Human Signals (CHS)</h2>
               <p className="text-[#a0aec0]">User-Sovereign Attestations that allow apps to request specific capability proofs without accessing raw data</p>
             </Block>
             
             <Block variant="dark" delay={0.15}>
               <h3 className="text-xl font-semibold mb-6">The Signal Set (v1)</h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full text-left" data-testid="table-chs-signals">
                   <thead>
                     <tr className="border-b border-[#2d2d2d]">
                       <th className="pb-4 pr-6 text-[#a0aec0] font-medium">Signal</th>
@@ -191,9 +191,9 @@ export default function ProposalCeloSelf() {
                       { signal: "Consistency", source: "MiniPlay", def: "Time-based activity proof (filters bursty/bot behavior)." },
                       { signal: "Agent Policy", source: "Selfclaw", def: "Proof that a user's AI agent operates within safe limits." },
                     ].map((row, i) => (
-                      <tr key={i} className="border-b border-[#2d2d2d]/50">
-                        <td className="py-4 pr-6 font-medium text-white">{row.signal}</td>
-                        <td className="py-4 pr-6 text-[#3b82f6]">{row.source}</td>
+                      <tr key={i} className="border-b border-[#2d2d2d]/50" data-testid={`row-signal-${i}`}>
+                        <td className="py-4 pr-6 font-medium text-white" data-testid={`text-signal-name-${i}`}>{row.signal}</td>
+                        <td className="py-4 pr-6 text-[#3b82f6]" data-testid={`text-signal-source-${i}`}>{row.source}</td>
                         <td className="py-4 text-[#a0aec0]">{row.def}</td>
                       </tr>
                     ))}
@@ -208,7 +208,7 @@ export default function ProposalCeloSelf() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Component B: The Routing Layer (ProsperON)</h2>
+              <h2 className="text-3xl font-semibold mb-2" data-testid="text-prosperon-title">Component B: The Routing Layer (ProsperON)</h2>
               <p className="text-[#a0aec0]">The native retention engine for Celo. Turns unavoidable gas costs into a loyalty program for the entire chain.</p>
             </Block>
             
@@ -221,7 +221,7 @@ export default function ProposalCeloSelf() {
               ].map((item, i) => (
                 <Block key={i} variant="dark" className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""}`} delay={0.15 + i * 0.05}>
                   <item.icon className="w-8 h-8 mb-4" style={{ color: item.color }} />
-                  <h3 className="text-lg font-semibold mb-1">{item.step}</h3>
+                  <h3 className="text-lg font-semibold mb-1" data-testid={`text-step-${item.step.toLowerCase()}`}>{item.step}</h3>
                   <p className="text-sm text-[#3b82f6] mb-2">{item.subtitle}</p>
                   <p className="text-sm text-[#a0aec0]">{item.desc}</p>
                 </Block>
@@ -252,7 +252,7 @@ export default function ProposalCeloSelf() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Studio Structure: Marshall Islands DAO (MIDAO)</h2>
+              <h2 className="text-3xl font-semibold mb-2" data-testid="text-midao-title">Studio Structure: Marshall Islands DAO (MIDAO)</h2>
               <p className="text-[#a0aec0]">Long-term alignment and regulatory clarity</p>
             </Block>
             
@@ -276,7 +276,7 @@ export default function ProposalCeloSelf() {
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto">
             <Block variant="accent" className="border-b border-[#2563eb]" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-2">Strategic Proposal & Ask</h2>
+              <h2 className="text-3xl font-semibold mb-2" data-testid="text-strategic-ask">Strategic Proposal & Ask</h2>
               <p className="text-white/90">Goal: Establish the "Real Human Economy" standard on Celo before social capital migrates to Base or TON</p>
             </Block>
             
@@ -335,7 +335,7 @@ export default function ProposalCeloSelf() {
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <div className="flex items-center gap-3 mb-2">
                 <AlertTriangle className="w-8 h-8 text-[#f59e0b]" />
-                <h2 className="text-3xl font-semibold">Critical Risk Assessment</h2>
+                <h2 className="text-3xl font-semibold" data-testid="text-risk-title">Critical Risk Assessment</h2>
               </div>
               <p className="text-[#a0aec0]">Identified risks and mitigation strategies</p>
             </Block>
@@ -373,10 +373,10 @@ export default function ProposalCeloSelf() {
                 },
               ].map((item, i) => (
                 <Block key={i} variant="dark" className={`${i % 2 === 0 ? "border-r border-[#2d2d2d]" : ""}`} delay={0.15 + i * 0.05}>
-                  <h3 className="text-lg font-semibold mb-3 text-[#f59e0b]">{item.risk}</h3>
+                  <h3 className="text-lg font-semibold mb-3 text-[#f59e0b]" data-testid={`text-risk-${i}`}>{item.risk}</h3>
                   <ul className="space-y-2">
                     {item.mitigations.map((m, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm text-[#a0aec0]">
+                      <li key={j} className="flex items-start gap-2 text-sm text-[#a0aec0]" data-testid={`text-mitigation-${i}-${j}`}>
                         <CheckCircle className="w-4 h-4 text-[#10b981] mt-0.5 flex-shrink-0" />
                         <span>{m}</span>
                       </li>
@@ -394,14 +394,14 @@ export default function ProposalCeloSelf() {
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <div className="flex items-center gap-3 mb-2">
                 <Calendar className="w-8 h-8 text-[#3b82f6]" />
-                <h2 className="text-3xl font-semibold">Execution Roadmap</h2>
+                <h2 className="text-3xl font-semibold" data-testid="text-roadmap-title">Execution Roadmap</h2>
               </div>
             </Block>
             
             <div className="grid grid-cols-1 md:grid-cols-3">
               <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
-                <div className="text-sm text-[#3b82f6] font-medium mb-2">PHASE 1</div>
-                <h3 className="text-xl font-semibold mb-1">Integration & Unification</h3>
+                <div className="text-sm text-[#3b82f6] font-medium mb-2" data-testid="text-phase-1-label">PHASE 1</div>
+                <h3 className="text-xl font-semibold mb-1" data-testid="text-phase-1-title">Integration & Unification</h3>
                 <p className="text-sm text-[#a0aec0] mb-4">Months 1–6</p>
                 <p className="text-[#a0aec0] mb-4">Ship CHS v1 + ProsperON Integration</p>
                 <ul className="space-y-2 text-sm">
@@ -421,8 +421,8 @@ export default function ProposalCeloSelf() {
               </Block>
               
               <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.2}>
-                <div className="text-sm text-[#8b5cf6] font-medium mb-2">PHASE 2</div>
-                <h3 className="text-xl font-semibold mb-1">Hardening & Agents</h3>
+                <div className="text-sm text-[#8b5cf6] font-medium mb-2" data-testid="text-phase-2-label">PHASE 2</div>
+                <h3 className="text-xl font-semibold mb-1" data-testid="text-phase-2-title">Hardening & Agents</h3>
                 <p className="text-sm text-[#a0aec0] mb-4">Months 6–12</p>
                 <p className="text-[#a0aec0] mb-4">Agentic workflows and ZK upgrades</p>
                 <ul className="space-y-2 text-sm">
@@ -438,8 +438,8 @@ export default function ProposalCeloSelf() {
               </Block>
               
               <Block variant="dark" delay={0.25}>
-                <div className="text-sm text-[#f59e0b] font-medium mb-2">PHASE 3</div>
-                <h3 className="text-xl font-semibold mb-1">Governance Experiments</h3>
+                <div className="text-sm text-[#f59e0b] font-medium mb-2" data-testid="text-phase-3-label">PHASE 3</div>
+                <h3 className="text-xl font-semibold mb-1" data-testid="text-phase-3-title">Governance Experiments</h3>
                 <p className="text-sm text-[#a0aec0] mb-4">Year 1+</p>
                 <p className="text-[#a0aec0] mb-4">Explore merit-based governance</p>
                 <ul className="space-y-2 text-sm">
@@ -462,8 +462,8 @@ export default function ProposalCeloSelf() {
           <div className="max-w-7xl mx-auto">
             <Block variant="green" delay={0.1}>
               <div className="text-center">
-                <h2 className="text-3xl font-semibold mb-4">Next Steps</h2>
-                <p className="text-xl text-white/90 mb-2">The stack is defined. The data is live. The opportunity is now.</p>
+                <h2 className="text-3xl font-semibold mb-4" data-testid="text-next-steps">Next Steps</h2>
+                <p className="text-xl text-white/90 mb-2" data-testid="text-cta-tagline">The stack is defined. The data is live. The opportunity is now.</p>
                 <p className="text-white/80 mb-8">
                   Schedule a 45-minute sync to review the MIDAO structure and ProsperON yield mechanics.<br />
                   Align on Q3/Q4 milestones for the "Real Human Economy" rollout.
