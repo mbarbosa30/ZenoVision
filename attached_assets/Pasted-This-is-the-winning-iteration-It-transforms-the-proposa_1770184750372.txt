@@ -1,0 +1,113 @@
+This is the winning iteration. It transforms the proposal from a "product pitch" into a "full-stack economic operating system" for Celo.
+By adding ProsperON, you solve the "So what?" problem. Identity and Context are infrastructure; Yield and Routing are the engine.
+Here is the fully consolidated Initiative Spec v1.1. It integrates CHS and ProsperON into a single, coherent architecture ("The Real Human Economy Stack") and addresses the specific risks around "pay-to-influence."
+PROPOSAL: ZENO VISION STUDIO
+Subject: Infrastructure Initiative: The Real Human Economy Stack
+To: Leadership Teams of Celo Foundation & Self.xyz
+From: Marco Barbosa, Founder of Zeno Vision Studio
+Date: February 2026
+Status: Initiative Spec v1.1
+1. Executive Summary: The Vertical Thesis
+The Pivot Point:
+L2s are currently competing on horizontal throughput (TPS). Celo does not need to run this race. Celo’s winning vertical is Real-World Identity & Mobile Distribution.
+However, "Identity" (Self.xyz) is the container. The content—context, reliability, and economic incentive—is currently missing.
+The Problem:
+Without this layer, Celo apps cannot distinguish long-term participants from extractive farmers. Furthermore, they lack a native retention engine; every builder currently has to reinvent their own loyalty program to keep users coming back.
+The Solution:
+Zeno Vision Studio proposes to build the Real Human Economy Stack on Celo. This is a unified infrastructure comprising:
+ * Identity (Self): Proof of uniqueness.
+ * Context (CHS): Privacy-preserving capability signals (Trust, Reliability, Vibe).
+ * Routing (ProsperON): A "Burn-to-Route" economic engine that turns gas fees into weekly yield claims.
+The Strategic Wedge:
+Zeno is not starting from zero. We bring a Data Moat (170k+ unique wallets across MiniPlay/NanoPay) and a Live Economic Engine (ProsperON) that solves retention for the entire ecosystem.
+2. The Architecture: The Triangle
+We propose a unified stack where Identity qualifies you, Context tiers you, and ProsperON rewards you.
+[ THE REAL HUMAN ECONOMY STACK ]
+
+      (1) IDENTITY (Self.xyz)
+   "Is this a real, unique human?"
+   (Prevents Sybil farming of the layers below)
+               |
+               v
+      (2) CONTEXT (Zeno CHS)
+   "What capabilities can this human safely unlock?"
+   (Signals: Trust Tier, Consistency, Agent Policy)
+               |
+               v
+      (3) ROUTING (ProsperON)
+   "How do we reward their participation?"
+   (Mechanism: Burn Gas -> Mint Score -> Claim Yield)
+
+The Value Prop:
+ * Self: Proves you are real.
+ * CHS: Proves you are safe/reliable.
+ * ProsperON: Funds the loop and keeps you coming back.
+3. Component A: Consentful Human Signals (CHS)
+We are deprecating "social scoring" in favor of User-Sovereign Attestations. CHS allows apps to request specific capability proofs without accessing raw data.
+The Signal Set (v1):
+| Signal | Source | Definition |
+| :--- | :--- | :--- |
+| Verified Human | Self.xyz | The baseline Sybil-resistance check. |
+| Prosper Tier | ProsperON | Economic weight based on real cost paid (gas) + activity decay. |
+| Trust Tier | NanoPay | Coarse reliability bucket (e.g., "Established History" vs. "New"). |
+| Consistency | MiniPlay | Time-based activity proof (filters bursty/bot behavior). |
+| Agent Policy | Selfclaw | Proof that a user's AI agent operates within safe limits. |
+4. Component B: The Routing Layer (ProsperON)
+ProsperON is the native retention engine for Celo. It turns the unavoidable cost of using the network (gas) into a loyalty program for the entire chain.
+The Mechanism:
+ * Burn (Real Cost): User transactions burn CELO (deflationary).
+ * Mint (Influence): Burning mints non-transferable Prosper Score.
+ * Decay (Rent, Don't Own): Scores decay at 2% weekly. Influence is rented; you must remain active to maintain it.
+ * Allocate (Yield): A weekly Yield Pool (stablecoins from endowment yield) is routed to users pro-rata based on their score.
+Why this wins:
+ * For Celo: It creates a counter-cyclical demand sink (Score is cheaper to earn when CELO price is low).
+ * For Builders: "Use my app, earn Network Yield." Builders get a loyalty program out-of-the-box.
+ * For Self: We bind Prosper Scores to Self IDs. This prevents wallet splitting (sybil attacks) from gaming the linear minting curve.
+5. Studio Structure: Marshall Islands DAO (MIDAO)
+To ensure long-term alignment and regulatory clarity, Zeno is restructuring as a Marshall Islands DAO LLC.
+ * Legal Personhood: Grants Zeno the ability to enter contracts/hold IP while maintaining credible neutrality.
+ * Alignment Token ($ZENO): Represents governance and treasury stewardship rights.
+ * Portfolio Model: The Zeno Treasury accrues value from ecosystem activity. Holding governance rights offers ecosystem-aligned exposure without promising passive returns.
+6. Strategic Proposal & Ask
+Goal: Establish the "Real Human Economy" standard on Celo before social capital migrates to Base or TON.
+A. Resource Alignment (Capital)
+We propose a Strategic Allocation / Token Swap.
+ * Ask: Runway funding (via Grant or Swap) to finalize MIDAO formation and fund 12 months of core dev.
+ * Offer: A milestone-vested strategic governance allocation of $ZENO tokens to the Celo Community Fund and Self Treasury.
+B. The Yield Endowment (ProsperON Pilot)
+ * Ask: We request Celo/Mento to allocate a pilot "Yield Endowment" (Principal stays safe; only yield is distributed) to the ProsperON Season 0 pool.
+ * Goal: Demonstrate that "paying gas" can be marketed as "investing in your weekly yield check," fundamentally changing the user psychology of L2 fees.
+C. Technical Integration
+ * Action: Designate a Technical Point-of-Contact from Celo/Self for bi-weekly architectural reviews to ensure CHS schemas align with Self credential standards.
+7. Critical Risk Assessment
+| Risk | Mitigation Strategy |
+|---|---|
+| "Pay-to-Win" (Plutocracy) | 1. Decay: The 2% weekly decay means whales cannot buy influence once and sit on it; they must be active participants.
+2. Linear Minting: There is no exponential bonus for massive burns.
+3. Usage Bias: We reserve a portion of the pool for transaction frequency (usage), not just volume (burn). |
+| "Regressive Tax" | 1. Sponsored Burns: Builders can subsidize onboarding for new users.
+2. Degraded Mode: Lack of a Prosper Tier never blocks basic access; it only limits advanced capabilities or yield boosts. |
+| "Black Mirror" (Privacy) | Degraded Mode Pattern. Users can always opt-out of sharing CHS signals. They sacrifice convenience/boosts, but never their fundamental right to transact. |
+| Sybil Farming | The Self Binding. We bind all CHS signals and Prosper Scores to a Self.xyz ID. It becomes exponentially expensive to farm yield/reputation when every account requires unique human verification. |
+8. Execution Roadmap
+Phase 1: Integration & Unification (Months 1–6)
+ * Goal: Ship CHS v1 + ProsperON Integration.
+ * Deliverables:
+   * CHS SDK (with "Prosper Tier" as a signal).
+   * Reference App: A "Retention Demo" showing the weekly claim loop.
+   * Dashboards: Transparent receipts for Gas Burn -> Yield Allocation.
+Phase 2: Hardening & Agents (Months 6–12)
+ * Goal: Agentic workflows and ZK upgrades.
+ * Deliverables:
+   * Agent Policy Attestations (Selfclaw).
+   * Roadmap to ZK proofs for sensitive financial signals.
+Phase 3: Governance Experiments (Year 1+)
+ * Goal: Explore merit-based governance (Optional).
+ * Note: Only pursued if community legitimacy allows.
+9. Next Steps
+The stack is defined. The data is live. The opportunity is now.
+Proposed Action:
+ * Schedule a 45-minute sync to review the MIDAO structure and ProsperON yield mechanics.
+ * Align on Q3/Q4 milestones for the "Real Human Economy" rollout.
+Marco Barbosa
+Founder, Zeno Vision Studio
