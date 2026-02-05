@@ -1,8 +1,86 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInquirySchema, insertProjectSchema, metricsSchema } from "@shared/schema";
+import { insertInquirySchema, insertProjectSchema, metricsSchema, type MetricsSnapshot } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import { z } from "zod";
+
+type MetricsData = z.infer<typeof metricsSchema>;
+
+interface ValidationResult {
+  isValid: boolean;
+  warnings: string[];
+  errors: string[];
+}
+
+function validateMetricsData(metrics: MetricsData, previousSnapshot?: MetricsSnapshot | null): ValidationResult {
+  const warnings: string[] = [];
+  const errors: string[] = [];
+
+  // Check for negative values where they shouldn't be
+  if (metrics.users.total < 0) errors.push("Total users cannot be negative");
+  if (metrics.users.daily_active < 0) errors.push("DAU cannot be negative");
+  if (metrics.users.weekly_active < 0) errors.push("WAU cannot be negative");
+  if (metrics.users.monthly_active < 0) errors.push("MAU cannot be negative");
+  if (metrics.users.paying < 0) errors.push("Paying users cannot be negative");
+  if (metrics.engagement.key_actions < 0) errors.push("Key actions cannot be negative");
+  if (metrics.engagement.sessions_today < 0) errors.push("Sessions today cannot be negative");
+  if (metrics.revenue.total_payments < 0) errors.push("Total payments cannot be negative");
+  if (metrics.revenue.net_income < 0) errors.push("Net income cannot be negative");
+  if (metrics.onchain.transactions < 0) errors.push("Transactions cannot be negative");
+  if (metrics.onchain.volume < 0) errors.push("Volume cannot be negative");
+
+  // Logical consistency checks
+  if (metrics.users.daily_active > metrics.users.total) {
+    warnings.push(`DAU (${metrics.users.daily_active}) exceeds total users (${metrics.users.total})`);
+  }
+  if (metrics.users.weekly_active > metrics.users.total) {
+    warnings.push(`WAU (${metrics.users.weekly_active}) exceeds total users (${metrics.users.total})`);
+  }
+  if (metrics.users.monthly_active > metrics.users.total) {
+    warnings.push(`MAU (${metrics.users.monthly_active}) exceeds total users (${metrics.users.total})`);
+  }
+  if (metrics.users.paying > metrics.users.total) {
+    warnings.push(`Paying users (${metrics.users.paying}) exceeds total users (${metrics.users.total})`);
+  }
+
+  // Check for dramatic changes compared to previous snapshot
+  if (previousSnapshot) {
+    const prev = previousSnapshot.metrics as MetricsData;
+    
+    // Check for cumulative metrics decreasing (shouldn't happen for lifetime totals)
+    if (metrics.users.total < prev.users.total) {
+      warnings.push(`Total users decreased from ${prev.users.total} to ${metrics.users.total}`);
+    }
+    if (metrics.revenue.total_payments < prev.revenue.total_payments) {
+      warnings.push(`Total payments decreased from ${prev.revenue.total_payments} to ${metrics.revenue.total_payments}`);
+    }
+    if (metrics.revenue.net_income < prev.revenue.net_income) {
+      warnings.push(`Net income decreased from $${prev.revenue.net_income} to $${metrics.revenue.net_income}`);
+    }
+    if (metrics.onchain.transactions < prev.onchain.transactions) {
+      warnings.push(`Transactions decreased from ${prev.onchain.transactions} to ${metrics.onchain.transactions}`);
+    }
+
+    // Check for dramatic increases (>500% in one snapshot)
+    const checkDramaticIncrease = (name: string, current: number, previous: number) => {
+      if (previous > 0 && current > previous * 6) {
+        warnings.push(`${name} increased dramatically: ${previous} → ${current} (${Math.round((current / previous - 1) * 100)}%)`);
+      }
+    };
+
+    checkDramaticIncrease("Total users", metrics.users.total, prev.users.total);
+    checkDramaticIncrease("DAU", metrics.users.daily_active, prev.users.daily_active);
+    checkDramaticIncrease("Revenue", metrics.revenue.net_income, prev.revenue.net_income);
+    checkDramaticIncrease("Transactions", metrics.onchain.transactions, prev.onchain.transactions);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    warnings,
+    errors,
+  };
+}
 
 const DEFAULT_PROJECTS = [
   { name: "MiniPlay.studio", description: "Cognition gaming platform", highlight: "500K plays / 1 week", url: "https://miniplay.studio", sortOrder: 0 },
@@ -174,12 +252,31 @@ export async function registerRoutes(
         return res.status(400).json({ success: false, error: "Invalid metrics format from external API", details: validated.error.issues });
       }
 
+      // Get previous snapshot for comparison
+      const previousSnapshot = await storage.getLatestMetricsSnapshot(id);
+      const validation = validateMetricsData(validated.data, previousSnapshot);
+
+      // Block if there are hard errors (like negative values)
+      if (!validation.isValid) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Metrics data validation failed", 
+          errors: validation.errors,
+          warnings: validation.warnings
+        });
+      }
+
       const snapshot = await storage.createMetricsSnapshot({
         projectId: id,
         metrics: validated.data,
       });
 
-      res.json({ success: true, snapshot });
+      // Return success with any warnings
+      res.json({ 
+        success: true, 
+        snapshot, 
+        warnings: validation.warnings.length > 0 ? validation.warnings : undefined 
+      });
     } catch (error: any) {
       console.error("Error fetching metrics:", error);
       res.status(500).json({ success: false, error: error.message || "Failed to fetch metrics" });
@@ -226,7 +323,7 @@ export async function registerRoutes(
   app.post("/api/metrics/fetch-all", async (req, res) => {
     try {
       const projects = await storage.getAllProjects();
-      const results: { projectId: string; success: boolean; error?: string }[] = [];
+      const results: { projectId: string; success: boolean; error?: string; warnings?: string[] }[] = [];
 
       for (const project of projects) {
         if (!project.metricsEndpoint) continue;
@@ -255,12 +352,31 @@ export async function registerRoutes(
             continue;
           }
 
+          // Get previous snapshot for comparison
+          const previousSnapshot = await storage.getLatestMetricsSnapshot(project.id);
+          const validation = validateMetricsData(validated.data, previousSnapshot);
+
+          // Block if there are hard errors
+          if (!validation.isValid) {
+            results.push({ 
+              projectId: project.id, 
+              success: false, 
+              error: `Validation failed: ${validation.errors.join(", ")}`,
+              warnings: validation.warnings
+            });
+            continue;
+          }
+
           await storage.createMetricsSnapshot({
             projectId: project.id,
             metrics: validated.data,
           });
 
-          results.push({ projectId: project.id, success: true });
+          results.push({ 
+            projectId: project.id, 
+            success: true,
+            warnings: validation.warnings.length > 0 ? validation.warnings : undefined
+          });
         } catch (err: any) {
           results.push({ projectId: project.id, success: false, error: err.message });
         }
@@ -305,6 +421,22 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching public metrics:", error);
       res.status(500).json({ success: false, error: "Failed to fetch public metrics" });
+    }
+  });
+
+  // Delete a single metrics snapshot by ID
+  app.delete("/api/metrics/snapshot/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteMetricsSnapshot(id);
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ success: false, error: "Snapshot not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting snapshot:", error);
+      res.status(500).json({ success: false, error: "Failed to delete snapshot" });
     }
   });
 

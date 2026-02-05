@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
-import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X, Lock, RefreshCw, Activity, Users, DollarSign, Zap, TrendingUp } from "lucide-react";
+import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X, Lock, RefreshCw, Activity, Users, DollarSign, Zap, TrendingUp, Database, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -450,6 +450,152 @@ Store the key as METRICS_API_KEY secret.`}
   );
 }
 
+function SnapshotManager({ projects, toast }: { projects: Project[]; toast: ReturnType<typeof useToast>["toast"] }) {
+  const queryClient = useQueryClient();
+  const [selectedProject, setSelectedProject] = useState<string>("all");
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
+    queryKey: ["/api/metrics/history"],
+    queryFn: async () => {
+      const res = await fetch("/api/metrics/history?limit=200");
+      if (!res.ok) throw new Error("Failed to fetch snapshots");
+      return res.json();
+    },
+  });
+
+  const deleteSnapshot = async (id: string) => {
+    if (!confirm("Delete this snapshot? This cannot be undone.")) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/metrics/snapshot/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast({ title: "Snapshot deleted", description: "The snapshot has been removed" });
+        queryClient.invalidateQueries({ queryKey: ["/api/metrics/history"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
+      } else {
+        toast({ title: "Error", description: "Failed to delete snapshot", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to delete snapshot", variant: "destructive" });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const allSnapshots = historyData?.snapshots || [];
+  const filteredSnapshots = selectedProject === "all" 
+    ? allSnapshots 
+    : allSnapshots.filter(s => s.projectId === selectedProject);
+
+  const detectSuspiciousValues = (metrics: Metrics) => {
+    const issues: string[] = [];
+    if (metrics.users.total < 0) issues.push("Negative total users");
+    if (metrics.users.daily_active < 0) issues.push("Negative DAU");
+    if (metrics.revenue.net_income < 0) issues.push("Negative revenue");
+    if (metrics.onchain.transactions < 0) issues.push("Negative transactions");
+    if (metrics.users.daily_active > metrics.users.total) issues.push("DAU > total users");
+    if (metrics.users.weekly_active > metrics.users.total) issues.push("WAU > total users");
+    if (metrics.users.monthly_active > metrics.users.total) issues.push("MAU > total users");
+    return issues;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            Snapshot Manager
+          </h2>
+          <p className="text-sm text-muted-foreground">Browse and delete individual metric snapshots</p>
+        </div>
+        <select
+          value={selectedProject}
+          onChange={(e) => setSelectedProject(e.target.value)}
+          className="bg-background border rounded px-3 py-2 text-sm"
+          data-testid="select-snapshot-project"
+        >
+          <option value="all">All Projects ({allSnapshots.length})</option>
+          {projects.filter(p => p.metricsEndpoint).map(p => (
+            <option key={p.id} value={p.id}>
+              {p.name} ({allSnapshots.filter(s => s.projectId === p.id).length})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {isLoading ? (
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground">Loading snapshots...</p>
+          </CardContent>
+        </Card>
+      ) : filteredSnapshots.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <Database className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No snapshots found.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {filteredSnapshots.map(snapshot => {
+            const project = projects.find(p => p.id === snapshot.projectId);
+            const m = snapshot.metrics;
+            const issues = detectSuspiciousValues(m);
+            const hasSuspiciousData = issues.length > 0;
+
+            return (
+              <Card key={snapshot.id} className={`${hasSuspiciousData ? "border-yellow-500/50 bg-yellow-500/5" : ""}`} data-testid={`snapshot-${snapshot.id}`}>
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium truncate">{project?.name || "Unknown"}</span>
+                        <Badge variant="outline" className="text-xs shrink-0">
+                          {format(new Date(snapshot.timestamp), "MMM d, h:mm a")}
+                        </Badge>
+                        {hasSuspiciousData && (
+                          <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-500 border-yellow-500/30 shrink-0">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            Suspicious
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span>Users: {m.users.total.toLocaleString()}</span>
+                        <span>DAU: {m.users.daily_active.toLocaleString()}</span>
+                        <span>Txs: {m.onchain.transactions.toLocaleString()}</span>
+                        <span>Revenue: ${m.revenue.net_income.toLocaleString()}</span>
+                      </div>
+                      {hasSuspiciousData && (
+                        <div className="text-xs text-yellow-500 mt-1">
+                          Issues: {issues.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteSnapshot(snapshot.id)}
+                      disabled={deleting === snapshot.id}
+                      className="shrink-0"
+                      data-testid={`button-delete-snapshot-${snapshot.id}`}
+                    >
+                      <Trash2 className={`w-4 h-4 text-destructive ${deleting === snapshot.id ? "animate-spin" : ""}`} />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -568,12 +714,17 @@ export default function Admin() {
         <Tabs defaultValue="metrics" className="space-y-6">
           <TabsList>
             <TabsTrigger value="metrics" data-testid="tab-metrics"><Activity className="w-4 h-4 mr-2" />Metrics</TabsTrigger>
+            <TabsTrigger value="snapshots" data-testid="tab-snapshots"><Database className="w-4 h-4 mr-2" />Snapshots</TabsTrigger>
             <TabsTrigger value="inquiries" data-testid="tab-inquiries">Inquiries ({inquiries.length})</TabsTrigger>
             <TabsTrigger value="projects" data-testid="tab-projects">Projects ({projects.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="metrics" className="space-y-6">
             <MetricsDashboard projects={projects} toast={toast} />
+          </TabsContent>
+
+          <TabsContent value="snapshots" className="space-y-6">
+            <SnapshotManager projects={projects} toast={toast} />
           </TabsContent>
 
           <TabsContent value="inquiries" className="space-y-4">

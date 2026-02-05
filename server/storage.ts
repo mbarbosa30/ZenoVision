@@ -14,6 +14,7 @@ export interface IStorage {
   getLatestMetricsSnapshot(projectId: string): Promise<MetricsSnapshot | null>;
   getAllLatestMetrics(): Promise<MetricsSnapshot[]>;
   getAllMetricsHistory(limit?: number): Promise<MetricsSnapshot[]>;
+  deleteMetricsSnapshot(id: string): Promise<boolean>;
   deleteAllMetricsSnapshots(): Promise<number>;
 }
 
@@ -80,6 +81,11 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(metricsSnapshots)
       .orderBy(desc(metricsSnapshots.timestamp))
       .limit(limit * 10);
+  }
+
+  async deleteMetricsSnapshot(id: string): Promise<boolean> {
+    const result = await db.delete(metricsSnapshots).where(eq(metricsSnapshots.id, id)).returning();
+    return result.length > 0;
   }
 
   async deleteAllMetricsSnapshots(): Promise<number> {
