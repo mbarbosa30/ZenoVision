@@ -574,66 +574,42 @@ function DashboardContent() {
     return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
   }, [historicalData, projects]);
 
-  // Estimated Daily Revenue Rate per app - uses 3+ data points within 24h window for stability
+  // Estimated Daily Revenue Rate per app - calculates rate between consecutive data points
   const estimatedDailyRevenueData = useMemo(() => {
-    if (historicalData.length < 3 || !perAppTimeSeries.hasPerAppData) {
+    if (historicalData.length < 2 || !perAppTimeSeries.hasPerAppData) {
       return { data: [], apps: [], hasData: false };
     }
     
-    // For each point, look back up to 24h and require 3+ non-negative data points
     const rateData: any[] = [];
-    const appsWithEnoughData = new Set<string>();
+    const appsWithData = new Set<string>();
     
-    for (let i = 2; i < historicalData.length; i++) {
+    for (let i = 1; i < historicalData.length; i++) {
+      const prev = historicalData[i - 1];
       const curr = historicalData[i];
+      const hoursElapsed = (curr.timestamp - prev.timestamp) / (1000 * 60 * 60);
       
-      // Get points within last 24h from this point
-      const windowStart = curr.timestamp - (24 * 60 * 60 * 1000);
-      const pointsInWindow = historicalData.slice(0, i + 1).filter(
-        h => h.timestamp >= windowStart && h.timestamp <= curr.timestamp
-      );
-      
-      if (pointsInWindow.length < 3) continue;
+      if (hoursElapsed <= 0) continue;
       
       const point: any = { timestamp: curr.timestamp };
       
-      // Calculate rate for each app using all points in window
       for (const app of perAppTimeSeries.apps) {
-        // Filter to non-negative revenue values (valid data points)
-        const appPoints = pointsInWindow
-          .map(h => ({ t: h.timestamp, rev: h[app.revenueKey] ?? 0 }))
-          .filter(p => p.rev >= 0);
+        const prevRev = prev[app.revenueKey] ?? 0;
+        const currRev = curr[app.revenueKey] ?? 0;
         
-        if (appPoints.length < 3) continue;
+        if (prevRev < 0 || currRev < 0) continue;
         
-        // Calculate rate using first/last delta over window
-        const first = appPoints[0];
-        const last = appPoints[appPoints.length - 1];
-        const hoursElapsed = (last.t - first.t) / (1000 * 60 * 60);
-        
-        if (hoursElapsed <= 0) continue;
-        
-        const revChange = last.rev - first.rev;
+        const revChange = currRev - prevRev;
         const dailyRate = (revChange / hoursElapsed) * 24;
         
-        // Show rate even if negative (but clamp display to 0 minimum)
         point[`${app.key}_DailyRate`] = Math.max(0, dailyRate);
-        appsWithEnoughData.add(app.key);
+        appsWithData.add(app.key);
       }
       
-      // Calculate total rate
-      const totalPoints = pointsInWindow
-        .map(h => ({ t: h.timestamp, rev: h.totalRevenue ?? 0 }))
-        .filter(p => p.rev >= 0);
-      
-      if (totalPoints.length >= 3) {
-        const first = totalPoints[0];
-        const last = totalPoints[totalPoints.length - 1];
-        const hoursElapsed = (last.t - first.t) / (1000 * 60 * 60);
-        if (hoursElapsed > 0) {
-          const totalChange = last.rev - first.rev;
-          point.totalDailyRate = Math.max(0, (totalChange / hoursElapsed) * 24);
-        }
+      const prevTotal = prev.totalRevenue ?? 0;
+      const currTotal = curr.totalRevenue ?? 0;
+      if (prevTotal >= 0 && currTotal >= 0 && hoursElapsed > 0) {
+        const totalChange = currTotal - prevTotal;
+        point.totalDailyRate = Math.max(0, (totalChange / hoursElapsed) * 24);
       }
       
       if (Object.keys(point).length > 1) {
@@ -641,8 +617,7 @@ function DashboardContent() {
       }
     }
     
-    // Include apps that have enough data (3+ non-negative points in window)
-    const validApps = perAppTimeSeries.apps.filter(app => appsWithEnoughData.has(app.key));
+    const validApps = perAppTimeSeries.apps.filter(app => appsWithData.has(app.key));
     
     return { 
       data: rateData, 
@@ -1586,7 +1561,7 @@ function DashboardContent() {
                                 name={app.name}
                                 stroke={colors[idx % colors.length]} 
                                 strokeWidth={2}
-                                dot={false}
+                                dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
                                 connectNulls
                               />
                             );
@@ -1598,7 +1573,7 @@ function DashboardContent() {
                             name="Total DAU"
                             stroke="#3b82f6" 
                             strokeWidth={2}
-                            dot={false}
+                            dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
                           />
                         )}
                       </LineChart>
@@ -1641,7 +1616,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={false}
+                              dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
                               connectNulls
                             />
                           );
@@ -1653,7 +1628,7 @@ function DashboardContent() {
                           name="Total MAU"
                           stroke="#8b5cf6" 
                           strokeWidth={2}
-                          dot={false}
+                          dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
                         />
                       )}
                     </LineChart>
@@ -1698,7 +1673,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={false}
+                              dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
                               connectNulls
                             />
                           );
@@ -1710,7 +1685,7 @@ function DashboardContent() {
                           name="Total Revenue"
                           stroke="#10b981" 
                           strokeWidth={2}
-                          dot={false}
+                          dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
                         />
                       )}
                     </LineChart>
@@ -1722,7 +1697,7 @@ function DashboardContent() {
               {metricVisibility.revenue && estimatedDailyRevenueData.hasData && (
                 <Block delay={0.2}>
                   <h3 className="text-lg font-medium mb-4">Estimated Daily Revenue Rate</h3>
-                  <p className="text-xs text-[#6b7280] mb-3">24h extrapolation based on rate between data points</p>
+                  <p className="text-xs text-[#6b7280] mb-3">Revenue change between snapshots, extrapolated to daily rate</p>
                   <div className="h-72" data-testid="chart-daily-revenue-rate">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={estimatedDailyRevenueData.data}>
@@ -1754,7 +1729,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={false}
+                              dot={estimatedDailyRevenueData.data.length <= 5 ? { r: 4 } : false}
                               connectNulls
                             />
                           );
@@ -1789,8 +1764,8 @@ function DashboardContent() {
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                       />
                       <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={estimatedDailyActivityData.length <= 5 ? { r: 4 } : false} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={estimatedDailyActivityData.length <= 5 ? { r: 4 } : false} />
                       <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
                   </ResponsiveContainer>
