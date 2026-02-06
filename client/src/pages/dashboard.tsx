@@ -574,42 +574,44 @@ function DashboardContent() {
     return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
   }, [historicalData, projects]);
 
-  // Estimated Daily Revenue Rate per app - calculates rate between consecutive data points
+  // Estimated Daily Revenue Rate per app
+  // Uses expanding window: for each point, calculates average daily rate from the first data point
+  // Requires at least 1 hour of data span to avoid noisy short-interval extrapolation
   const estimatedDailyRevenueData = useMemo(() => {
     if (historicalData.length < 2 || !perAppTimeSeries.hasPerAppData) {
       return { data: [], apps: [], hasData: false };
     }
     
+    const first = historicalData[0];
     const rateData: any[] = [];
     const appsWithData = new Set<string>();
     
     for (let i = 1; i < historicalData.length; i++) {
-      const prev = historicalData[i - 1];
       const curr = historicalData[i];
-      const hoursElapsed = (curr.timestamp - prev.timestamp) / (1000 * 60 * 60);
+      const hoursFromStart = (curr.timestamp - first.timestamp) / (1000 * 60 * 60);
       
-      if (hoursElapsed <= 0) continue;
+      if (hoursFromStart < 1) continue;
       
       const point: any = { timestamp: curr.timestamp };
       
       for (const app of perAppTimeSeries.apps) {
-        const prevRev = prev[app.revenueKey] ?? 0;
+        const firstRev = first[app.revenueKey] ?? 0;
         const currRev = curr[app.revenueKey] ?? 0;
         
-        if (prevRev < 0 || currRev < 0) continue;
+        if (firstRev < 0 || currRev < 0) continue;
         
-        const revChange = currRev - prevRev;
-        const dailyRate = (revChange / hoursElapsed) * 24;
+        const revChange = currRev - firstRev;
+        const dailyRate = (revChange / hoursFromStart) * 24;
         
         point[`${app.key}_DailyRate`] = Math.max(0, dailyRate);
         appsWithData.add(app.key);
       }
       
-      const prevTotal = prev.totalRevenue ?? 0;
+      const firstTotal = first.totalRevenue ?? 0;
       const currTotal = curr.totalRevenue ?? 0;
-      if (prevTotal >= 0 && currTotal >= 0 && hoursElapsed > 0) {
-        const totalChange = currTotal - prevTotal;
-        point.totalDailyRate = Math.max(0, (totalChange / hoursElapsed) * 24);
+      if (firstTotal >= 0 && currTotal >= 0 && hoursFromStart > 0) {
+        const totalChange = currTotal - firstTotal;
+        point.totalDailyRate = Math.max(0, (totalChange / hoursFromStart) * 24);
       }
       
       if (Object.keys(point).length > 1) {
@@ -627,25 +629,26 @@ function DashboardContent() {
   }, [historicalData, perAppTimeSeries]);
 
   // Estimated daily activity data - transactions and volume extrapolated to 24h
+  // Uses expanding window from first data point for stable rates
   const estimatedDailyActivityData = useMemo(() => {
     if (historicalData.length < 2) return [];
     
+    const first = historicalData[0];
     const result: any[] = [];
     
     for (let i = 1; i < historicalData.length; i++) {
-      const prev = historicalData[i - 1];
       const curr = historicalData[i];
-      const hoursElapsed = (curr.timestamp - prev.timestamp) / (1000 * 60 * 60);
+      const hoursFromStart = (curr.timestamp - first.timestamp) / (1000 * 60 * 60);
       
-      if (hoursElapsed <= 0) continue;
+      if (hoursFromStart < 1) continue;
       
-      const txChange = (curr.totalTransactions ?? 0) - (prev.totalTransactions ?? 0);
-      const volChange = (curr.totalVolume ?? 0) - (prev.totalVolume ?? 0);
+      const txChange = (curr.totalTransactions ?? 0) - (first.totalTransactions ?? 0);
+      const volChange = (curr.totalVolume ?? 0) - (first.totalVolume ?? 0);
       
       result.push({
         timestamp: curr.timestamp,
-        dailyTransactions: Math.max(0, (txChange / hoursElapsed) * 24),
-        dailyVolume: Math.max(0, (volChange / hoursElapsed) * 24),
+        dailyTransactions: Math.max(0, (txChange / hoursFromStart) * 24),
+        dailyVolume: Math.max(0, (volChange / hoursFromStart) * 24),
         totalPaying: curr.totalPaying ?? 0,
       });
     }
@@ -1697,7 +1700,7 @@ function DashboardContent() {
               {metricVisibility.revenue && estimatedDailyRevenueData.hasData && (
                 <Block delay={0.2}>
                   <h3 className="text-lg font-medium mb-4">Estimated Daily Revenue Rate</h3>
-                  <p className="text-xs text-[#6b7280] mb-3">Revenue change between snapshots, extrapolated to daily rate</p>
+                  <p className="text-xs text-[#6b7280] mb-3">Average daily revenue rate based on cumulative change over time</p>
                   <div className="h-72" data-testid="chart-daily-revenue-rate">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={estimatedDailyRevenueData.data}>
