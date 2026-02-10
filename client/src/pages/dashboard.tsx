@@ -1,4 +1,5 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, useInView } from "framer-motion";
 import { 
   Users, TrendingUp, TrendingDown, DollarSign, Zap, Activity, 
@@ -85,6 +86,85 @@ const Block = ({ children, className = "", delay = 0 }: BlockProps) => {
     >
       {children}
     </motion.div>
+  );
+};
+
+const metricDefinitions: Record<string, { title: string; calculation: string; importance: string }> = {
+  mrr: { title: "Monthly Recurring Revenue", calculation: "Sum of net_income across all tracked apps.", importance: "Shows current monthly revenue run-rate." },
+  arr: { title: "Annual Recurring Revenue", calculation: "MRR × 12.", importance: "Projects yearly revenue if current pace continues." },
+  arpu: { title: "Average Revenue Per User", calculation: "Total net_income ÷ total paying users.", importance: "Shows how much each paying customer contributes." },
+  conversion: { title: "Conversion Rate", calculation: "(Paying users ÷ Total users) × 100.", importance: "Shows what percentage of users become customers." },
+  dauGrowth: { title: "DAU Growth", calculation: "Percentage change in daily active users over selected timeframe. Calculated from average hourly rate × target hours.", importance: "Shows short-term user engagement momentum." },
+  mauGrowth: { title: "MAU Growth", calculation: "Percentage change in monthly active users.", importance: "Shows longer-term user acquisition trajectory." },
+  revenueGrowth: { title: "Revenue Growth", calculation: "Percentage change in net income over time.", importance: "Key indicator of business momentum." },
+  nrr: { title: "Net Revenue Retention", calculation: "Estimated at 100% + revenue growth rate.", importance: "Shows if existing revenue base is expanding or contracting." },
+  ltv: { title: "Lifetime Value", calculation: "ARPU × 12 months (estimated).", importance: "Total revenue expected from an average paying user." },
+  cac: { title: "Customer Acquisition Cost", calculation: "Estimated based on revenue/engagement ratios.", importance: "What it costs to acquire a paying user." },
+  ltvCac: { title: "LTV:CAC Ratio", calculation: "LTV ÷ CAC.", importance: "Should be >3x for sustainable business. Shows return on acquisition investment." },
+  payback: { title: "Payback Period", calculation: "CAC ÷ monthly ARPU.", importance: "How many months to recover acquisition cost." },
+  dauMauRatio: { title: "DAU/MAU Ratio (Stickiness)", calculation: "Percentage of monthly users who are active daily.", importance: "Above 20% indicates strong daily habit." },
+  revenuePerUser: { title: "Revenue Per User", calculation: "Net income ÷ total users.", importance: "Shows monetization efficiency across entire user base." },
+  txnsPerUser: { title: "Transactions Per User", calculation: "Total onchain transactions ÷ total users.", importance: "Indicates onchain engagement depth." },
+  actionsPerUser: { title: "Actions Per User", calculation: "Total key actions ÷ total users.", importance: "Measures feature adoption across user base." },
+  dauWau: { title: "DAU/WAU", calculation: "Daily actives as % of weekly actives.", importance: "Higher = more frequent usage within the week." },
+  wauMau: { title: "WAU/MAU", calculation: "Weekly actives as % of monthly actives.", importance: "Higher = more users engaging weekly." },
+  payingMau: { title: "Paying/MAU", calculation: "Paying users as % of monthly actives.", importance: "Shows monetization of engaged users." },
+  stickiness: { title: "DAU/MAU Stickiness", calculation: "Daily actives ÷ monthly actives × 100.", importance: "Above 20% is strong for consumer apps." },
+  arppu: { title: "ARPPU", calculation: "Average Revenue Per Paying User. Net income ÷ paying users.", importance: "Higher-resolution than ARPU." },
+  revPerTx: { title: "Revenue/Transaction", calculation: "Net income ÷ total transactions.", importance: "Shows revenue efficiency per onchain action." },
+  avgTxSize: { title: "Average Transaction Size", calculation: "Onchain volume ÷ total transactions.", importance: "Shows typical transfer amount." },
+  arpuAll: { title: "ARPU (All Users)", calculation: "Net income ÷ all users.", importance: "Shows total-base monetization including non-payers." },
+  txPerUser: { title: "Transactions Per User", calculation: "Total transactions ÷ total users.", importance: "Measures blockchain interaction frequency." },
+  volumePerTx: { title: "Volume/Transaction", calculation: "Total volume ÷ total transactions.", importance: "Average dollar amount per transaction." },
+  volumePerDau: { title: "Volume/DAU", calculation: "Total volume ÷ daily active users.", importance: "Shows daily economic activity per active user." },
+  totalVolume: { title: "Total Volume", calculation: "Sum of all onchain transfer volume across tracked apps.", importance: "Shows overall economic throughput." },
+  actionsPerSession: { title: "Actions/Session", calculation: "Total key actions ÷ sessions today.", importance: "Shows depth of engagement per visit." },
+  actionsPerDau: { title: "Actions/DAU", calculation: "Total key actions ÷ daily active users.", importance: "Feature interactions per active user." },
+  sessionsPerDau: { title: "Sessions/DAU", calculation: "Sessions today ÷ DAU.", importance: "How many times each active user opens the app daily." },
+  totalSessions: { title: "Total Sessions", calculation: "Sum of sessions_today across all tracked apps.", importance: "Shows overall platform engagement volume." },
+  engagementRevenue: { title: "Engagement vs Revenue Correlation", calculation: "Scatter plot showing each app's key actions (X) vs net income (Y). Bubble size = DAU.", importance: "Reveals which apps monetize engagement most effectively. Apps in upper-right are both engaging and profitable." },
+  volumeTransactions: { title: "Volume vs Transactions", calculation: "Scatter plot showing each app's transaction count (X) vs volume (Y). Bubble size = MAU.", importance: "Shows relationship between onchain activity and value transfer. Higher volume/tx ratio indicates higher-value transactions." },
+  valuation: { title: "Zeno Studio Valuation", calculation: "Blended estimate using 5 Web3/dApp industry methods: revenue multiples (10-50x), volume percentage (1-10%), per-DAU ($50-300), per-MAU ($10-75), and per-wallet ($100-1.5K).", importance: "Conservative/Mid/Aggressive ranges reflect different market assumptions." },
+};
+
+const InfoModal = ({ isOpen, onClose, metric }: { isOpen: boolean; onClose: () => void; metric: string }) => {
+  if (!isOpen) return null;
+  const def = metricDefinitions[metric];
+  if (!def) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60" />
+      <div className="relative bg-[#1a1a1a] border border-[#2d2d2d] p-6 max-w-md w-full mx-4 z-10" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-3 right-3 text-[#a0aec0] hover:text-white text-lg leading-none">✕</button>
+        <h4 className="text-lg font-semibold mb-4">{def.title}</h4>
+        <div className="mb-3">
+          <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-1 font-medium">How it's calculated</div>
+          <p className="text-sm text-[#ccc]">{def.calculation}</p>
+        </div>
+        <div>
+          <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-1 font-medium">Why it matters</div>
+          <p className="text-sm text-[#ccc]">{def.importance}</p>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+const InfoButton = ({ metric }: { metric: string }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        className="inline-flex items-center justify-center w-4 h-4 text-[10px] border border-[#444] text-[#888] hover:text-white hover:border-[#888] transition-colors leading-none flex-shrink-0"
+        title="Info"
+      >
+        i
+      </button>
+      <InfoModal isOpen={open} onClose={() => setOpen(false)} metric={metric} />
+    </>
   );
 };
 
@@ -384,6 +464,7 @@ function DashboardContent() {
   const [growthTimeframe, setGrowthTimeframe] = useState<GrowthTimeframe>('daily');
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [trendRange, setTrendRange] = useState<'7d' | '30d' | 'all'>('7d');
 
   const { data: projectsData } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
@@ -655,6 +736,16 @@ function DashboardContent() {
     
     return result;
   }, [historicalData]);
+
+  const trendCutoff = useMemo(() => {
+    if (trendRange === 'all') return 0;
+    const days = trendRange === '7d' ? 7 : 30;
+    return Date.now() - days * 24 * 60 * 60 * 1000;
+  }, [trendRange]);
+
+  const filteredTrendData = useMemo(() => perAppTimeSeries.data.filter(d => d.timestamp >= trendCutoff), [perAppTimeSeries.data, trendCutoff]);
+  const filteredRevenueRateData = useMemo(() => estimatedDailyRevenueData.data.filter(d => d.timestamp >= trendCutoff), [estimatedDailyRevenueData.data, trendCutoff]);
+  const filteredActivityData = useMemo(() => estimatedDailyActivityData.filter(d => d.timestamp >= trendCutoff), [estimatedDailyActivityData, trendCutoff]);
 
   // Estimated Daily Payers - calculated from cumulative paying users difference over time
   const dailyPayersEstimate = useMemo(() => {
@@ -1135,22 +1226,22 @@ function DashboardContent() {
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <Block delay={0.05} className="min-h-[130px]">
-                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">MRR</div>
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium flex items-center gap-1">MRR <InfoButton metric="mrr" /></div>
                 <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-mrr">{formatNum(financialMetrics.mrr, "$")}</div>
                 <div className="text-xs text-[#666] mt-2">Net Revenue (Current)</div>
               </Block>
               <Block delay={0.1} className="min-h-[130px]">
-                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">ARR</div>
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium flex items-center gap-1">ARR <InfoButton metric="arr" /></div>
                 <div className="text-2xl md:text-3xl font-bold text-[#10b981]" data-testid="value-arr">{formatNum(financialMetrics.arr, "$")}</div>
                 <div className="text-xs text-[#666] mt-2">Annualized Run Rate</div>
               </Block>
               <Block delay={0.15} className="min-h-[130px]">
-                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">ARPU</div>
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium flex items-center gap-1">ARPU <InfoButton metric="arpu" /></div>
                 <div className="text-2xl md:text-3xl font-bold" data-testid="value-arpu">${financialMetrics.arpu.toFixed(2)}</div>
                 <div className="text-xs text-[#666] mt-2">Per Paying User</div>
               </Block>
               <Block delay={0.2} className="min-h-[130px]">
-                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium">Conversion</div>
+                <div className="text-xs text-[#a0aec0] uppercase tracking-wider mb-3 font-medium flex items-center gap-1">Conversion <InfoButton metric="conversion" /></div>
                 <div className="text-2xl md:text-3xl font-bold" data-testid="value-conversion">{financialMetrics.conversionRate.toFixed(2)}%</div>
                 <div className="text-xs text-[#666] mt-2">Paid / Total Users</div>
               </Block>
@@ -1187,25 +1278,25 @@ function DashboardContent() {
                 </p>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">DAU Growth</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">DAU Growth <InfoButton metric="dauGrowth" /></span>
                     <span data-testid="value-dau-growth" className={`font-semibold ${financialMetrics.dauGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
                       {financialMetrics.dauGrowthRate >= 0 ? "+" : ""}{financialMetrics.dauGrowthRate.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">MAU Growth</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">MAU Growth <InfoButton metric="mauGrowth" /></span>
                     <span data-testid="value-mau-growth" className={`font-semibold ${financialMetrics.mauGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
                       {financialMetrics.mauGrowthRate >= 0 ? "+" : ""}{financialMetrics.mauGrowthRate.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Revenue Growth</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">Revenue Growth <InfoButton metric="revenueGrowth" /></span>
                     <span data-testid="value-revenue-growth" className={`font-semibold ${financialMetrics.revenueGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}`}>
                       {financialMetrics.revenueGrowthRate >= 0 ? "+" : ""}{financialMetrics.revenueGrowthRate.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                    <span className="text-[#a0aec0]">NRR (Est.)</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">NRR (Est.) <InfoButton metric="nrr" /></span>
                     <span data-testid="value-nrr" className="font-semibold text-[#8b5cf6]">{financialMetrics.nrr.toFixed(0)}%</span>
                   </div>
                 </div>
@@ -1215,21 +1306,21 @@ function DashboardContent() {
                 <h3 className="text-lg font-medium mb-4 text-[#f59e0b]">Unit Economics</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">LTV (Est.)</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">LTV (Est.) <InfoButton metric="ltv" /></span>
                     <span data-testid="value-ltv" className="font-semibold">${financialMetrics.ltv.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">CAC (Est.)</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">CAC (Est.) <InfoButton metric="cac" /></span>
                     <span data-testid="value-cac" className="font-semibold">${financialMetrics.estimatedCac.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">LTV:CAC</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">LTV:CAC <InfoButton metric="ltvCac" /></span>
                     <span data-testid="value-ltv-cac" className={`font-semibold ${financialMetrics.ltvCacRatio >= 3 ? "text-[#10b981]" : financialMetrics.ltvCacRatio >= 2 ? "text-[#f59e0b]" : "text-[#ef4444]"}`}>
                       {financialMetrics.ltvCacRatio.toFixed(1)}x
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                    <span className="text-[#a0aec0]">Payback Period</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">Payback Period <InfoButton metric="payback" /></span>
                     <span data-testid="value-payback" className="font-semibold">{financialMetrics.paybackMonths.toFixed(1)} mo</span>
                   </div>
                 </div>
@@ -1239,21 +1330,21 @@ function DashboardContent() {
                 <h3 className="text-lg font-medium mb-4 text-[#06b6d4]">Engagement Metrics</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">DAU/MAU Ratio</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">DAU/MAU Ratio <InfoButton metric="dauMauRatio" /></span>
                     <span data-testid="value-stickiness" className={`font-semibold ${financialMetrics.stickiness >= 20 ? "text-[#10b981]" : financialMetrics.stickiness >= 10 ? "text-[#f59e0b]" : "text-white"}`}>
                       {financialMetrics.stickiness.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Revenue/User</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">Revenue/User <InfoButton metric="revenuePerUser" /></span>
                     <span data-testid="value-rev-per-user" className="font-semibold">${financialMetrics.revenuePerUser.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Txns/User</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">Txns/User <InfoButton metric="txnsPerUser" /></span>
                     <span data-testid="value-txns-per-user" className="font-semibold">{financialMetrics.transactionsPerUser.toFixed(1)}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                    <span className="text-[#a0aec0]">Actions/User</span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">Actions/User <InfoButton metric="actionsPerUser" /></span>
                     <span data-testid="value-actions-per-user" className="font-semibold">{financialMetrics.engagementPerUser.toFixed(1)}</span>
                   </div>
                 </div>
@@ -1262,7 +1353,7 @@ function DashboardContent() {
 
             <Block delay={0.4} className="bg-gradient-to-r from-[#8b5cf6]/10 to-[#06b6d4]/10 border-[#8b5cf6]/30">
               <div className="flex items-center gap-3 mb-6">
-                <h3 className="text-xl font-semibold">Zeno Studio Valuation</h3>
+                <h3 className="text-xl font-semibold flex items-center gap-2">Zeno Studio Valuation <InfoButton metric="valuation" /></h3>
                 <span className="text-xs text-[#666] px-2 py-1 bg-[#2d2d2d]">Web3 / dApps / MiniApps</span>
               </div>
               
@@ -1420,25 +1511,25 @@ function DashboardContent() {
                   <h3 className="text-lg font-medium mb-4 text-[#3b82f6]">Cohort Ratios</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">DAU/WAU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">DAU/WAU <InfoButton metric="dauWau" /></span>
                       <span className={`font-semibold ${financialMetrics.dauWauRatio >= 30 ? "text-[#10b981]" : financialMetrics.dauWauRatio >= 20 ? "text-[#f59e0b]" : "text-white"}`}>
                         {financialMetrics.dauWauRatio.toFixed(1)}%
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">WAU/MAU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">WAU/MAU <InfoButton metric="wauMau" /></span>
                       <span className={`font-semibold ${financialMetrics.wauMauRatio >= 50 ? "text-[#10b981]" : financialMetrics.wauMauRatio >= 30 ? "text-[#f59e0b]" : "text-white"}`}>
                         {financialMetrics.wauMauRatio.toFixed(1)}%
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Paying/MAU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Paying/MAU <InfoButton metric="payingMau" /></span>
                       <span className={`font-semibold ${financialMetrics.payingMauRatio >= 5 ? "text-[#10b981]" : financialMetrics.payingMauRatio >= 2 ? "text-[#f59e0b]" : "text-white"}`}>
                         {financialMetrics.payingMauRatio.toFixed(2)}%
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                      <span className="text-[#a0aec0]">DAU/MAU (Stickiness)</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">DAU/MAU (Stickiness) <InfoButton metric="stickiness" /></span>
                       <span className={`font-semibold ${financialMetrics.stickiness >= 20 ? "text-[#10b981]" : financialMetrics.stickiness >= 10 ? "text-[#f59e0b]" : "text-white"}`}>
                         {financialMetrics.stickiness.toFixed(1)}%
                       </span>
@@ -1452,19 +1543,19 @@ function DashboardContent() {
                   <h3 className="text-lg font-medium mb-4 text-[#10b981]">Revenue Analytics</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">ARPPU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">ARPPU <InfoButton metric="arppu" /></span>
                       <span className="font-semibold">${financialMetrics.arppu.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Revenue/Tx</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Revenue/Tx <InfoButton metric="revPerTx" /></span>
                       <span className="font-semibold">${financialMetrics.revenuePerTx.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Avg Tx Size</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Avg Tx Size <InfoButton metric="avgTxSize" /></span>
                       <span className="font-semibold">${financialMetrics.avgTxSize.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                      <span className="text-[#a0aec0]">ARPU (All)</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">ARPU (All) <InfoButton metric="arpuAll" /></span>
                       <span className="font-semibold">${financialMetrics.arpuAll.toFixed(2)}</span>
                     </div>
                   </div>
@@ -1476,19 +1567,19 @@ function DashboardContent() {
                   <h3 className="text-lg font-medium mb-4 text-[#f59e0b]">On-chain Health</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Tx/User</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Tx/User <InfoButton metric="txPerUser" /></span>
                       <span className="font-semibold">{financialMetrics.txPerUser.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Volume/Tx</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Volume/Tx <InfoButton metric="volumePerTx" /></span>
                       <span className="font-semibold">${financialMetrics.volumePerTx.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Volume/DAU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Volume/DAU <InfoButton metric="volumePerDau" /></span>
                       <span className="font-semibold">${financialMetrics.volumePerActiveUser.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                      <span className="text-[#a0aec0]">Total Volume</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Total Volume <InfoButton metric="totalVolume" /></span>
                       <span className="font-semibold">{formatNum(aggregatedStats.totalVolume, "$")}</span>
                     </div>
                   </div>
@@ -1500,19 +1591,19 @@ function DashboardContent() {
                   <h3 className="text-lg font-medium mb-4 text-[#8b5cf6]">Engagement Quality</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Actions/Session</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Actions/Session <InfoButton metric="actionsPerSession" /></span>
                       <span className="font-semibold">{financialMetrics.actionsPerSession.toFixed(1)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Actions/DAU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Actions/DAU <InfoButton metric="actionsPerDau" /></span>
                       <span className="font-semibold">{financialMetrics.actionsPerDAU.toFixed(1)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#a0aec0]">Sessions/DAU</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Sessions/DAU <InfoButton metric="sessionsPerDau" /></span>
                       <span className="font-semibold">{financialMetrics.sessionsPerDAU.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                      <span className="text-[#a0aec0]">Total Sessions</span>
+                      <span className="text-[#a0aec0] flex items-center gap-1">Total Sessions <InfoButton metric="totalSessions" /></span>
                       <span className="font-semibold">{formatNum(aggregatedStats.sessions)}</span>
                     </div>
                   </div>
@@ -1527,6 +1618,22 @@ function DashboardContent() {
             <div className="flex items-center gap-3 mb-8">
               <LineChartIcon className="w-6 h-6 text-[#3b82f6]" />
               <h2 className="text-2xl font-semibold">Growth Trends</h2>
+              <div className="ml-auto flex gap-1">
+                {(['7d', '30d', 'all'] as const).map(range => (
+                  <button
+                    key={range}
+                    onClick={() => setTrendRange(range)}
+                    className={`px-3 py-1 text-xs font-medium transition-colors ${
+                      trendRange === range
+                        ? 'bg-[#3b82f6] text-white'
+                        : 'bg-[#2d2d2d] text-[#a0aec0] hover:bg-[#3d3d3d]'
+                    }`}
+                    data-testid={`btn-trend-${range}`}
+                  >
+                    {range === 'all' ? 'All' : range.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1535,7 +1642,7 @@ function DashboardContent() {
                   <h3 className="text-lg font-medium mb-4">Daily Active Users by App</h3>
                   <div className="h-72" data-testid="chart-dau-by-app">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={perAppTimeSeries.data}>
+                      <LineChart data={filteredTrendData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                         <XAxis 
                           dataKey="timestamp" 
@@ -1564,7 +1671,7 @@ function DashboardContent() {
                                 name={app.name}
                                 stroke={colors[idx % colors.length]} 
                                 strokeWidth={2}
-                                dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
+                                dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
                                 connectNulls
                               />
                             );
@@ -1576,7 +1683,7 @@ function DashboardContent() {
                             name="Total DAU"
                             stroke="#3b82f6" 
                             strokeWidth={2}
-                            dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
+                            dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
                           />
                         )}
                       </LineChart>
@@ -1590,7 +1697,7 @@ function DashboardContent() {
                   <h3 className="text-lg font-medium mb-4">Monthly Active Users by App</h3>
                 <div className="h-72" data-testid="chart-mau-by-app">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={perAppTimeSeries.data}>
+                    <LineChart data={filteredTrendData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis 
                         dataKey="timestamp" 
@@ -1619,7 +1726,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
+                              dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
                               connectNulls
                             />
                           );
@@ -1631,7 +1738,7 @@ function DashboardContent() {
                           name="Total MAU"
                           stroke="#8b5cf6" 
                           strokeWidth={2}
-                          dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
+                          dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
                         />
                       )}
                     </LineChart>
@@ -1646,7 +1753,7 @@ function DashboardContent() {
                 <p className="text-xs text-[#6b7280] mb-3">Cumulative revenue (MRR equivalent)</p>
                 <div className="h-72" data-testid="chart-revenue-by-app">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={perAppTimeSeries.data}>
+                    <LineChart data={filteredTrendData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis 
                         dataKey="timestamp" 
@@ -1676,7 +1783,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
+                              dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
                               connectNulls
                             />
                           );
@@ -1688,7 +1795,7 @@ function DashboardContent() {
                           name="Total Revenue"
                           stroke="#10b981" 
                           strokeWidth={2}
-                          dot={perAppTimeSeries.data.length <= 5 ? { r: 4 } : false}
+                          dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
                         />
                       )}
                     </LineChart>
@@ -1703,7 +1810,7 @@ function DashboardContent() {
                   <p className="text-xs text-[#6b7280] mb-3">Average daily revenue rate based on cumulative change over time</p>
                   <div className="h-72" data-testid="chart-daily-revenue-rate">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={estimatedDailyRevenueData.data}>
+                      <LineChart data={filteredRevenueRateData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                         <XAxis 
                           dataKey="timestamp" 
@@ -1732,7 +1839,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={estimatedDailyRevenueData.data.length <= 5 ? { r: 4 } : false}
+                              dot={filteredRevenueRateData.length <= 5 ? { r: 4 } : false}
                               connectNulls
                             />
                           );
@@ -1748,7 +1855,7 @@ function DashboardContent() {
                 <p className="text-xs text-[#6b7280] mb-3">Transactions & Volume extrapolated to 24h rate; Payers shown as point-in-time</p>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={estimatedDailyActivityData}>
+                    <ComposedChart data={filteredActivityData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis 
                         dataKey="timestamp" 
@@ -1767,8 +1874,8 @@ function DashboardContent() {
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
                       />
                       <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={estimatedDailyActivityData.length <= 5 ? { r: 4 } : false} />
-                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={estimatedDailyActivityData.length <= 5 ? { r: 4 } : false} />
+                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={filteredActivityData.length <= 5 ? { r: 4 } : false} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={filteredActivityData.length <= 5 ? { r: 4 } : false} />
                       <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
                   </ResponsiveContainer>
@@ -1846,7 +1953,7 @@ function DashboardContent() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               <Block delay={0.2}>
-                <h3 className="text-lg font-medium mb-4">Engagement vs Revenue Correlation</h3>
+                <h3 className="text-lg font-medium mb-4 flex items-center gap-2">Engagement vs Revenue Correlation <InfoButton metric="engagementRevenue" /></h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart>
@@ -1885,7 +1992,7 @@ function DashboardContent() {
               </Block>
 
               <Block delay={0.25}>
-                <h3 className="text-lg font-medium mb-4">Volume vs Transactions</h3>
+                <h3 className="text-lg font-medium mb-4 flex items-center gap-2">Volume vs Transactions <InfoButton metric="volumeTransactions" /></h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart>
