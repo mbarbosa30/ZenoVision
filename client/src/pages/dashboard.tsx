@@ -118,6 +118,13 @@ const metricDefinitions: Record<string, { title: string; calculation: string; im
   volumePerTx: { title: "Volume/Transaction", calculation: "Total volume ÷ total transactions.", importance: "Average dollar amount per transaction." },
   volumePerDau: { title: "Volume/DAU", calculation: "Total volume ÷ daily active users.", importance: "Shows daily economic activity per active user." },
   totalVolume: { title: "Total Volume", calculation: "Sum of all onchain transfer volume across tracked apps.", importance: "Shows overall economic throughput." },
+  projections: { title: "Growth Projections", calculation: "Uses actual observed monthly growth rates for each metric (users, revenue, transactions) computed from historical snapshots. Each month applies a 15% decay factor to model natural growth deceleration — month 1 uses the full observed rate, month 2 uses 85% of it, month 3 uses 72.25%. Similar to DCF fade rates used in startup financial modeling.", importance: "Data-driven forecasting avoids wishful thinking. The decay factor reflects that maintaining the same percentage growth becomes harder as the base scales — a well-established principle in startup growth modeling." },
+  valRevMultiple: { title: "Revenue Multiple (10-50x)", calculation: "ARR × multiple. Range: 10x (conservative, established projects), 25x (mid, growing steadily), 50x (aggressive, hypergrowth). Based on comparable Web3 gaming and miniapp fundraises.", importance: "Revenue multiples are the most common SaaS/Web3 valuation method. 10-50x range reflects early-stage, high-growth potential typical of pre-seed/seed gaming and utility dApps." },
+  valVolumeMultiple: { title: "Volume Percentage (1-10%)", calculation: "Annualized onchain volume × percentage. 1% (conservative), 5% (mid), 10% (aggressive). Treats the studio as a value-capture layer on transaction flow.", importance: "Common in DeFi and payment protocol valuations where the protocol captures fees on volume. Higher percentages reflect stronger moats or fee structures." },
+  valPerDau: { title: "Per-DAU Valuation ($50-300)", calculation: "Total DAU × dollar value per daily active user. $50 (conservative), $150 (mid), $300 (aggressive). Based on gaming/social app acquisition benchmarks.", importance: "DAU-based valuation reflects engagement intensity. Gaming miniapps with strong daily habits command higher per-DAU values. Comparable to Telegram miniapp and mobile gaming acquisition multiples." },
+  valPerMau: { title: "Per-MAU Valuation ($10-75)", calculation: "Total MAU × dollar value per monthly active user. $10 (conservative), $30 (mid), $75 (aggressive). Standard consumer app valuation approach.", importance: "MAU-based methods are standard for consumer products. The range reflects Web3 premium over traditional apps due to onchain monetization potential and composability." },
+  valPerWallet: { title: "Per-Wallet Valuation ($100-1.5K)", calculation: "Total paying/active wallets × dollar value per wallet. $100 (conservative), $500 (mid), $1,500 (aggressive). Unique to Web3 where wallets represent verified economic actors.", importance: "Wallet-based valuation is unique to crypto/Web3. Each active wallet represents a verified economic participant, not just a signup — making wallet counts more valuable than traditional user counts." },
+  valBlended: { title: "Blended Valuation", calculation: "Weighted average of 5 methods. Weights adjust based on data quality: metrics with more data points and higher confidence receive more weight. Equal-weight baseline with adjustments for data availability.", importance: "No single valuation method is perfect for early-stage Web3 studios. Blending multiple approaches (revenue, volume, users, wallets) reduces reliance on any single metric and provides a more robust estimate." },
   actionsPerSession: { title: "Actions/Session", calculation: "Total key actions ÷ sessions today.", importance: "Shows depth of engagement per visit." },
   actionsPerDau: { title: "Actions/DAU", calculation: "Total key actions ÷ daily active users.", importance: "Feature interactions per active user." },
   sessionsPerDau: { title: "Sessions/DAU", calculation: "Sessions today ÷ DAU.", importance: "How many times each active user opens the app daily." },
@@ -884,10 +891,38 @@ function DashboardContent() {
       },
     };
     
+    const valuationWeights = {
+      revenue: stats.totalRevenue > 0 ? 1.0 : 0.1,
+      volume: stats.totalVolume > 0 ? 1.0 : 0.1,
+      dau: stats.dau > 100 ? 1.0 : (stats.dau > 0 ? 0.5 : 0.1),
+      mau: stats.mau > 100 ? 1.0 : (stats.mau > 0 ? 0.5 : 0.1),
+      wallet: stats.payingUsers > 10 ? 1.0 : (stats.payingUsers > 0 ? 0.5 : 0.1),
+    };
+
+    const totalWeight = Object.values(valuationWeights).reduce((a, b) => a + b, 0);
+
     const blendedValuation = {
-      low: Math.round((web3Valuation.revenueMultiple.low + web3Valuation.dauBased.low + web3Valuation.mauBased.low + web3Valuation.volumeMultiple.low + web3Valuation.walletBased.low) / 5),
-      mid: Math.round((web3Valuation.revenueMultiple.mid + web3Valuation.dauBased.mid + web3Valuation.mauBased.mid + web3Valuation.volumeMultiple.mid + web3Valuation.walletBased.mid) / 5),
-      high: Math.round((web3Valuation.revenueMultiple.high + web3Valuation.dauBased.high + web3Valuation.mauBased.high + web3Valuation.volumeMultiple.high + web3Valuation.walletBased.high) / 5),
+      low: Math.round(
+        (web3Valuation.revenueMultiple.low * valuationWeights.revenue +
+         web3Valuation.volumeMultiple.low * valuationWeights.volume +
+         web3Valuation.dauBased.low * valuationWeights.dau +
+         web3Valuation.mauBased.low * valuationWeights.mau +
+         web3Valuation.walletBased.low * valuationWeights.wallet) / totalWeight
+      ),
+      mid: Math.round(
+        (web3Valuation.revenueMultiple.mid * valuationWeights.revenue +
+         web3Valuation.volumeMultiple.mid * valuationWeights.volume +
+         web3Valuation.dauBased.mid * valuationWeights.dau +
+         web3Valuation.mauBased.mid * valuationWeights.mau +
+         web3Valuation.walletBased.mid * valuationWeights.wallet) / totalWeight
+      ),
+      high: Math.round(
+        (web3Valuation.revenueMultiple.high * valuationWeights.revenue +
+         web3Valuation.volumeMultiple.high * valuationWeights.volume +
+         web3Valuation.dauBased.high * valuationWeights.dau +
+         web3Valuation.mauBased.high * valuationWeights.mau +
+         web3Valuation.walletBased.high * valuationWeights.wallet) / totalWeight
+      ),
     };
     
     // Advanced metrics
@@ -927,6 +962,7 @@ function DashboardContent() {
       actionsGrowthRate, sessionsGrowthRate,
       web3Valuation,
       blendedValuation,
+      valuationWeights,
       revenuePerUser, transactionsPerUser, engagementPerUser,
       revenuePerTx, avgTxSize,
       dauWauRatio, wauMauRatio, payingMauRatio,
@@ -946,31 +982,55 @@ function DashboardContent() {
   }, [aggregatedStats, historicalData, growthTimeframe]);
 
   const projections = useMemo(() => {
-    const growthRate = Math.max(0.02, Math.min(0.15, financialMetrics.monthlyGrowthRate || 0.05));
     const current = aggregatedStats;
-    
+    const decayFactor = 0.85;
+
+    const toMonthlyRate = (rate: number): number => {
+      if (growthTimeframe === 'daily') return (rate * 30) / 100;
+      if (growthTimeframe === 'weekly') return (rate * (30 / 7)) / 100;
+      return rate / 100;
+    };
+
+    const clampRate = (rate: number): number => Math.max(-0.5, Math.min(1.0, rate));
+
+    const userMonthlyRate = clampRate(toMonthlyRate(financialMetrics.mauGrowthRate));
+    const revenueMonthlyRate = clampRate(toMonthlyRate(financialMetrics.revenueGrowthRate));
+    const txMonthlyRate = clampRate(toMonthlyRate(financialMetrics.txGrowthRate));
+
+    const projectWithDecay = (current: number, monthlyRate: number, months: number, decay: number = decayFactor): number => {
+      let value = current;
+      for (let m = 0; m < months; m++) {
+        const effectiveRate = monthlyRate * Math.pow(decay, m);
+        value *= (1 + effectiveRate);
+      }
+      return Math.round(value);
+    };
+
     return {
       day30: {
-        users: Math.round(current.mau * Math.pow(1 + growthRate, 1)),
-        revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 1)),
-        transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 1)),
-        arr: Math.round(financialMetrics.arr * Math.pow(1 + growthRate, 1)),
+        users: projectWithDecay(current.mau, userMonthlyRate, 1),
+        revenue: projectWithDecay(current.totalRevenue, revenueMonthlyRate, 1),
+        transactions: projectWithDecay(current.totalTransactions, txMonthlyRate, 1),
+        arr: projectWithDecay(financialMetrics.arr, revenueMonthlyRate, 1),
       },
       day60: {
-        users: Math.round(current.mau * Math.pow(1 + growthRate, 2)),
-        revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 2)),
-        transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 2)),
-        arr: Math.round(financialMetrics.arr * Math.pow(1 + growthRate, 2)),
+        users: projectWithDecay(current.mau, userMonthlyRate, 2),
+        revenue: projectWithDecay(current.totalRevenue, revenueMonthlyRate, 2),
+        transactions: projectWithDecay(current.totalTransactions, txMonthlyRate, 2),
+        arr: projectWithDecay(financialMetrics.arr, revenueMonthlyRate, 2),
       },
       day90: {
-        users: Math.round(current.mau * Math.pow(1 + growthRate, 3)),
-        revenue: Math.round(current.totalRevenue * Math.pow(1 + growthRate, 3)),
-        transactions: Math.round(current.totalTransactions * Math.pow(1 + growthRate, 3)),
-        arr: Math.round(financialMetrics.arr * Math.pow(1 + growthRate, 3)),
+        users: projectWithDecay(current.mau, userMonthlyRate, 3),
+        revenue: projectWithDecay(current.totalRevenue, revenueMonthlyRate, 3),
+        transactions: projectWithDecay(current.totalTransactions, txMonthlyRate, 3),
+        arr: projectWithDecay(financialMetrics.arr, revenueMonthlyRate, 3),
       },
-      growthRate: growthRate * 100,
+      userGrowthRate: userMonthlyRate * 100,
+      revenueGrowthRate: revenueMonthlyRate * 100,
+      txGrowthRate: txMonthlyRate * 100,
+      decayFactor,
     };
-  }, [aggregatedStats, financialMetrics]);
+  }, [aggregatedStats, financialMetrics, growthTimeframe]);
 
   const sortedTableData = useMemo(() => {
     const data = snapshots.map(s => {
@@ -1384,38 +1444,55 @@ function DashboardContent() {
                 </div>
               </div>
 
-              <div className="text-xs text-[#666] mb-4">Valuation methodology breakdown:</div>
+              <div className="text-xs text-[#666] mb-4 flex items-center gap-1">Valuation methodology breakdown: <InfoButton metric="valBlended" /></div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
                 <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] text-xs mb-2">Revenue (10-50x)</div>
+                  <div className="text-[#a0aec0] text-xs mb-2 flex items-center gap-1">Revenue (10-50x) <InfoButton metric="valRevMultiple" /></div>
                   <div className="font-bold text-lg" data-testid="value-rev-multiple">
                     ${(financialMetrics.web3Valuation.revenueMultiple.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
                 <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] text-xs mb-2">Volume (1-10%)</div>
+                  <div className="text-[#a0aec0] text-xs mb-2 flex items-center gap-1">Volume (1-10%) <InfoButton metric="valVolumeMultiple" /></div>
                   <div className="font-bold text-lg" data-testid="value-vol-multiple">
                     ${(financialMetrics.web3Valuation.volumeMultiple.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
                 <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] text-xs mb-2">Per DAU ($50-300)</div>
+                  <div className="text-[#a0aec0] text-xs mb-2 flex items-center gap-1">Per DAU ($50-300) <InfoButton metric="valPerDau" /></div>
                   <div className="font-bold text-lg" data-testid="value-dau-multiple">
                     ${(financialMetrics.web3Valuation.dauBased.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
                 <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] text-xs mb-2">Per MAU ($10-75)</div>
+                  <div className="text-[#a0aec0] text-xs mb-2 flex items-center gap-1">Per MAU ($10-75) <InfoButton metric="valPerMau" /></div>
                   <div className="font-bold text-lg" data-testid="value-mau-multiple">
                     ${(financialMetrics.web3Valuation.mauBased.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
                 <div className="p-4 bg-[#1a1a1a] border border-[#2d2d2d]">
-                  <div className="text-[#a0aec0] text-xs mb-2">Per Wallet ($100-1.5K)</div>
+                  <div className="text-[#a0aec0] text-xs mb-2 flex items-center gap-1">Per Wallet ($100-1.5K) <InfoButton metric="valPerWallet" /></div>
                   <div className="font-bold text-lg" data-testid="value-wallet-multiple">
                     ${(financialMetrics.web3Valuation.walletBased.mid / 1000).toFixed(0)}K
                   </div>
                 </div>
+              </div>
+              <div className="grid grid-cols-5 gap-3 text-xs text-center mt-2">
+                {[
+                  { label: 'Revenue', weight: financialMetrics.valuationWeights.revenue },
+                  { label: 'Volume', weight: financialMetrics.valuationWeights.volume },
+                  { label: 'DAU', weight: financialMetrics.valuationWeights.dau },
+                  { label: 'MAU', weight: financialMetrics.valuationWeights.mau },
+                  { label: 'Wallet', weight: financialMetrics.valuationWeights.wallet },
+                ].map(w => {
+                  const totalWeight = Object.values(financialMetrics.valuationWeights).reduce((a: number, b: number) => a + b, 0);
+                  const pct = ((w.weight / totalWeight) * 100).toFixed(0);
+                  return (
+                    <div key={w.label} className="text-[#666]">
+                      {pct}% weight
+                    </div>
+                  );
+                })}
               </div>
               
               <div className="mt-4 text-xs text-[#666] italic">
@@ -2038,7 +2115,19 @@ function DashboardContent() {
             <div className="flex items-center gap-3 mb-8">
               <TrendingUp className="w-6 h-6 text-[#3b82f6]" />
               <h2 className="text-2xl font-semibold">Projections</h2>
-              <span className="text-sm text-[#a0aec0] ml-2">({projections.growthRate.toFixed(1)}% monthly growth based on trends)</span>
+              <InfoButton metric="projections" />
+              <div className="ml-auto flex flex-wrap gap-3 text-xs">
+                <span className="text-[#a0aec0]">
+                  Users <span className={projections.userGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}>{projections.userGrowthRate >= 0 ? "+" : ""}{projections.userGrowthRate.toFixed(1)}%</span>/mo
+                </span>
+                <span className="text-[#a0aec0]">
+                  Revenue <span className={projections.revenueGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}>{projections.revenueGrowthRate >= 0 ? "+" : ""}{projections.revenueGrowthRate.toFixed(1)}%</span>/mo
+                </span>
+                <span className="text-[#a0aec0]">
+                  Txns <span className={projections.txGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}>{projections.txGrowthRate >= 0 ? "+" : ""}{projections.txGrowthRate.toFixed(1)}%</span>/mo
+                </span>
+                <span className="text-[#666]">({(projections.decayFactor * 100).toFixed(0)}% decay/mo)</span>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -2107,6 +2196,9 @@ function DashboardContent() {
                   </div>
                 </div>
               </Block>
+            </div>
+            <div className="text-xs text-[#666] mt-4 italic">
+              * Growth rates derived from observed trends. Each successive month applies {((1 - projections.decayFactor) * 100).toFixed(0)}% decay to model natural growth deceleration as the base scales.
             </div>
           </div>
         </section>
