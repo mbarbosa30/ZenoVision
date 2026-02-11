@@ -2096,7 +2096,7 @@ function DashboardContent() {
                                 name={app.name}
                                 stroke={colors[idx % colors.length]} 
                                 strokeWidth={2}
-                                dot={{ r: 3 }}
+                                dot={false}
                                 connectNulls
                               />
                             );
@@ -2108,7 +2108,7 @@ function DashboardContent() {
                             name="Total DAU"
                             stroke="#3b82f6" 
                             strokeWidth={2}
-                            dot={{ r: 3 }}
+                            dot={false}
                           />
                         )}
                       </LineChart>
@@ -2153,7 +2153,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={{ r: 3 }}
+                              dot={false}
                               connectNulls
                             />
                           );
@@ -2165,7 +2165,7 @@ function DashboardContent() {
                           name="Total MAU"
                           stroke="#8b5cf6" 
                           strokeWidth={2}
-                          dot={{ r: 3 }}
+                          dot={false}
                         />
                       )}
                     </LineChart>
@@ -2212,7 +2212,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={{ r: 3 }}
+                              dot={false}
                               connectNulls
                             />
                           );
@@ -2224,7 +2224,7 @@ function DashboardContent() {
                           name="Total Revenue"
                           stroke="#10b981" 
                           strokeWidth={2}
-                          dot={{ r: 3 }}
+                          dot={false}
                         />
                       )}
                     </LineChart>
@@ -2270,7 +2270,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={{ r: 3 }}
+                              dot={false}
                               connectNulls
                             />
                           );
@@ -2307,8 +2307,8 @@ function DashboardContent() {
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                       />
                       <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={false} />
                       <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
                   </ResponsiveContainer>
