@@ -167,9 +167,9 @@ export default function Memo() {
             
             <div className="grid grid-cols-1 md:grid-cols-3">
               {[
-                { name: "MiniPlay.studio", desc: "Cognition gaming platform", stat: "184K+ users, 19K+ paying, 41K+ onchain txs", highlight: "$595 revenue" },
-                { name: "nanoPay.live", desc: "Digital financial utility", stat: "12K+ users, $157K+ onchain volume", highlight: "21K+ transactions" },
-                { name: "Oracle360.net", desc: "AI cosmic daily guide", stat: "17K+ users, 4.4K DAU, 2.7K paying", highlight: "$520 revenue" },
+                { name: "MiniPlay.studio", desc: "Cognition gaming platform", stat: "184K+ users | 19K+ paying | 41K+ onchain txs", highlight: "$1.9K+ onchain volume" },
+                { name: "nanoPay.live", desc: "Digital financial utility", stat: "12K+ users | 300+ paying | 21K+ onchain txs", highlight: "$157K+ onchain volume" },
+                { name: "Oracle360.net", desc: "AI cosmic daily guide", stat: "17K+ users | 2.7K paying | 3.9K+ onchain txs", highlight: "$520+ onchain volume" },
               ].map((project, i) => (
                 <Block 
                   key={i} 
@@ -236,9 +236,9 @@ export default function Memo() {
             
             <div className="grid grid-cols-1 md:grid-cols-3">
               {[
-                { title: "Retainer", desc: "High-trust preferred partners with ongoing collaboration and guaranteed allocation" },
-                { title: "Co-build + Upside", desc: "Heavy upside via token allocation or revenue share. We build, they distribute." },
-                { title: "Pure Upside", desc: "High-conviction internal bets. Full ownership, full risk, full reward." },
+                { title: "Retainer", desc: "High-trust preferred partners with ongoing collaboration and guaranteed allocation. Predictable cash flow funds studio operations and new experiments." },
+                { title: "Co-build + Upside", desc: "Heavy upside via token allocation or revenue share. We build, they distribute. Aligned incentives ensure both sides push for real traction." },
+                { title: "Pure Upside", desc: "High-conviction internal bets with full ownership, full risk, full reward. These are the products that can 10x the entire portfolio." },
               ].map((model, i) => (
                 <Block 
                   key={i} 
@@ -312,13 +312,16 @@ export default function Memo() {
                 <h3 className="text-xl font-semibold mb-4">$ZENO Token Allocation</h3>
                 <div className="space-y-3">
                   {[
-                    { label: "Pilot / Co-Pilot", pct: "70%" },
-                    { label: "Agents (incl. humans)", pct: "10%" },
-                    { label: "Investors", pct: "10%" },
-                    { label: "FAFO", pct: "10%" },
+                    { label: "Pilot / Co-Pilot", pct: "70%", note: "Core team and operators" },
+                    { label: "Agents (incl. humans)", pct: "10%", note: "Contributors and builders" },
+                    { label: "Investors", pct: "10%", note: "Current and future rounds" },
+                    { label: "FAFO", pct: "10%", note: "Experiments and incentives" },
                   ].map((row, i) => (
                     <div key={i} className="flex items-center justify-between">
-                      <span className="text-[#a0aec0]">{row.label}</span>
+                      <div>
+                        <span className="text-[#a0aec0]">{row.label}</span>
+                        <span className="text-xs text-[#4a5568] ml-2">{row.note}</span>
+                      </div>
                       <span className="text-[#3b82f6] font-semibold">{row.pct}</span>
                     </div>
                   ))}
@@ -327,12 +330,19 @@ export default function Memo() {
               
               <Block variant="dark" delay={0.2}>
                 <h3 className="text-xl font-semibold mb-4">$ZENO Flywheel</h3>
-                <ul className="space-y-3 text-[#a0aec0]">
-                  <li>&#x2022; LPs pair $ZENO with app tokens ($APP)</li>
-                  <li>&#x2022; Fees in $ZENO are burned (supply reduction)</li>
-                  <li>&#x2022; Fees in $APP accrue to treasury</li>
-                  <li>&#x2022; Activity-driven, not narrative-driven</li>
-                </ul>
+                <div className="space-y-3">
+                  {[
+                    { step: "LPs pair $ZENO with app tokens ($APP)", detail: "Liquidity deepens with each new product launch" },
+                    { step: "Fees in $ZENO are burned", detail: "Sustained activity reduces circulating supply" },
+                    { step: "Fees in $APP accrue to treasury", detail: "Portfolio diversification happens automatically" },
+                    { step: "Activity-driven, not narrative-driven", detail: "Real usage from real products creates real demand" },
+                  ].map((item, i) => (
+                    <div key={i}>
+                      <div className="text-[#a0aec0]">&#x2022; {item.step}</div>
+                      <div className="text-xs text-[#4a5568] ml-4">{item.detail}</div>
+                    </div>
+                  ))}
+                </div>
               </Block>
             </div>
           </div>
@@ -362,6 +372,7 @@ export default function Memo() {
               <Block variant="dark" delay={0.25}>
                 <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-2">Minimum Ticket</div>
                 <div className="text-xl font-semibold">$25K</div>
+                <div className="text-sm text-[#a0aec0] mt-2">No maximum cap</div>
               </Block>
             </div>
             
