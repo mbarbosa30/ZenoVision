@@ -32,6 +32,7 @@ interface Project {
   showEngagementMetrics: boolean;
   showRevenueMetrics: boolean;
   showOnchainMetrics: boolean;
+  chartColor: string | null;
 }
 
 interface Metrics {
@@ -988,7 +989,7 @@ function DashboardContent() {
     const sortedProjects = [...projects].sort((a, b) => a.name.localeCompare(b.name));
     sortedProjects.forEach((p, i) => {
       const key = p.id.slice(0, 8);
-      map[key] = APP_COLORS[i % APP_COLORS.length];
+      map[key] = p.chartColor || APP_COLORS[i % APP_COLORS.length];
     });
     return map;
   }, [projects]);

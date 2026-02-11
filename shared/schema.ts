@@ -16,6 +16,7 @@ export const projects = pgTable("projects", {
   showEngagementMetrics: boolean("show_engagement_metrics").notNull().default(true),
   showRevenueMetrics: boolean("show_revenue_metrics").notNull().default(true),
   showOnchainMetrics: boolean("show_onchain_metrics").notNull().default(true),
+  chartColor: text("chart_color"),
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({

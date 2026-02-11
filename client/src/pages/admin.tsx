@@ -40,6 +40,7 @@ interface Project {
   showEngagementMetrics: boolean;
   showRevenueMetrics: boolean;
   showOnchainMetrics: boolean;
+  chartColor: string | null;
 }
 
 interface Metrics {
@@ -602,7 +603,7 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("adminAuth") === "true");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true });
+  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, chartColor: "" });
   const [fetchingMetrics, setFetchingMetrics] = useState<string | null>(null);
   const [selectedProjectForMetrics, setSelectedProjectForMetrics] = useState<string | null>(null);
 
@@ -639,7 +640,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setIsAddDialogOpen(false);
-      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true });
+      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, chartColor: "" });
       toast({ title: "Project added", description: "The project has been added successfully." });
     },
     onError: () => {
@@ -852,6 +853,21 @@ export default function Admin() {
                           </div>
                         </div>
                       </div>
+                      <div>
+                        <Label className="text-sm font-medium">Chart Color</Label>
+                        <div className="flex items-center gap-2 mt-2">
+                          {['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#ec4899', '#f97316', '#14b8a6', '#a855f7'].map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              className={`w-7 h-7 border-2 ${newProject.chartColor === color ? 'border-white scale-110' : 'border-transparent'}`}
+                              style={{ backgroundColor: color }}
+                              onClick={() => setNewProject({ ...newProject, chartColor: color })}
+                              data-testid={`color-swatch-${color.slice(1)}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     <Button className="w-full" onClick={() => createProjectMutation.mutate(newProject)} disabled={createProjectMutation.isPending} data-testid="button-save-project">
                       {createProjectMutation.isPending ? "Adding..." : "Add Project"}
@@ -915,6 +931,21 @@ export default function Admin() {
                               <Label htmlFor="editShowOnchain" className="text-xs">On-chain</Label>
                             </div>
                           </div>
+                          <div>
+                            <Label className="text-xs font-medium mb-1 block">Chart Color</Label>
+                            <div className="flex items-center gap-1.5">
+                              {['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#ec4899', '#f97316', '#14b8a6', '#a855f7'].map((color) => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  className={`w-5 h-5 border-2 ${editingProject.chartColor === color ? 'border-white scale-110' : 'border-transparent'}`}
+                                  style={{ backgroundColor: color }}
+                                  onClick={() => setEditingProject({ ...editingProject, chartColor: color })}
+                                  data-testid={`edit-color-swatch-${color.slice(1)}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
                           <div className="flex gap-2 justify-end">
                             <Button variant="outline" size="sm" onClick={() => setEditingProject(null)} data-testid="button-cancel-edit"><X className="w-4 h-4" /></Button>
                             <Button size="sm" onClick={() => updateProjectMutation.mutate(editingProject)} disabled={updateProjectMutation.isPending} data-testid="button-save-edit">Save</Button>
@@ -924,6 +955,7 @@ export default function Admin() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <GripVertical className="w-4 h-4 text-muted-foreground" />
+                            {project.chartColor && <div className="w-3 h-3 shrink-0" style={{ backgroundColor: project.chartColor }} />}
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-medium font-heading">{project.name}</span>
