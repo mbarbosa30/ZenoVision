@@ -810,6 +810,8 @@ function DashboardContent() {
     try {
       await fetch("/api/metrics/fetch-all", { method: "POST" });
       queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metrics/history"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setLastRefreshTime(new Date());
     } finally {
       setFetching(false);
