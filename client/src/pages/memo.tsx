@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowRight, ArrowLeft, Zap, Users, TrendingUp, Shield, Coins, Target, BarChart3, Repeat } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, Users, TrendingUp, Shield, Coins, Target, BarChart3, Repeat, AlertTriangle, Layers, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { PasswordGate } from "@/components/password-gate";
@@ -75,7 +75,7 @@ export default function Memo() {
                 <span className="text-[#3b82f6]">Ship what moves.</span>
               </h1>
               <p className="text-xl text-[#a0aec0] max-w-2xl mb-6">
-                Zeno is an AI-native app studio. We run high-throughput product experiments, validate them through partner distribution rails, and compound upside across a portfolio of products and co-builds.
+                Zeno is an AI-native Web3 app studio operating as a "startups ETF" — building our own products and helping others build theirs for equity and tokens. We compound upside across a growing portfolio through high-throughput experimentation and real distribution rails.
               </p>
               <p className="text-sm text-[#4a5568] italic">
                 For discussion and feedback purposes only. Not investment advice.
@@ -90,7 +90,7 @@ export default function Memo() {
             <Block variant="accent" className="border-b border-[#2563eb]" delay={0.1}>
               <h2 className="text-2xl font-semibold mb-4">TL;DR</h2>
               <p className="text-white/90 leading-relaxed">
-                Zeno is built for a moment where three things became true at once: AI collapses build costs, crypto is the economic layer, and distribution is king. We're a high-throughput experimentation machine with explicit scale-or-kill gates.
+                Zeno is built for a moment where three things became true at once: AI collapses build costs, crypto is the economic layer, and distribution is king. We're a high-throughput experimentation machine with explicit scale-or-kill gates — 8+ live products shipped, 200K+ users across the portfolio, and real onchain traction, in weeks, not years.
               </p>
             </Block>
             
@@ -111,7 +111,7 @@ export default function Memo() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Crypto is the Economic Layer</h3>
                 <p className="text-[#a0aec0]">
-                  Global value exchange and coordination—including AI agent transactions—will happen onchain. Ownership, incentives, and composability.
+                  Global value exchange and coordination — including AI agent transactions — will happen onchain. Ownership, incentives, and composability.
                 </p>
               </Block>
               
@@ -138,10 +138,10 @@ export default function Memo() {
             
             <div className="grid grid-cols-2 md:grid-cols-4">
               {[
-                { value: "10+", label: "Products shipped" },
-                { value: "200K+", label: "Users (MiniPlay)" },
-                { value: "100K+", label: "Onchain txs" },
-                { value: "5K+", label: "Signals computed" },
+                { value: "200K+", label: "Total users" },
+                { value: "7K+", label: "Daily active users" },
+                { value: "67K+", label: "Onchain transactions" },
+                { value: "22K+", label: "Paying users" },
               ].map((stat, i) => (
                 <Block 
                   key={i} 
@@ -162,14 +162,14 @@ export default function Memo() {
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-2">Portfolio Highlights</h2>
-              <p className="text-[#a0aec0]">Selected examples with hard early signals</p>
+              <p className="text-[#a0aec0]">Live products with hard early signals — all built in weeks</p>
             </Block>
             
             <div className="grid grid-cols-1 md:grid-cols-3">
               {[
-                { name: "Miniplay.studio", stat: "200K+ users, 100K+ onchain txs", time: "3 weeks" },
-                { name: "nanoPay.live", stat: "7,500+ users, 20K onchain transactions", time: "4 weeks" },
-                { name: "MaxFlow.one", stat: "5,000+ signals computed", time: "Live" },
+                { name: "MiniPlay.studio", desc: "Cognition gaming platform", stat: "184K+ users, 19K+ paying, 41K+ onchain txs", highlight: "$595 revenue" },
+                { name: "nanoPay.live", desc: "Digital financial utility", stat: "12K+ users, $157K+ onchain volume", highlight: "21K+ transactions" },
+                { name: "Oracle360.net", desc: "AI cosmic daily guide", stat: "17K+ users, 4.4K DAU, 2.7K paying", highlight: "$520 revenue" },
               ].map((project, i) => (
                 <Block 
                   key={i} 
@@ -177,18 +177,52 @@ export default function Memo() {
                   className={`${i < 2 ? "border-r border-[#2d2d2d]" : ""}`} 
                   delay={0.15 + i * 0.1}
                 >
-                  <h3 className="text-xl font-semibold mb-2">{project.name}</h3>
-                  <p className="text-[#a0aec0] mb-2">{project.stat}</p>
-                  <div className="text-sm text-[#3b82f6]">After {project.time}</div>
+                  <h3 className="text-xl font-semibold mb-1">{project.name}</h3>
+                  <p className="text-xs text-[#4a5568] mb-3">{project.desc}</p>
+                  <p className="text-[#a0aec0] mb-2 text-sm">{project.stat}</p>
+                  <div className="text-sm text-[#3b82f6] font-medium">{project.highlight}</div>
                 </Block>
               ))}
             </div>
             
             <Block variant="dark" delay={0.3}>
               <p className="text-[#a0aec0]">
-                Other shipped experiments: oracle360.net, tempos.bet, inspector.markets, x4pp.xyz, prosperon.market, timecapsule.social (and more).
+                Additional shipped experiments: MaxFlow.one, tempos.bet, x4pp.xyz, prosperon.market, timecapsule.news — each testing a different thesis at the intersection of AI, crypto, and user behavior.
               </p>
             </Block>
+          </div>
+        </section>
+
+        {/* The ETF Model */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto">
+            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+              <div className="flex items-center gap-3 mb-2">
+                <Layers className="w-6 h-6 text-[#3b82f6]" />
+                <h2 className="text-3xl font-semibold">The Startups ETF Model</h2>
+              </div>
+              <p className="text-[#a0aec0]">Why the portfolio approach compounds faster than single bets</p>
+            </Block>
+
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
+                <h3 className="text-xl font-semibold mb-4">Portfolio Diversification</h3>
+                <ul className="space-y-3 text-[#a0aec0] text-sm">
+                  <li className="flex gap-2"><span className="text-[#3b82f6] mt-0.5">&#x2022;</span><span>Each product is an independent experiment — if one fails, the portfolio absorbs it</span></li>
+                  <li className="flex gap-2"><span className="text-[#3b82f6] mt-0.5">&#x2022;</span><span>Cross-pollination: user bases, distribution rails, and infrastructure are shared across products</span></li>
+                  <li className="flex gap-2"><span className="text-[#3b82f6] mt-0.5">&#x2022;</span><span>Co-builds with partners add deal flow without proportional cost</span></li>
+                </ul>
+              </Block>
+
+              <Block variant="dark" delay={0.2}>
+                <h3 className="text-xl font-semibold mb-4">Compounding Advantages</h3>
+                <ul className="space-y-3 text-[#a0aec0] text-sm">
+                  <li className="flex gap-2"><span className="text-[#3b82f6] mt-0.5">&#x2022;</span><span>AI makes each subsequent product cheaper and faster to build</span></li>
+                  <li className="flex gap-2"><span className="text-[#3b82f6] mt-0.5">&#x2022;</span><span>Learnings from each launch improve hit rate over time</span></li>
+                  <li className="flex gap-2"><span className="text-[#3b82f6] mt-0.5">&#x2022;</span><span>One breakout product can 10x the entire portfolio value</span></li>
+                </ul>
+              </Block>
+            </div>
           </div>
         </section>
 
@@ -197,14 +231,14 @@ export default function Memo() {
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-2">Business Model</h2>
-              <p className="text-[#a0aec0]">We don't sell hours: we either build in-house, or co-build with a partner</p>
+              <p className="text-[#a0aec0]">We don't sell hours — we either build in-house, or co-build with a partner for shared upside</p>
             </Block>
             
             <div className="grid grid-cols-1 md:grid-cols-3">
               {[
-                { title: "Retainer", desc: "High-trust preferred partners with ongoing collaboration" },
-                { title: "Co-build + Upside", desc: "Heavy upside via token or revenue share arrangements" },
-                { title: "Pure Upside", desc: "High-conviction bets on internal products" },
+                { title: "Retainer", desc: "High-trust preferred partners with ongoing collaboration and guaranteed allocation" },
+                { title: "Co-build + Upside", desc: "Heavy upside via token allocation or revenue share. We build, they distribute." },
+                { title: "Pure Upside", desc: "High-conviction internal bets. Full ownership, full risk, full reward." },
               ].map((model, i) => (
                 <Block 
                   key={i} 
@@ -216,6 +250,51 @@ export default function Memo() {
                   <div className="text-sm text-[#a0aec0]">{model.desc}</div>
                 </Block>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why $10M */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto">
+            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+              <div className="flex items-center gap-3 mb-2">
+                <Target className="w-6 h-6 text-[#3b82f6]" />
+                <h2 className="text-3xl font-semibold">Why $10M</h2>
+              </div>
+              <p className="text-[#a0aec0]">This is a forward-looking valuation for a studio with demonstrated velocity. Here's the logic.</p>
+            </Block>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3">
+              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
+                <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Portfolio Traction</div>
+                <p className="text-[#a0aec0] text-sm mb-3">
+                  200K+ users, 22K+ paying, 67K+ onchain transactions, and $160K+ onchain volume — achieved organically through product-led growth without paid acquisition.
+                </p>
+                <p className="text-[#a0aec0] text-sm">
+                  Even at conservative early-stage multiples, the combination of user growth velocity, paying conversion, and onchain activity puts portfolio trajectory well above the $10M mark.
+                </p>
+              </Block>
+
+              <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.2}>
+                <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Comparable Models</div>
+                <p className="text-[#a0aec0] text-sm mb-3">
+                  Venture studios (Idealab, eFounders, Atomic) are typically valued at 2-5x their portfolio. Crypto studios with token mechanics carry additional upside via token appreciation and LP fees.
+                </p>
+                <p className="text-[#a0aec0] text-sm">
+                  $10M prices Zeno at the lower end of studio comps, with the speed advantage of AI-native building.
+                </p>
+              </Block>
+
+              <Block variant="dark" delay={0.25}>
+                <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Throughput Premium</div>
+                <p className="text-[#a0aec0] text-sm mb-3">
+                  Traditional studios ship 2-4 products per year. Zeno has shipped 8+ live products in weeks. AI-native building is a structural advantage that compounds — each product is cheaper and faster than the last.
+                </p>
+                <p className="text-[#a0aec0] text-sm">
+                  You're not buying one product. You're buying a machine that produces them.
+                </p>
+              </Block>
             </div>
           </div>
         </section>
@@ -249,10 +328,10 @@ export default function Memo() {
               <Block variant="dark" delay={0.2}>
                 <h3 className="text-xl font-semibold mb-4">$ZENO Flywheel</h3>
                 <ul className="space-y-3 text-[#a0aec0]">
-                  <li>• LPs pair $ZENO with app tokens ($APP)</li>
-                  <li>• Fees in $ZENO are burned (supply reduction)</li>
-                  <li>• Fees in $APP accrue to treasury</li>
-                  <li>• Activity-driven, not narrative-driven</li>
+                  <li>&#x2022; LPs pair $ZENO with app tokens ($APP)</li>
+                  <li>&#x2022; Fees in $ZENO are burned (supply reduction)</li>
+                  <li>&#x2022; Fees in $APP accrue to treasury</li>
+                  <li>&#x2022; Activity-driven, not narrative-driven</li>
                 </ul>
               </Block>
             </div>
@@ -277,11 +356,12 @@ export default function Memo() {
               <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.2}>
                 <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-2">Valuation</div>
                 <div className="text-xl font-semibold">$10M post-money</div>
+                <div className="text-sm text-[#a0aec0] mt-2">Raising $500K–$1M</div>
               </Block>
               
               <Block variant="dark" delay={0.25}>
-                <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-2">Ticket Size</div>
-                <div className="text-xl font-semibold">$50K – $150K</div>
+                <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-2">Minimum Ticket</div>
+                <div className="text-xl font-semibold">$25K</div>
               </Block>
             </div>
             
@@ -305,13 +385,45 @@ export default function Memo() {
           </div>
         </section>
 
+        {/* Risks */}
+        <section className="border-b border-[#2d2d2d]">
+          <div className="max-w-7xl mx-auto">
+            <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+              <div className="flex items-center gap-3 mb-2">
+                <AlertTriangle className="w-6 h-6 text-[#f59e0b]" />
+                <h2 className="text-3xl font-semibold">Risks & Transparency</h2>
+              </div>
+              <p className="text-[#a0aec0]">We believe in being direct about what could go wrong</p>
+            </Block>
+
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {[
+                { risk: "Solo operator risk", mitigation: "AI agents handle the work of a 5-person team. Co-pilot and agent hiring underway. The DAO structure distributes governance over time." },
+                { risk: "Early revenue", mitigation: "Revenue is nascent (~$1.1K cumulative) but growing. The model is designed for optionality: most value accrues through token appreciation and onchain activity, not SaaS margins." },
+                { risk: "Regulatory uncertainty", mitigation: "DAO LLC (MIDAO) provides legal structure. SAFT instrument is standard for token-based raises. No US securities offerings." },
+                { risk: "Market timing", mitigation: "Products are live and generating real usage regardless of market conditions. Crypto-native infrastructure reduces dependency on bull/bear cycles." },
+              ].map((item, i) => (
+                <Block
+                  key={i}
+                  variant="dark"
+                  className={`${i % 2 === 0 ? "border-r border-[#2d2d2d]" : ""}`}
+                  delay={0.15 + i * 0.05}
+                >
+                  <h3 className="text-lg font-semibold mb-2 text-[#f59e0b]">{item.risk}</h3>
+                  <p className="text-sm text-[#a0aec0]">{item.mitigation}</p>
+                </Block>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section>
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="text-center" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-4">Interested?</h2>
               <p className="text-[#a0aec0] mb-8 max-w-xl mx-auto">
-                We're looking for aligned investors who understand the opportunity at the intersection of AI, crypto, and distribution.
+                We're raising $500K–$1M from aligned investors who understand the opportunity at the intersection of AI, crypto, and distribution. $25K minimum.
               </p>
               <Button asChild className="bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-none h-12 px-8">
                 <Link href="/#contact" data-testid="cta-contact">
