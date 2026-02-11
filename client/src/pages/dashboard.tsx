@@ -467,6 +467,23 @@ const formatNum = (num: number, prefix = ""): string => {
   return `${prefix}${num.toLocaleString()}`;
 };
 
+function smartTickFormat(ts: number, data: any[]): string {
+  if (!data || data.length === 0) return '';
+  const timestamps = data.map(d => d.timestamp).filter(Boolean);
+  if (timestamps.length < 2) return format(new Date(ts), "MMM d HH:mm");
+  const min = Math.min(...timestamps);
+  const max = Math.max(...timestamps);
+  const spanHours = (max - min) / (1000 * 60 * 60);
+  
+  if (spanHours < 6) {
+    return format(new Date(ts), "HH:mm");
+  } else if (spanHours < 72) {
+    return format(new Date(ts), "M/d HH:mm");
+  } else {
+    return format(new Date(ts), "MMM d");
+  }
+}
+
 const StatCard = ({ 
   label, 
   value, 
@@ -2057,13 +2074,15 @@ function DashboardContent() {
                           domain={['dataMin', 'dataMax']}
                           stroke="#666" 
                           tick={{ fill: '#a0aec0', fontSize: 10 }} 
-                          tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                          tickFormatter={(ts) => smartTickFormat(ts, filteredTrendData)}
+                          tickCount={6}
+                          minTickGap={40}
                         />
                         <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                           labelStyle={{ color: '#fff' }}
-                          labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                          labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
                         {perAppTimeSeries.hasPerAppData ? (
@@ -2077,7 +2096,7 @@ function DashboardContent() {
                                 name={app.name}
                                 stroke={colors[idx % colors.length]} 
                                 strokeWidth={2}
-                                dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
+                                dot={{ r: 3 }}
                                 connectNulls
                               />
                             );
@@ -2089,7 +2108,7 @@ function DashboardContent() {
                             name="Total DAU"
                             stroke="#3b82f6" 
                             strokeWidth={2}
-                            dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
+                            dot={{ r: 3 }}
                           />
                         )}
                       </LineChart>
@@ -2112,13 +2131,15 @@ function DashboardContent() {
                         domain={['dataMin', 'dataMax']}
                         stroke="#666" 
                         tick={{ fill: '#a0aec0', fontSize: 10 }} 
-                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                        tickFormatter={(ts) => smartTickFormat(ts, filteredTrendData)}
+                        tickCount={6}
+                        minTickGap={40}
                       />
                       <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
-                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                       />
                       <Legend />
                       {perAppTimeSeries.hasPerAppData ? (
@@ -2132,7 +2153,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
+                              dot={{ r: 3 }}
                               connectNulls
                             />
                           );
@@ -2144,7 +2165,7 @@ function DashboardContent() {
                           name="Total MAU"
                           stroke="#8b5cf6" 
                           strokeWidth={2}
-                          dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
+                          dot={{ r: 3 }}
                         />
                       )}
                     </LineChart>
@@ -2168,13 +2189,15 @@ function DashboardContent() {
                         domain={['dataMin', 'dataMax']}
                         stroke="#666" 
                         tick={{ fill: '#a0aec0', fontSize: 10 }} 
-                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                        tickFormatter={(ts) => smartTickFormat(ts, filteredTrendData)}
+                        tickCount={6}
+                        minTickGap={40}
                       />
                       <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
-                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                         formatter={(value: any) => [formatNum(Number(value), "$"), '']}
                       />
                       <Legend />
@@ -2189,7 +2212,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
+                              dot={{ r: 3 }}
                               connectNulls
                             />
                           );
@@ -2201,7 +2224,7 @@ function DashboardContent() {
                           name="Total Revenue"
                           stroke="#10b981" 
                           strokeWidth={2}
-                          dot={filteredTrendData.length <= 5 ? { r: 4 } : false}
+                          dot={{ r: 3 }}
                         />
                       )}
                     </LineChart>
@@ -2225,13 +2248,15 @@ function DashboardContent() {
                           domain={['dataMin', 'dataMax']}
                           stroke="#666" 
                           tick={{ fill: '#a0aec0', fontSize: 10 }} 
-                          tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                          tickFormatter={(ts) => smartTickFormat(ts, filteredRevenueRateData)}
+                          tickCount={6}
+                          minTickGap={40}
                         />
                         <YAxis stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v.toFixed(0)}`} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                           labelStyle={{ color: '#fff' }}
-                          labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                          labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                           formatter={(value: any) => [`$${Number(value).toFixed(2)}/day`, '']}
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
@@ -2245,7 +2270,7 @@ function DashboardContent() {
                               name={app.name}
                               stroke={colors[idx % colors.length]} 
                               strokeWidth={2}
-                              dot={filteredRevenueRateData.length <= 5 ? { r: 4 } : false}
+                              dot={{ r: 3 }}
                               connectNulls
                             />
                           );
@@ -2270,18 +2295,20 @@ function DashboardContent() {
                         domain={['dataMin', 'dataMax']}
                         stroke="#666" 
                         tick={{ fill: '#a0aec0', fontSize: 10 }} 
-                        tickFormatter={(ts) => format(new Date(ts), "MMM d HH:mm")}
+                        tickFormatter={(ts) => smartTickFormat(ts, filteredActivityData)}
+                        tickCount={6}
+                        minTickGap={40}
                       />
                       <YAxis yAxisId="left" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                       <YAxis yAxisId="right" orientation="right" stroke="#666" tick={{ fill: '#a0aec0', fontSize: 12 }} tickFormatter={(v) => `$${v.toFixed(0)}`} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
-                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm")}
+                        labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                       />
                       <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={filteredActivityData.length <= 5 ? { r: 4 } : false} />
-                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={filteredActivityData.length <= 5 ? { r: 4 } : false} />
+                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
                       <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
                   </ResponsiveContainer>
