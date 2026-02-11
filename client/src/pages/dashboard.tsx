@@ -2141,7 +2141,7 @@ function DashboardContent() {
                         labelStyle={{ color: '#fff' }}
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                       {perAppTimeSeries.hasPerAppData ? (
                         perAppTimeSeries.apps.filter(app => app.showUsers).map((app, idx) => {
                           const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#ef4444'];
@@ -2200,7 +2200,7 @@ function DashboardContent() {
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                         formatter={(value: any) => [formatNum(Number(value), "$"), '']}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                       {perAppTimeSeries.hasPerAppData ? (
                         perAppTimeSeries.apps.filter(app => app.showRevenue).map((app, idx) => {
                           const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
@@ -2306,7 +2306,7 @@ function DashboardContent() {
                         labelStyle={{ color: '#fff' }}
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                       <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={false} />
                       <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={false} />
                       <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
@@ -2338,7 +2338,7 @@ function DashboardContent() {
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                       <Bar dataKey="MAU" fill="#8b5cf6" />
                       <Bar dataKey="Revenue" fill="#10b981" />
                       <Bar dataKey="Transactions" fill="#f59e0b" />
