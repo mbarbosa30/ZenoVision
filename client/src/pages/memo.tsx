@@ -108,18 +108,23 @@ export default function Memo() {
   }, [snapshots]);
 
   const portfolioCards = useMemo(() => {
-    return snapshots.map((s) => {
-      const proj = projects.find((p) => p.id.toString() === s.projectId.toString());
-      return {
-        name: proj?.name ?? s.metrics.app,
-        desc: proj?.description ?? "",
-        stat: `${fmt(s.metrics.users.total)} users | ${fmt(s.metrics.users.paying)} paying | ${fmt(s.metrics.onchain.transactions)} onchain txs`,
-        highlight: `${fmtDollar(s.metrics.onchain.volume)} onchain volume`,
-      };
-    });
+    return snapshots
+      .map((s) => {
+        const proj = projects.find((p) => p.id.toString() === s.projectId.toString());
+        const traction = s.metrics.users.total + s.metrics.onchain.transactions + s.metrics.onchain.volume;
+        return {
+          name: proj?.name ?? s.metrics.app,
+          desc: proj?.description ?? "",
+          stat: `${fmt(s.metrics.users.total)} users | ${fmt(s.metrics.users.paying)} paying | ${fmt(s.metrics.onchain.transactions)} onchain txs`,
+          highlight: `${fmtDollar(s.metrics.onchain.volume)} onchain volume`,
+          traction,
+        };
+      })
+      .sort((a, b) => b.traction - a.traction);
   }, [snapshots, projects]);
 
-  const trackedApps = projects.length || snapshots.length;
+  const appsWithLiveData = snapshots.length;
+  const totalApps = projects.length;
   const snapshotProjectIds = new Set(snapshots.map((s) => s.projectId.toString()));
   const appsWithoutMetrics = projects.filter((p) => !snapshotProjectIds.has(p.id.toString()));
 
@@ -176,7 +181,7 @@ export default function Memo() {
             <Block variant="accent" className="border-b border-[#2563eb]" delay={0.1}>
               <h2 className="text-2xl font-semibold mb-4">TL;DR</h2>
               <p className="text-white/90 leading-relaxed">
-                Zeno is built for a moment where three things became true at once: AI collapses build costs, crypto is the economic layer, and distribution is king. We're a high-throughput experimentation machine with explicit scale-or-kill gates — {trackedApps}+ live products shipped, {fmt(agg.users)} users across the portfolio, and real onchain traction, in weeks, not years.
+                Zeno is built for a moment where three things became true at once: AI collapses build costs, crypto is the economic layer, and distribution is king. We're a high-throughput experimentation machine with explicit scale-or-kill gates — {totalApps}+ products shipped, {appsWithLiveData} with live traction data, {fmt(agg.users)} users across the portfolio, and real onchain activity, in weeks, not years.
               </p>
             </Block>
 
@@ -222,18 +227,20 @@ export default function Memo() {
               <p className="text-[#a0aec0]">Zeno is not an idea. It's a throughput machine that already ships.</p>
             </Block>
 
-            <div className="grid grid-cols-2 md:grid-cols-4">
+            <div className="grid grid-cols-2 md:grid-cols-3">
               {[
                 { value: fmt(agg.users), label: "Total users" },
                 { value: fmt(agg.dau), label: "Daily active users" },
-                { value: fmt(agg.txns), label: "Onchain transactions" },
                 { value: fmt(agg.paying), label: "Paying users" },
+                { value: fmt(agg.txns), label: "Onchain transactions" },
+                { value: fmtDollar(agg.volume), label: "Onchain volume" },
+                { value: fmtDollar(agg.revenue), label: "Revenue" },
               ].map((stat, i) => (
                 <Block
                   key={i}
                   variant="dark"
-                  className={`${i < 3 ? "border-r border-[#2d2d2d]" : ""}`}
-                  delay={0.15 + i * 0.1}
+                  className={`${(i % 3) < 2 ? "border-r border-[#2d2d2d]" : ""}`}
+                  delay={0.15 + i * 0.05}
                 >
                   <div className="text-3xl md:text-4xl font-semibold text-[#3b82f6] mb-1" data-testid={`stat-value-${i}`}>{stat.value}</div>
                   <div className="text-sm text-[#a0aec0]">{stat.label}</div>
@@ -376,7 +383,7 @@ export default function Memo() {
               <Block variant="dark" delay={0.25}>
                 <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Throughput Premium</div>
                 <p className="text-[#a0aec0] text-sm mb-3">
-                  Traditional studios ship 2-4 products per year. Zeno has shipped {trackedApps}+ live products in weeks. AI-native building is a structural advantage that compounds — each product is cheaper and faster than the last.
+                  Traditional studios ship 2-4 products per year. Zeno has shipped {totalApps}+ products in weeks, {appsWithLiveData} already generating real traction. AI-native building is a structural advantage that compounds — each product is cheaper and faster than the last.
                 </p>
                 <p className="text-[#a0aec0] text-sm">
                   You're not buying one product. You're buying a machine that produces them.
