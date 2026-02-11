@@ -982,6 +982,17 @@ function DashboardContent() {
     return { data: historicalData, apps, hasPerAppData: apps.length > 0 };
   }, [historicalData, projects]);
 
+  const APP_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+  const appColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    const sortedProjects = [...projects].sort((a, b) => a.name.localeCompare(b.name));
+    sortedProjects.forEach((p, i) => {
+      const key = p.id.slice(0, 8);
+      map[key] = APP_COLORS[i % APP_COLORS.length];
+    });
+    return map;
+  }, [projects]);
+
   // Estimated Daily Revenue Rate per app
   // Uses expanding window: for each point, calculates average daily rate from the first data point
   // Requires at least 1 hour of data span to avoid noisy short-interval extrapolation
@@ -2086,15 +2097,14 @@ function DashboardContent() {
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
                         {perAppTimeSeries.hasPerAppData ? (
-                          perAppTimeSeries.apps.filter(app => app.showUsers).map((app, idx) => {
-                            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                          perAppTimeSeries.apps.filter(app => app.showUsers).map((app) => {
                             return (
                               <Line 
                                 key={app.key}
                                 type="monotone" 
                                 dataKey={app.dauKey} 
                                 name={app.name}
-                                stroke={colors[idx % colors.length]} 
+                                stroke={appColorMap[app.key] || '#3b82f6'} 
                                 strokeWidth={2}
                                 dot={false}
                                 connectNulls
@@ -2143,15 +2153,14 @@ function DashboardContent() {
                       />
                       <Legend wrapperStyle={{ fontSize: '12px' }} />
                       {perAppTimeSeries.hasPerAppData ? (
-                        perAppTimeSeries.apps.filter(app => app.showUsers).map((app, idx) => {
-                          const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#ef4444'];
+                        perAppTimeSeries.apps.filter(app => app.showUsers).map((app) => {
                           return (
                             <Line 
                               key={app.key}
                               type="monotone" 
                               dataKey={`${app.key}_MAU`} 
                               name={app.name}
-                              stroke={colors[idx % colors.length]} 
+                              stroke={appColorMap[app.key] || '#3b82f6'} 
                               strokeWidth={2}
                               dot={false}
                               connectNulls
@@ -2202,15 +2211,14 @@ function DashboardContent() {
                       />
                       <Legend wrapperStyle={{ fontSize: '12px' }} />
                       {perAppTimeSeries.hasPerAppData ? (
-                        perAppTimeSeries.apps.filter(app => app.showRevenue).map((app, idx) => {
-                          const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                        perAppTimeSeries.apps.filter(app => app.showRevenue).map((app) => {
                           return (
                             <Line 
                               key={app.key}
                               type="monotone" 
                               dataKey={app.revenueKey} 
                               name={app.name}
-                              stroke={colors[idx % colors.length]} 
+                              stroke={appColorMap[app.key] || '#3b82f6'} 
                               strokeWidth={2}
                               dot={false}
                               connectNulls
@@ -2260,15 +2268,14 @@ function DashboardContent() {
                           formatter={(value: any) => [`$${Number(value).toFixed(2)}/day`, '']}
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
-                        {estimatedDailyRevenueData.apps.filter(app => app.showRevenue).map((app, idx) => {
-                          const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                        {estimatedDailyRevenueData.apps.filter(app => app.showRevenue).map((app) => {
                           return (
                             <Line 
                               key={app.key}
                               type="monotone" 
                               dataKey={`${app.key}_DailyRate`} 
                               name={app.name}
-                              stroke={colors[idx % colors.length]} 
+                              stroke={appColorMap[app.key] || '#3b82f6'} 
                               strokeWidth={2}
                               dot={false}
                               connectNulls
@@ -2356,17 +2363,18 @@ function DashboardContent() {
                         <PolarGrid stroke="#2d2d2d" />
                         <PolarAngleAxis dataKey="metric" tick={{ fill: '#a0aec0', fontSize: 12 }} />
                         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#666', fontSize: 10 }} />
-                        {snapshots.map((s, idx) => {
+                        {snapshots.map((s) => {
                           const project = projects.find(p => p.id === s.projectId);
                           const name = project?.name.split('.')[0] || 'Unknown';
-                          const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'];
+                          const appKey = s.projectId.slice(0, 8);
+                          const color = appColorMap[appKey] || '#3b82f6';
                           return (
                             <Radar 
                               key={s.id} 
                               name={name} 
                               dataKey={name} 
-                              stroke={colors[idx % colors.length]} 
-                              fill={colors[idx % colors.length]} 
+                              stroke={color} 
+                              fill={color} 
                               fillOpacity={0.2} 
                             />
                           );
