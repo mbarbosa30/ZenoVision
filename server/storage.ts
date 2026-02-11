@@ -6,6 +6,7 @@ export interface IStorage {
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
   getAllInquiries(): Promise<Inquiry[]>;
   createProject(project: InsertProject): Promise<Project>;
+  getProject(id: string): Promise<Project | null>;
   getAllProjects(): Promise<Project[]>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project | null>;
   deleteProject(id: string): Promise<boolean>;
@@ -31,6 +32,11 @@ export class DatabaseStorage implements IStorage {
   async createProject(project: InsertProject): Promise<Project> {
     const [newProject] = await db.insert(projects).values(project).returning();
     return newProject;
+  }
+
+  async getProject(id: string): Promise<Project | null> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+    return project || null;
   }
 
   async getAllProjects(): Promise<Project[]> {

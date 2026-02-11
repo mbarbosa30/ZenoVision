@@ -543,9 +543,8 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
   }
   
   return sessions.map(sessionSnapshots => {
-    // Use the earliest timestamp in the session as the representative time
     const timestamps = sessionSnapshots.map(s => new Date(s.timestamp).getTime());
-    const sessionTime = Math.min(...timestamps);
+    const sessionTime = Math.max(...timestamps);
     const timestamp = new Date(sessionTime);
     
     const pointData: any = {
@@ -738,6 +737,7 @@ function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'd
 function DashboardContent() {
   const queryClient = useQueryClient();
   const [fetching, setFetching] = useState(false);
+  const [fetchProgress, setFetchProgress] = useState<Record<string, 'pending' | 'fetching' | 'done' | 'error'>>({});
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<string>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -806,15 +806,34 @@ function DashboardContent() {
   }, [projects]);
 
   const fetchAllMetrics = async () => {
+    const appsToFetch = connectedProjects.filter(p => p.metricsEndpoint);
+    if (appsToFetch.length === 0) return;
+
     setFetching(true);
+    const progress: Record<string, 'pending' | 'fetching' | 'done' | 'error'> = {};
+    appsToFetch.forEach(p => { progress[p.id] = 'pending'; });
+    setFetchProgress({ ...progress });
+
     try {
-      await fetch("/api/metrics/fetch-all", { method: "POST" });
+      for (const project of appsToFetch) {
+        progress[project.id] = 'fetching';
+        setFetchProgress({ ...progress });
+        try {
+          const res = await fetch(`/api/metrics/fetch/${project.id}`, { method: "POST" });
+          const result = await res.json();
+          progress[project.id] = result.success ? 'done' : 'error';
+        } catch {
+          progress[project.id] = 'error';
+        }
+        setFetchProgress({ ...progress });
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
       queryClient.invalidateQueries({ queryKey: ["/api/metrics/history"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setLastRefreshTime(new Date());
     } finally {
       setFetching(false);
+      setTimeout(() => setFetchProgress({}), 3000);
     }
   };
 
@@ -1367,7 +1386,33 @@ function DashboardContent() {
         </div>
       </header>
 
-      <main className="pt-16">
+      {Object.keys(fetchProgress).length > 0 && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-[#1a1a1a] border-b border-[#2d2d2d] px-6 py-3">
+          <div className="max-w-7xl mx-auto flex items-center gap-4 flex-wrap" data-testid="fetch-progress-bar">
+            {connectedProjects.filter(p => fetchProgress[p.id]).map(project => {
+              const status = fetchProgress[project.id];
+              return (
+                <div key={project.id} className="flex items-center gap-2 text-sm" data-testid={`fetch-status-${project.id}`}>
+                  {status === 'pending' && <div className="w-2 h-2 bg-[#a0aec0]" />}
+                  {status === 'fetching' && <RefreshCw className="w-3 h-3 text-[#3b82f6] animate-spin" />}
+                  {status === 'done' && <div className="w-2 h-2 bg-[#10b981]" />}
+                  {status === 'error' && <div className="w-2 h-2 bg-[#ef4444]" />}
+                  <span className={
+                    status === 'fetching' ? 'text-[#3b82f6]' :
+                    status === 'done' ? 'text-[#10b981]' :
+                    status === 'error' ? 'text-[#ef4444]' :
+                    'text-[#a0aec0]'
+                  }>
+                    {project.name.split('.')[0]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <main className={`pt-16 ${Object.keys(fetchProgress).length > 0 ? 'mt-12' : ''}`}>
         <section className="border-b border-[#2d2d2d]">
           <div className="max-w-7xl mx-auto p-8 md:p-12">
             <motion.div

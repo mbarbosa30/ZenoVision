@@ -389,6 +389,59 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/metrics/fetch/:projectId", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.projectId);
+      if (!project) {
+        return res.status(404).json({ success: false, error: "Project not found" });
+      }
+      if (!project.metricsEndpoint) {
+        return res.status(400).json({ success: false, error: "No metrics endpoint configured" });
+      }
+
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (project.metricsApiKey) {
+        headers["Authorization"] = `Bearer ${project.metricsApiKey}`;
+      }
+
+      const response = await fetch(project.metricsEndpoint, { headers });
+      if (!response.ok) {
+        return res.json({ success: false, projectId: project.id, error: `HTTP ${response.status}` });
+      }
+
+      const data = await response.json();
+      const validated = metricsSchema.safeParse(data);
+      if (!validated.success) {
+        return res.json({ success: false, projectId: project.id, error: "Invalid format" });
+      }
+
+      const previousSnapshot = await storage.getLatestMetricsSnapshot(project.id);
+      const validation = validateMetricsData(validated.data, previousSnapshot);
+
+      if (!validation.isValid) {
+        return res.json({
+          success: false,
+          projectId: project.id,
+          error: `Validation failed: ${validation.errors.join(", ")}`,
+          warnings: validation.warnings,
+        });
+      }
+
+      await storage.createMetricsSnapshot({
+        projectId: project.id,
+        metrics: validated.data,
+      });
+
+      res.json({
+        success: true,
+        projectId: project.id,
+        warnings: validation.warnings.length > 0 ? validation.warnings : undefined,
+      });
+    } catch (error: any) {
+      res.json({ success: false, projectId: req.params.projectId, error: error.message });
+    }
+  });
+
   // Public metrics endpoint (aggregated stats for landing page)
   app.get("/api/public-metrics", async (req, res) => {
     try {
