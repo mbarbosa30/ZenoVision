@@ -543,7 +543,16 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
   }
   
   return sessions.map(sessionSnapshots => {
-    const timestamps = sessionSnapshots.map(s => new Date(s.timestamp).getTime());
+    const dedupedByProject = new Map<string, MetricsSnapshot>();
+    sessionSnapshots.forEach(snapshot => {
+      const existing = dedupedByProject.get(snapshot.projectId);
+      if (!existing || new Date(snapshot.timestamp).getTime() > new Date(existing.timestamp).getTime()) {
+        dedupedByProject.set(snapshot.projectId, snapshot);
+      }
+    });
+    const uniqueSnapshots = Array.from(dedupedByProject.values());
+
+    const timestamps = uniqueSnapshots.map(s => new Date(s.timestamp).getTime());
     const sessionTime = Math.max(...timestamps);
     const timestamp = new Date(sessionTime);
     
@@ -565,7 +574,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     let totalKeyActions = 0;
     let totalSessions = 0;
     
-    sessionSnapshots.forEach(snapshot => {
+    uniqueSnapshots.forEach(snapshot => {
       const project = projects.find(p => p.id === snapshot.projectId);
       if (!project) return;
       
@@ -602,7 +611,7 @@ function processHistoricalSnapshots(snapshots: MetricsSnapshot[], projects: Proj
     pointData.totalVolume = totalVolume;
     pointData.totalKeyActions = totalKeyActions;
     pointData.totalSessions = totalSessions;
-    pointData.appsInSession = sessionSnapshots.length;
+    pointData.appsInSession = uniqueSnapshots.length;
     
     return pointData;
   });
