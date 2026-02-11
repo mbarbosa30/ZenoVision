@@ -115,8 +115,8 @@ export default function Memo() {
         return {
           name: proj?.name ?? s.metrics.app,
           desc: proj?.description ?? "",
-          stat: `${fmt(s.metrics.users.total)} users | ${fmt(s.metrics.users.paying)} paying | ${fmt(s.metrics.onchain.transactions)} onchain txs`,
-          highlight: `${fmtDollar(s.metrics.onchain.volume)} onchain volume`,
+          stat: `${fmt(s.metrics.users.total)} users | ${fmt(s.metrics.users.paying)} paying`,
+          highlight: `${fmt(s.metrics.onchain.transactions)} onchain transfers`,
           traction,
         };
       })
@@ -202,7 +202,7 @@ export default function Memo() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Crypto is the Economic Layer</h3>
                 <p className="text-[#a0aec0]">
-                  Global value exchange and coordination — including AI agent transactions — will happen onchain. Ownership, incentives, and composability.
+                  Global value exchange and coordination — including AI agent transfers — will happen onchain. Ownership, incentives, and composability.
                 </p>
               </Block>
 
@@ -227,20 +227,17 @@ export default function Memo() {
               <p className="text-[#a0aec0]">Zeno is not an idea. It's a throughput machine that already ships.</p>
             </Block>
 
-            <div className="grid grid-cols-2 md:grid-cols-3">
+            <div className="grid grid-cols-1 md:grid-cols-3">
               {[
                 { value: fmt(agg.users), label: "Total users" },
-                { value: fmt(agg.dau), label: "Daily active users" },
                 { value: fmt(agg.paying), label: "Paying users" },
-                { value: fmt(agg.txns), label: "Onchain transactions" },
-                { value: fmtDollar(agg.volume), label: "Onchain volume" },
-                { value: fmtDollar(agg.revenue), label: "Revenue" },
+                { value: fmt(agg.txns), label: "Onchain transfers" },
               ].map((stat, i) => (
                 <Block
                   key={i}
                   variant="dark"
-                  className={`${(i % 3) < 2 ? "border-r border-[#2d2d2d]" : ""}`}
-                  delay={0.15 + i * 0.05}
+                  className={`${i < 2 ? "border-r border-[#2d2d2d]" : ""}`}
+                  delay={0.15 + i * 0.1}
                 >
                   <div className="text-3xl md:text-4xl font-semibold text-[#3b82f6] mb-1" data-testid={`stat-value-${i}`}>{stat.value}</div>
                   <div className="text-sm text-[#a0aec0]">{stat.label}</div>
@@ -363,7 +360,7 @@ export default function Memo() {
               <Block variant="dark" className="border-r border-[#2d2d2d]" delay={0.15}>
                 <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Portfolio Traction</div>
                 <p className="text-[#a0aec0] text-sm mb-3">
-                  {fmt(agg.users)} users, {fmt(agg.paying)} paying, {fmt(agg.txns)} onchain transactions, and {fmtDollar(agg.volume)} onchain volume — achieved organically through product-led growth without paid acquisition.
+                  {fmt(agg.users)} users, {fmt(agg.paying)} paying, and {fmt(agg.txns)} onchain transfers — achieved organically through product-led growth without paid acquisition.
                 </p>
                 <p className="text-[#a0aec0] text-sm">
                   Even at conservative early-stage multiples, the combination of user growth velocity, paying conversion, and onchain activity puts portfolio trajectory well above the $10M mark.
@@ -504,7 +501,7 @@ export default function Memo() {
             <div className="grid grid-cols-1 md:grid-cols-2">
               {[
                 { risk: "Solo operator risk", mitigation: "AI agents handle the work of a 5-person team. Co-pilot and agent hiring underway. The DAO structure distributes governance over time." },
-                { risk: "Early revenue", mitigation: `Revenue is nascent (${fmtDollar(agg.revenue)} cumulative) but growing. The model is designed for optionality: most value accrues through token appreciation and onchain activity, not SaaS margins.` },
+                { risk: "Early-stage monetization", mitigation: "Monetization is nascent but growing. The model is designed for optionality: most value accrues through token appreciation and onchain activity, not SaaS margins." },
                 { risk: "Regulatory uncertainty", mitigation: "DAO LLC (MIDAO) provides legal structure. SAFT instrument is standard for token-based raises. No US securities offerings." },
                 { risk: "Market timing", mitigation: "Products are live and generating real usage regardless of market conditions. Crypto-native infrastructure reduces dependency on bull/bear cycles." },
               ].map((item, i) => (
