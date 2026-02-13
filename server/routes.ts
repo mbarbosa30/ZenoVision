@@ -7,6 +7,22 @@ import { z } from "zod";
 
 type MetricsData = z.infer<typeof metricsSchema>;
 
+function isEmptyMetrics(metrics: MetricsData): boolean {
+  return (
+    metrics.users.total === 0 &&
+    metrics.users.paying === 0 &&
+    metrics.users.daily_active === 0 &&
+    metrics.users.weekly_active === 0 &&
+    metrics.users.monthly_active === 0 &&
+    metrics.onchain.transactions === 0 &&
+    metrics.onchain.volume === 0 &&
+    metrics.engagement.key_actions === 0 &&
+    metrics.engagement.sessions_today === 0 &&
+    metrics.revenue.net_income === 0 &&
+    metrics.revenue.total_payments === 0
+  );
+}
+
 interface ValidationResult {
   isValid: boolean;
   warnings: string[];
@@ -252,6 +268,10 @@ export async function registerRoutes(
         return res.status(400).json({ success: false, error: "Invalid metrics format from external API", details: validated.error.issues });
       }
 
+      if (isEmptyMetrics(validated.data)) {
+        return res.status(400).json({ success: false, error: "Skipped: all metrics are zero" });
+      }
+
       // Get previous snapshot for comparison
       const previousSnapshot = await storage.getLatestMetricsSnapshot(id);
       const validation = validateMetricsData(validated.data, previousSnapshot);
@@ -352,6 +372,11 @@ export async function registerRoutes(
             continue;
           }
 
+          if (isEmptyMetrics(validated.data)) {
+            results.push({ projectId: project.id, success: false, error: "Skipped: all metrics are zero" });
+            continue;
+          }
+
           // Get previous snapshot for comparison
           const previousSnapshot = await storage.getLatestMetricsSnapshot(project.id);
           const validation = validateMetricsData(validated.data, previousSnapshot);
@@ -413,6 +438,10 @@ export async function registerRoutes(
       const validated = metricsSchema.safeParse(data);
       if (!validated.success) {
         return res.json({ success: false, projectId: project.id, error: "Invalid format" });
+      }
+
+      if (isEmptyMetrics(validated.data)) {
+        return res.json({ success: false, projectId: project.id, error: "Skipped: all metrics are zero" });
       }
 
       const previousSnapshot = await storage.getLatestMetricsSnapshot(project.id);
