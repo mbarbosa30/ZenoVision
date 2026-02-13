@@ -82,7 +82,7 @@ export default function Home() {
     refetchInterval: 60000,
   });
 
-  const projects = data?.projects || PROJECTS;
+  const projects = (data?.projects || PROJECTS).filter((p: any) => p.showOnLandingPage !== false);
   const publicMetrics = metricsData?.metrics;
   const trackedProjectIds = new Set(publicMetrics?.trackedProjectIds || []);
 

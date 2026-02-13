@@ -40,6 +40,7 @@ interface Project {
   showEngagementMetrics: boolean;
   showRevenueMetrics: boolean;
   showOnchainMetrics: boolean;
+  showOnLandingPage: boolean;
   chartColor: string | null;
 }
 
@@ -603,7 +604,7 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("adminAuth") === "true");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, chartColor: "" });
+  const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, showOnLandingPage: true, chartColor: "" });
   const [fetchingMetrics, setFetchingMetrics] = useState<string | null>(null);
   const [selectedProjectForMetrics, setSelectedProjectForMetrics] = useState<string | null>(null);
 
@@ -640,7 +641,7 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setIsAddDialogOpen(false);
-      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, chartColor: "" });
+      setNewProject({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, showOnLandingPage: true, chartColor: "" });
       toast({ title: "Project added", description: "The project has been added successfully." });
     },
     onError: () => {
@@ -833,6 +834,10 @@ export default function Admin() {
                         <Input id="metricsApiKey" type="password" value={newProject.metricsApiKey} onChange={(e) => setNewProject({ ...newProject, metricsApiKey: e.target.value })} placeholder="Bearer token" data-testid="input-project-metrics-key" />
                       </div>
                       <div className="border-t pt-4 mt-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <Label htmlFor="showOnLanding" className="text-sm font-medium">Show on Landing Page</Label>
+                          <Switch id="showOnLanding" checked={newProject.showOnLandingPage} onCheckedChange={(checked) => setNewProject({ ...newProject, showOnLandingPage: checked })} data-testid="switch-show-landing" />
+                        </div>
                         <p className="text-sm text-muted-foreground mb-3">Dashboard Visibility (choose which metrics to show)</p>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex items-center justify-between">
@@ -912,6 +917,10 @@ export default function Admin() {
                           <div className="flex gap-2">
                             <Input value={editingProject.metricsEndpoint || ""} onChange={(e) => setEditingProject({ ...editingProject, metricsEndpoint: e.target.value })} placeholder="Metrics Endpoint" data-testid="input-edit-metrics-endpoint" />
                             <Input type="password" value={editingProject.metricsApiKey || ""} onChange={(e) => setEditingProject({ ...editingProject, metricsApiKey: e.target.value })} placeholder="API Key" data-testid="input-edit-metrics-key" />
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Switch id="editShowLanding" checked={editingProject.showOnLandingPage} onCheckedChange={(checked) => setEditingProject({ ...editingProject, showOnLandingPage: checked })} data-testid="switch-edit-show-landing" />
+                            <Label htmlFor="editShowLanding" className="text-xs font-medium">Show on Landing Page</Label>
                           </div>
                           <div className="flex gap-4 flex-wrap text-sm">
                             <div className="flex items-center gap-2">
