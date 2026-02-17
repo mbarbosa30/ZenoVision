@@ -7,6 +7,14 @@ import { z } from "zod";
 
 type MetricsData = z.infer<typeof metricsSchema>;
 
+const FETCH_TIMEOUT_MS = 10000;
+
+function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+}
+
 function isEmptyMetrics(metrics: MetricsData): boolean {
   return (
     metrics.users.total === 0 &&
@@ -255,7 +263,7 @@ export async function registerRoutes(
         headers["Authorization"] = `Bearer ${project.metricsApiKey}`;
       }
 
-      const response = await fetch(project.metricsEndpoint, { headers });
+      const response = await fetchWithTimeout(project.metricsEndpoint, { headers });
       
       if (!response.ok) {
         return res.status(502).json({ success: false, error: `Failed to fetch metrics: ${response.status}` });
@@ -343,12 +351,10 @@ export async function registerRoutes(
   app.post("/api/metrics/fetch-all", async (req, res) => {
     try {
       const projects = await storage.getAllProjects();
-      const results: { projectId: string; success: boolean; error?: string; warnings?: string[] }[] = [];
+      const fetchableProjects = projects.filter(p => p.metricsEndpoint);
 
-      for (const project of projects) {
-        if (!project.metricsEndpoint) continue;
-
-        try {
+      const settled = await Promise.allSettled(
+        fetchableProjects.map(async (project): Promise<{ projectId: string; success: boolean; error?: string; warnings?: string[] }> => {
           const headers: Record<string, string> = {
             "Content-Type": "application/json",
           };
@@ -357,39 +363,33 @@ export async function registerRoutes(
             headers["Authorization"] = `Bearer ${project.metricsApiKey}`;
           }
 
-          const response = await fetch(project.metricsEndpoint, { headers });
+          const response = await fetchWithTimeout(project.metricsEndpoint!, { headers });
           
           if (!response.ok) {
-            results.push({ projectId: project.id, success: false, error: `HTTP ${response.status}` });
-            continue;
+            return { projectId: project.id, success: false, error: `HTTP ${response.status}` };
           }
 
           const data = await response.json();
           const validated = metricsSchema.safeParse(data);
           
           if (!validated.success) {
-            results.push({ projectId: project.id, success: false, error: "Invalid format" });
-            continue;
+            return { projectId: project.id, success: false, error: "Invalid format" };
           }
 
           if (isEmptyMetrics(validated.data)) {
-            results.push({ projectId: project.id, success: false, error: "Skipped: all metrics are zero" });
-            continue;
+            return { projectId: project.id, success: false, error: "Skipped: all metrics are zero" };
           }
 
-          // Get previous snapshot for comparison
           const previousSnapshot = await storage.getLatestMetricsSnapshot(project.id);
           const validation = validateMetricsData(validated.data, previousSnapshot);
 
-          // Block if there are hard errors
           if (!validation.isValid) {
-            results.push({ 
+            return { 
               projectId: project.id, 
               success: false, 
               error: `Validation failed: ${validation.errors.join(", ")}`,
               warnings: validation.warnings
-            });
-            continue;
+            };
           }
 
           await storage.createMetricsSnapshot({
@@ -397,15 +397,17 @@ export async function registerRoutes(
             metrics: validated.data,
           });
 
-          results.push({ 
+          return { 
             projectId: project.id, 
             success: true,
             warnings: validation.warnings.length > 0 ? validation.warnings : undefined
-          });
-        } catch (err: any) {
-          results.push({ projectId: project.id, success: false, error: err.message });
-        }
-      }
+          };
+        })
+      );
+
+      const results = settled.map((s, i) => 
+        s.status === 'fulfilled' ? s.value : { projectId: fetchableProjects[i].id, success: false, error: (s.reason as Error)?.message || 'Unknown error' }
+      );
 
       res.json({ success: true, results });
     } catch (error) {
@@ -429,7 +431,7 @@ export async function registerRoutes(
         headers["Authorization"] = `Bearer ${project.metricsApiKey}`;
       }
 
-      const response = await fetch(project.metricsEndpoint, { headers });
+      const response = await fetchWithTimeout(project.metricsEndpoint, { headers });
       if (!response.ok) {
         return res.json({ success: false, projectId: project.id, error: `HTTP ${response.status}` });
       }
