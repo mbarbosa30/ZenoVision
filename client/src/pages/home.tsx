@@ -1,9 +1,9 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 interface Project {
   id?: string;
@@ -61,6 +61,153 @@ const Block = ({ variant = "dark", children, className = "", delay = 0 }: BlockP
     </motion.div>
   );
 };
+
+function CoBuildSection() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    role: "Co-Builder",
+    exploring: "",
+    organization: "",
+    links: "",
+    consent: "true",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to submit");
+      return res.json();
+    },
+    onSuccess: () => setSubmitted(true),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate(formData);
+  };
+
+  const inputClass = "w-full bg-[#0f0f0f] border border-[#2d2d2d] text-white px-4 py-3 text-sm placeholder-[#4a5568] focus:outline-none focus:border-[#3b82f6] transition-colors";
+
+  return (
+    <section id="contact" className="border-b border-[#2d2d2d]">
+      <div className="max-w-7xl mx-auto">
+        <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
+          <h2 className="text-3xl font-semibold mb-2">Co-Build With Us</h2>
+          <p className="text-[#a0aec0]">
+            Have an idea or need help building? Tell us what you're working on and let's explore together.
+          </p>
+        </Block>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          <Block variant="dark" className="lg:border-r border-[#2d2d2d]" delay={0.2}>
+            {submitted ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <CheckCircle className="w-12 h-12 text-emerald-400 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">We got your message</h3>
+                <p className="text-[#a0aec0]">We'll review your submission and get back to you soon.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className={inputClass}
+                    data-testid="input-cobuild-name"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className={inputClass}
+                    data-testid="input-cobuild-email"
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Organization or project name (optional)"
+                  value={formData.organization}
+                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                  className={inputClass}
+                  data-testid="input-cobuild-org"
+                />
+                <textarea
+                  placeholder="What are you building or exploring? Tell us about your idea, the problem you're solving, and what kind of help you need."
+                  required
+                  rows={5}
+                  value={formData.exploring}
+                  onChange={(e) => setFormData({ ...formData, exploring: e.target.value })}
+                  className={`${inputClass} resize-none`}
+                  data-testid="input-cobuild-idea"
+                />
+                <input
+                  type="text"
+                  placeholder="Links to demos, repos, or references (optional)"
+                  value={formData.links}
+                  onChange={(e) => setFormData({ ...formData, links: e.target.value })}
+                  className={inputClass}
+                  data-testid="input-cobuild-links"
+                />
+                <Button
+                  type="submit"
+                  disabled={mutation.isPending}
+                  className="bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-none h-12 px-8 w-full md:w-auto"
+                  data-testid="button-cobuild-submit"
+                >
+                  {mutation.isPending ? "Submitting..." : (
+                    <>Submit <Send className="ml-2 w-4 h-4" /></>
+                  )}
+                </Button>
+                {mutation.isError && (
+                  <p className="text-red-400 text-sm" data-testid="text-cobuild-error">Something went wrong. Please try again.</p>
+                )}
+              </form>
+            )}
+          </Block>
+
+          <Block variant="dark" delay={0.3}>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">What we look for</h3>
+                <ul className="space-y-2 text-sm text-[#a0aec0]">
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">-</span> Clear problem with identifiable users</li>
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">-</span> Web3 or AI angle that adds real value</li>
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">-</span> Can ship an MVP in 2-4 weeks</li>
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">-</span> Distribution path through existing ecosystems</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">How it works</h3>
+                <ul className="space-y-2 text-sm text-[#a0aec0]">
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">01</span> You submit your idea</li>
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">02</span> We review and reach out within 48h</li>
+                  <li className="flex items-start gap-2"><span className="text-[#3b82f6] mt-0.5">03</span> If it's a fit, we co-build and ship together</li>
+                </ul>
+              </div>
+              <div className="pt-4 border-t border-[#2d2d2d]">
+                <p className="text-sm text-[#a0aec0] mb-2">Or reach out directly</p>
+                <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#3b82f6] hover:text-[#60a5fa] transition-colors text-sm" data-testid="link-twitter">
+                  @zenoVision_
+                </a>
+              </div>
+            </div>
+          </Block>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   const { data } = useQuery<{ success: boolean; projects: Project[] }>({
@@ -277,20 +424,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Contact */}
-        <section id="contact">
-          <div className="max-w-7xl mx-auto">
-            <Block variant="accent" delay={0.1}>
-              <h2 className="text-3xl font-semibold mb-6">Let's connect</h2>
-              <p className="text-white/80 mb-8">
-                Investors, distribution partners, and builders welcome.
-              </p>
-              <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 text-white hover:text-white/80 transition-colors text-lg" data-testid="link-twitter">
-                @zenoVision_
-              </a>
-            </Block>
-          </div>
-        </section>
+        {/* Co-Build Form */}
+        <CoBuildSection />
 
         {/* Footer */}
         <footer className="border-t border-[#2d2d2d] py-8">
