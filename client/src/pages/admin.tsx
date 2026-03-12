@@ -361,7 +361,7 @@ Store the key as METRICS_API_KEY secret.`}
               <div className="text-sm text-muted-foreground space-y-2">
                 <p><strong>total_payments</strong> — Cumulative count of user-initiated purchases (lifetime). A payment is when a user pays for something in your app (purchases, subscriptions, tips).</p>
                 <p><strong>net_income</strong> — Cumulative revenue after platform fees and refunds (lifetime, in USD). This is the actual money received.</p>
-                <p><strong>currency</strong> — Always report as "USD". Convert other currencies at time of transaction.</p>
+                <p><strong>currency</strong> — Always report as "USD". Convert other currencies at time of transfer.</p>
                 <p className="italic mt-2">The dashboard calculates Daily Payments from the difference between snapshots.</p>
               </div>
             </div>
@@ -371,9 +371,9 @@ Store the key as METRICS_API_KEY secret.`}
                 <Zap className="w-4 h-4" /> On-chain (Web3 apps only) <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5">CUMULATIVE</span>
               </h4>
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>transactions</strong> — Cumulative count of ALL blockchain transactions through the app (lifetime). Includes user actions, system operations, swaps, transfers — everything on-chain.</p>
-                <p><strong>volume</strong> — Cumulative USD value of on-chain transactions (lifetime). Use price at time of transaction.</p>
-                <p className="italic mt-2">Unlike payments (user purchases only), transactions include all on-chain activity. Set both to 0 if your app doesn't have blockchain functionality.</p>
+                <p><strong>transactions</strong> — Cumulative count of ALL blockchain transfers through the app (lifetime). Includes user actions, system operations, swaps, transfers — everything on-chain.</p>
+                <p><strong>volume</strong> — Cumulative USD value of on-chain transfers (lifetime). Use price at time of transfer.</p>
+                <p className="italic mt-2">Unlike payments (user purchases only), transfers include all on-chain activity. Set both to 0 if your app doesn't have blockchain functionality.</p>
               </div>
             </div>
           </div>
@@ -381,7 +381,7 @@ Store the key as METRICS_API_KEY secret.`}
           <div className="bg-muted/50 p-4 rounded-lg mt-4">
             <h4 className="font-medium text-sm mb-2">Important Notes</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• <strong>Cumulative metrics</strong> (total, payments, transactions, volume, net_income) should always increase over time</li>
+              <li>• <strong>Cumulative metrics</strong> (total, payments, transfers, volume, net_income) should always increase over time</li>
               <li>• <strong>Active metrics</strong> (DAU, WAU, MAU, sessions, key_actions) are rolling windows and can fluctuate</li>
               <li>• <strong>Timestamp</strong> should be the exact time the metrics were computed (ISO 8601 format)</li>
               <li>• Report real data only — the dashboard calculates growth rates from changes over time</li>

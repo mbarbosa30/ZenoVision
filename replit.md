@@ -53,21 +53,39 @@ Preferred communication style: Simple, everyday language.
 client/           # Frontend React application
   src/
     components/   # UI components (shadcn/ui)
+      block.tsx   # Shared Block component (used across all pages)
+      dashboard/  # Dashboard-specific extracted components
+        metric-definitions.ts  # Metric info definitions
+        ui-components.tsx      # StatCard, InfoButton, InfoModal, formatNum
+        data-utils.ts          # processHistoricalSnapshots, calculateGrowthRates
+        index.ts               # Re-exports
+      password-gate.tsx  # Server-session-based password gate
     pages/        # Route components
       home.tsx    # Homepage with portfolio and contact form
       about.tsx   # About page with Why Zeno, vision, team
       memo.tsx    # Investment memo page
       admin.tsx   # Protected admin dashboard
+      dashboard.tsx  # Portfolio metrics dashboard
+      proposal.tsx   # Partnership proposal (gated)
+      proposal-marco.tsx  # Personal proposal (gated)
+      proposal-celo-self.tsx  # Initiative proposal (gated)
     hooks/        # Custom React hooks
     lib/          # Utilities and query client
+      types.ts    # Shared TypeScript types (Project, Metrics, MetricsSnapshot, etc.)
 server/           # Backend Express application
-  index.ts        # Server entry point
-  routes.ts       # API route definitions
+  index.ts        # Server entry point (cookie-parser enabled)
+  routes.ts       # API route definitions (requireAdmin middleware for admin routes)
   storage.ts      # Database access layer
   db.ts           # Database connection
 shared/           # Shared code between client/server
   schema.ts       # Drizzle schema definitions
 ```
+
+### Admin Security
+- Server-side auth via HTTP-only `adminToken` cookie
+- `requireAdmin` middleware protects all admin endpoints
+- `/api/admin/verify` issues cookie, `/api/admin/session` validates, `/api/admin/logout` clears
+- Public endpoints: `/api/projects` (GET), `/api/public-metrics`, `POST /api/inquiries`
 
 ### Page Routes
 - `/` - Homepage
