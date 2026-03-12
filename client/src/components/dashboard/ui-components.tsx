@@ -86,9 +86,9 @@ export const formatNum = (num: number, prefix = ""): string => {
   return `${prefix}${num.toLocaleString()}`;
 };
 
-export function smartTickFormat(ts: number, data: any[]): string {
+export function smartTickFormat(ts: number, data: Record<string, number | string>[]): string {
   if (!data || data.length === 0) return '';
-  const timestamps = data.map(d => d.timestamp).filter(Boolean);
+  const timestamps = data.map(d => Number(d.timestamp)).filter(Boolean);
   if (timestamps.length < 2) return format(new Date(ts), "MMM d HH:mm");
   const min = Math.min(...timestamps);
   const max = Math.max(...timestamps);
@@ -115,7 +115,7 @@ export const StatCard = ({
   label: string; 
   value: string | number; 
   change?: number; 
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   color?: "blue" | "green" | "yellow" | "purple" | "cyan";
   delay?: number;
   testId?: string;

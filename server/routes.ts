@@ -166,8 +166,8 @@ export async function registerRoutes(
       const validated = insertInquirySchema.parse(req.body);
       const inquiry = await storage.createInquiry(validated);
       res.status(201).json({ success: true, inquiry });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
+    } catch (error) {
+      if (error instanceof z.ZodError) {
         const validationError = fromZodError(error);
         return res.status(400).json({ 
           success: false, 
@@ -256,8 +256,8 @@ export async function registerRoutes(
       const validated = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validated);
       res.status(201).json({ success: true, project });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
+    } catch (error) {
+      if (error instanceof z.ZodError) {
         const validationError = fromZodError(error);
         return res.status(400).json({ success: false, error: validationError.message });
       }
@@ -361,9 +361,9 @@ export async function registerRoutes(
         snapshot, 
         warnings: validation.warnings.length > 0 ? validation.warnings : undefined 
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching metrics:", error);
-      res.status(500).json({ success: false, error: error.message || "Failed to fetch metrics" });
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Failed to fetch metrics" });
     }
   });
 
@@ -524,8 +524,8 @@ export async function registerRoutes(
         projectId: project.id,
         warnings: validation.warnings.length > 0 ? validation.warnings : undefined,
       });
-    } catch (error: any) {
-      res.json({ success: false, projectId: req.params.projectId, error: error.message });
+    } catch (error) {
+      res.json({ success: false, projectId: req.params.projectId, error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
@@ -542,7 +542,7 @@ export async function registerRoutes(
       let totalTransactions = 0;
       
       for (const snapshot of latestSnapshots) {
-        const metrics = snapshot.metrics as any;
+        const metrics = snapshot.metrics as MetricsData;
         if (metrics) {
           totalUsers += metrics.users?.total || 0;
           totalTransactions += metrics.onchain?.transactions || 0;

@@ -115,7 +115,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
       const res = await fetch("/api/metrics/fetch-all", { method: "POST", credentials: "include" });
       const data = await res.json();
       if (data.success) {
-        const successCount = data.results.filter((r: any) => r.success).length;
+        const successCount = data.results.filter((r: { success: boolean }) => r.success).length;
         toast({ title: "Metrics fetched", description: `Successfully fetched ${successCount} of ${data.results.length} projects` });
         queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
       }

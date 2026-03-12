@@ -6,15 +6,7 @@ import { Block } from "@/components/block";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import type { PublicMetrics } from "@/lib/types";
-
-interface HomeProject {
-  id?: string;
-  name: string;
-  description: string;
-  highlight: string;
-  url: string;
-}
+import type { PublicMetrics, Project } from "@/lib/types";
 
 function CoBuildSection() {
   const [formData, setFormData] = useState({
@@ -164,7 +156,7 @@ function CoBuildSection() {
 }
 
 export default function Home() {
-  const { data } = useQuery<{ success: boolean; projects: HomeProject[] }>({
+  const { data } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
     queryFn: async () => {
       const res = await fetch("/api/projects");
@@ -183,7 +175,7 @@ export default function Home() {
     refetchInterval: 60000,
   });
 
-  const projects = (data?.projects || []).filter((p: any) => p.showOnLandingPage !== false);
+  const projects = (data?.projects || []).filter(p => p.showOnLandingPage !== false);
   const publicMetrics = metricsData?.metrics;
   const trackedProjectIds = new Set(publicMetrics?.trackedProjectIds || []);
 

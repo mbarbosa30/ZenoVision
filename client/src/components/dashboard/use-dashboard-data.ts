@@ -172,7 +172,7 @@ export function useDashboardData() {
     }), { DAU: 1, WAU: 1, MAU: 1, Revenue: 1, Transfers: 1, Volume: 1 });
 
     return ['DAU', 'WAU', 'MAU', 'Revenue', 'Transfers', 'Volume'].map(metric => {
-      const result: any = { metric };
+      const result: Record<string, string | number> = { metric };
       snapshots.forEach(s => {
         const project = projects.find(p => p.id === s.projectId);
         const name = project?.name.split('.')[0] || 'Unknown';
@@ -182,7 +182,7 @@ export function useDashboardData() {
                       metric === 'Revenue' ? s.metrics.revenue.net_income :
                       metric === 'Transfers' ? s.metrics.onchain.transactions :
                       s.metrics.onchain.volume;
-        result[name] = Math.round((value / (maxValues as any)[metric]) * 100);
+        result[name] = Math.round((value / maxValues[metric as keyof typeof maxValues]) * 100);
       });
       return result;
     });
@@ -237,7 +237,7 @@ export function useDashboardData() {
     }
 
     const first = historicalData[0];
-    const rateData: any[] = [];
+    const rateData: Record<string, number>[] = [];
     const appsWithData = new Set<string>();
 
     for (let i = 1; i < historicalData.length; i++) {
@@ -246,7 +246,7 @@ export function useDashboardData() {
 
       if (hoursFromStart < 1) continue;
 
-      const point: any = { timestamp: curr.timestamp };
+      const point: Record<string, number> = { timestamp: curr.timestamp };
 
       for (const app of perAppTimeSeries.apps) {
         const firstRev = first[app.revenueKey] ?? 0;
@@ -286,7 +286,7 @@ export function useDashboardData() {
     if (historicalData.length < 2) return [];
 
     const first = historicalData[0];
-    const result: any[] = [];
+    const result: Record<string, number>[] = [];
 
     for (let i = 1; i < historicalData.length; i++) {
       const curr = historicalData[i];
@@ -582,7 +582,7 @@ export function useDashboardData() {
     }).filter(d => d.project);
 
     return data.sort((a, b) => {
-      let aVal: any, bVal: any;
+      let aVal: string | number, bVal: string | number;
       switch (sortField) {
         case "name": aVal = a.project!.name; bVal = b.project!.name; break;
         case "dau": aVal = a.snapshot.metrics.users.daily_active; bVal = b.snapshot.metrics.users.daily_active; break;
@@ -591,8 +591,8 @@ export function useDashboardData() {
         case "transactions": aVal = a.snapshot.metrics.onchain.transactions; bVal = b.snapshot.metrics.onchain.transactions; break;
         default: aVal = a.project!.name; bVal = b.project!.name;
       }
-      if (typeof aVal === 'string') return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+      if (typeof aVal === 'string' && typeof bVal === 'string') return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      return sortDir === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
     });
   }, [snapshots, projects, sortField, sortDir]);
 

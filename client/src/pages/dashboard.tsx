@@ -844,7 +844,7 @@ function DashboardContent() {
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         labelStyle={{ color: '#fff' }}
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
-                        formatter={(value: any) => [formatNum(Number(value), "$"), '']}
+                        formatter={(value: number | string) => [formatNum(Number(value), "$"), '']}
                       />
                       <Legend wrapperStyle={{ fontSize: '12px' }} />
                       {perAppTimeSeries.hasPerAppData ? (
@@ -902,7 +902,7 @@ function DashboardContent() {
                           contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                           labelStyle={{ color: '#fff' }}
                           labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
-                          formatter={(value: any) => [`$${Number(value).toFixed(2)}/day`, '']}
+                          formatter={(value: number | string) => [`$${Number(value).toFixed(2)}/day`, '']}
                         />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
                         {estimatedDailyRevenueData.apps.filter(app => app.showRevenue).map((app) => {
@@ -1056,7 +1056,7 @@ function DashboardContent() {
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         cursor={{ strokeDasharray: '3 3' }}
-                        formatter={(value: any, name: string) => [formatNum(Number(value)), name]}
+                        formatter={(value: number | string, name: string) => [formatNum(Number(value)), name]}
                       />
                       <Scatter 
                         name="Apps" 
@@ -1095,7 +1095,7 @@ function DashboardContent() {
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 0 }} 
                         cursor={{ strokeDasharray: '3 3' }}
-                        formatter={(value: any, name: string) => [typeof value === 'number' ? formatNum(value) : value, name]}
+                        formatter={(value: number | string, name: string) => [typeof value === 'number' ? formatNum(value) : value, name]}
                       />
                       <Scatter 
                         name="Apps" 
@@ -1330,7 +1330,7 @@ function DashboardContent() {
                                 </div>
                                 <div>
                                   <div className="text-sm text-[#a0aec0] mb-1">WAU</div>
-                                  <div className="text-lg font-semibold">{(snapshot.metrics.users as any).weekly_active ? formatNum((snapshot.metrics.users as any).weekly_active) : 'N/A'}</div>
+                                  <div className="text-lg font-semibold">{snapshot.metrics.users.weekly_active ? formatNum(snapshot.metrics.users.weekly_active) : 'N/A'}</div>
                                 </div>
                               </div>
                             </td>

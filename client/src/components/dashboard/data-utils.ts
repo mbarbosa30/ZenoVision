@@ -66,7 +66,7 @@ export function processHistoricalSnapshots(snapshots: MetricsSnapshot[], project
     const sessionTime = Math.max(...timestamps);
     const timestamp = new Date(sessionTime);
     
-    const pointData: any = {
+    const pointData: Record<string, string | number> = {
       date: format(timestamp, "MMM d HH:mm"),
       fullDate: timestamp.toISOString(),
       timestamp: sessionTime,
@@ -127,7 +127,7 @@ export function processHistoricalSnapshots(snapshots: MetricsSnapshot[], project
   });
 }
 
-export function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'daily'): GrowthResult {
+export function calculateGrowthRates(historical: Record<string, string | number>[], timeframe: GrowthTimeframe = 'daily'): GrowthResult {
   const targetHours = timeframe === 'daily' ? 24 : timeframe === 'weekly' ? 168 : 720;
   
   const defaultRates: GrowthResult = { 
