@@ -1,7 +1,8 @@
-import React, { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { ArrowRight, ExternalLink, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Block } from "@/components/block";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
@@ -19,48 +20,6 @@ interface PublicMetrics {
   totalTransactions: number;
   trackedProjectIds: string[];
 }
-
-const PROJECTS: Project[] = [
-  { name: "MiniPlay.studio", highlight: "200K+ users", description: "Cognition gaming platform", url: "https://miniplay.studio" },
-  { name: "nanoPay.live", highlight: "20K+ txs", description: "Digital financial utility", url: "https://nanopay.live" },
-  { name: "MaxFlow.one", highlight: "5K+ signals", description: "Signal computation engine", url: "https://maxflow.one" },
-  { name: "Tempos.bet", highlight: "Experiment", description: "Conviction markets", url: "https://tempos.bet" },
-  { name: "inspecTor.markets", highlight: "Live", description: "Tor network analysis", url: "https://inspector.markets" },
-  { name: "x4pp.xyz", highlight: "Prototype", description: "Attention-driven inbox", url: "https://x4pp.xyz" },
-  { name: "ProsperON.market", highlight: "Beta", description: "Tokenomics utility OS", url: "https://prosperon.market" },
-  { name: "TimeCapsule.news", highlight: "Live", description: "Time-bound content", url: "https://timecapsule.news" },
-];
-
-
-interface BlockProps {
-  variant?: "dark" | "light" | "accent";
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-const Block = ({ variant = "dark", children, className = "", delay = 0 }: BlockProps) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  
-  const styles = {
-    dark: "bg-[#1a1a1a] text-white border-[#2d2d2d]",
-    light: "bg-white text-[#1a1a1a] border-[#e5e5e5]",
-    accent: "bg-[#3b82f6] text-white border-[#2563eb]",
-  };
-  
-  return (
-    <motion.div
-      ref={ref}
-      className={`border p-6 md:p-8 ${styles[variant]} ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4, delay }}
-    >
-      {children}
-    </motion.div>
-  );
-};
 
 function CoBuildSection() {
   const [formData, setFormData] = useState({
@@ -229,7 +188,7 @@ export default function Home() {
     refetchInterval: 60000,
   });
 
-  const projects = (data?.projects || PROJECTS).filter((p: any) => p.showOnLandingPage !== false);
+  const projects = (data?.projects || []).filter((p: any) => p.showOnLandingPage !== false);
   const publicMetrics = metricsData?.metrics;
   const trackedProjectIds = new Set(publicMetrics?.trackedProjectIds || []);
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Mail, Building2, Link2, Calendar, MessageSquare, Plus, Pencil, Trash2, ExternalLink, GripVertical, X, Lock, RefreshCw, Activity, Users, DollarSign, Zap, TrendingUp, Database, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,10 +91,10 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
+        credentials: "include",
       });
       
       if (res.ok) {
-        sessionStorage.setItem("adminAuth", "true");
         onSuccess();
       } else {
         setError("Invalid password");
@@ -214,7 +214,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
       DAU: s.metrics.users.daily_active,
       WAU: s.metrics.users.weekly_active,
       MAU: s.metrics.users.monthly_active,
-      Transactions: s.metrics.onchain.transactions,
+      Transfers: s.metrics.onchain.transactions,
       Revenue: s.metrics.revenue.net_income,
     }));
 
@@ -288,7 +288,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
                         <Zap className="w-4 h-4 text-yellow-500" />
                         <div>
                           <div className="font-medium">{m.onchain.transactions.toLocaleString()}</div>
-                          <div className="text-xs text-muted-foreground">Transactions</div>
+                          <div className="text-xs text-muted-foreground">Transfers</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -325,7 +325,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
                       <Line yAxisId="left" type="monotone" dataKey="DAU" stroke="#3b82f6" strokeWidth={2} dot={false} />
                       <Line yAxisId="left" type="monotone" dataKey="WAU" stroke="#8b5cf6" strokeWidth={2} dot={false} />
                       <Line yAxisId="left" type="monotone" dataKey="MAU" stroke="#06b6d4" strokeWidth={2} dot={false} />
-                      <Line yAxisId="left" type="monotone" dataKey="Transactions" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="Transfers" stroke="#f59e0b" strokeWidth={2} dot={false} />
                       <Line yAxisId="right" type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -601,7 +601,13 @@ function SnapshotManager({ projects, toast }: { projects: Project[]; toast: Retu
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("adminAuth") === "true");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/session", { credentials: "include" })
+      .then(res => setIsAuthenticated(res.ok))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newProject, setNewProject] = useState({ name: "", description: "", highlight: "", url: "", sortOrder: 0, metricsEndpoint: "", metricsApiKey: "", showUsersMetrics: true, showEngagementMetrics: true, showRevenueMetrics: true, showOnchainMetrics: true, showOnLandingPage: true, chartColor: "" });
@@ -615,7 +621,7 @@ export default function Admin() {
       if (!res.ok) throw new Error("Failed to fetch inquiries");
       return res.json();
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated === true,
   });
 
   const { data: projectsData, isLoading: projectsLoading } = useQuery<{ success: boolean; projects: Project[] }>({
@@ -625,7 +631,7 @@ export default function Admin() {
       if (!res.ok) throw new Error("Failed to fetch projects");
       return res.json();
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated === true,
   });
 
   const createProjectMutation = useMutation({
@@ -686,6 +692,14 @@ export default function Admin() {
 
   const inquiries = inquiriesData?.inquiries || [];
   const projects = projectsData?.projects || [];
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;

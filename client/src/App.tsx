@@ -31,7 +31,7 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="labyrhythm-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="zeno-theme">
       <QueryClientProvider client={queryClient}>
         <Toaster />
         <Router />

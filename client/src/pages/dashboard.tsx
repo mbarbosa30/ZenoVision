@@ -8,6 +8,7 @@ import {
   Calendar, Wallet, Box, Target, Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Block } from "@/components/block";
 import { Link } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PasswordGate } from "@/components/password-gate";
@@ -66,29 +67,6 @@ interface MetricsSnapshot {
   timestamp: string;
   metrics: Metrics;
 }
-
-interface BlockProps {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-const Block = ({ children, className = "", delay = 0 }: BlockProps) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  
-  return (
-    <motion.div
-      ref={ref}
-      className={`bg-[#1a1a1a] border border-[#2d2d2d] p-6 md:p-8 ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4, delay }}
-    >
-      {children}
-    </motion.div>
-  );
-};
 
 const metricDefinitions: Record<string, { title: string; description: string; calculation: string; benchmarks: string; context: string }> = {
   mrr: {
@@ -190,11 +168,11 @@ const metricDefinitions: Record<string, { title: string; description: string; ca
     context: "This metric reveals untapped monetization potential in the portfolio. A big gap between ARPU (paying users) and Revenue/User (all users) means there's a large free user base that could be converted — a growth lever the operator can pull through better onboarding, pricing, or token incentives."
   },
   txnsPerUser: {
-    title: "Transactions Per User",
-    description: "How many onchain transactions each user makes on average. This measures blockchain engagement depth — are users just signing up, or actually transacting onchain?",
-    calculation: "Total onchain transactions across tracked apps ÷ total users across tracked apps.",
+    title: "Transfers Per User",
+    description: "How many onchain transfers each user makes on average. This measures blockchain engagement depth — are users just signing up, or actually transacting onchain?",
+    calculation: "Total onchain transfers across tracked apps ÷ total users across tracked apps.",
     benchmarks: "Low engagement: <0.1 tx/user (most users never transact). Moderate: 0.1-1 tx/user. Strong onchain engagement: 1+ tx/user. DeFi power users: 10+ tx/user.",
-    context: "For a Web3 studio, onchain transactions are proof of real economic activity, not just pageviews. High tx/user across the portfolio means users are actively engaging with blockchain features — validating the Web3 thesis and creating protocol-level value that can be captured through fees or token mechanics."
+    context: "For a Web3 studio, onchain transfers are proof of real economic activity, not just pageviews. High tx/user across the portfolio means users are actively engaging with blockchain features — validating the Web3 thesis and creating protocol-level value that can be captured through fees or token mechanics."
   },
   actionsPerUser: {
     title: "Key Actions Per User",
@@ -239,18 +217,18 @@ const metricDefinitions: Record<string, { title: string; description: string; ca
     context: "ARPPU reveals the revenue ceiling per customer. For a studio building premium Web3 products, high ARPPU suggests users find deep, ongoing value. Combined with conversion rate, ARPPU helps model total revenue potential: (Total Users × Conversion Rate × ARPPU = Revenue)."
   },
   revPerTx: {
-    title: "Revenue Per Transaction",
-    description: "How much revenue each onchain transaction generates. This measures the studio's ability to capture value from blockchain activity — essentially the 'take rate' on onchain flows.",
-    calculation: "Total net_income ÷ total onchain transactions across tracked apps.",
-    benchmarks: "Payment protocols: $0.01-0.10/tx (high volume, low margin). Gaming transactions: $0.10-1.00/tx. DeFi/trading: highly variable. Higher rev/tx with fewer transactions can be more profitable than low rev/tx at massive scale.",
+    title: "Revenue Per Transfer",
+    description: "How much revenue each onchain transfer generates. This measures the studio's ability to capture value from blockchain activity — essentially the 'take rate' on onchain flows.",
+    calculation: "Total net_income ÷ total onchain transfers across tracked apps.",
+    benchmarks: "Payment protocols: $0.01-0.10/tx (high volume, low margin). Gaming transfers: $0.10-1.00/tx. DeFi/trading: highly variable. Higher rev/tx with fewer transfers can be more profitable than low rev/tx at massive scale.",
     context: "Revenue per transaction is the studio's onchain monetization efficiency. In the ETF model, this helps compare which portfolio apps extract the most value per blockchain interaction — informing where to invest more development time and which monetization mechanics to replicate across products."
   },
   avgTxSize: {
-    title: "Average Transaction Size",
-    description: "The average dollar amount of each onchain transaction. This shows the typical economic magnitude of user interactions with the portfolio's blockchain features.",
-    calculation: "Total onchain volume (USD) ÷ total onchain transactions across tracked apps.",
-    benchmarks: "Micro-payments (gaming): $0.01-1.00. Standard payments: $1-50. DeFi/trading: $100-10,000+. The distribution matters more than the average — a few whale transactions can skew this significantly.",
-    context: "Average transaction size reveals what kind of economic activity the portfolio facilitates. Small, frequent transactions (gaming, micropayments) suggest consumer-scale utility. Large, infrequent transactions suggest financial/DeFi utility. Both are valid — but they imply very different growth strategies and investor narratives."
+    title: "Average Transfer Size",
+    description: "The average dollar amount of each onchain transfer. This shows the typical economic magnitude of user interactions with the portfolio's blockchain features.",
+    calculation: "Total onchain volume (USD) ÷ total onchain transfers across tracked apps.",
+    benchmarks: "Micro-payments (gaming): $0.01-1.00. Standard payments: $1-50. DeFi/trading: $100-10,000+. The distribution matters more than the average — a few whale transfers can skew this significantly.",
+    context: "Average transfer size reveals what kind of economic activity the portfolio facilitates. Small, frequent transfers (gaming, micropayments) suggest consumer-scale utility. Large, infrequent transfers suggest financial/DeFi utility. Both are valid — but they imply very different growth strategies and investor narratives."
   },
   arpuAll: {
     title: "ARPU (All Users)",
@@ -260,15 +238,15 @@ const metricDefinitions: Record<string, { title: string; description: string; ca
     context: "This metric is essential for modeling portfolio-level revenue potential. If you know ARPU(all) and total user count, you can quickly estimate total revenue without needing to know exact conversion rates. For investors, rising ARPU(all) means the studio is getting better at monetizing its reach."
   },
   txPerUser: {
-    title: "Onchain Transactions Per User",
-    description: "How many blockchain transactions each user generates on average. This is a Web3-specific engagement metric — are users actually using the onchain features, or just the off-chain parts?",
-    calculation: "Total onchain transactions ÷ total users across all tracked apps.",
+    title: "Onchain Transfers Per User",
+    description: "How many blockchain transfers each user generates on average. This is a Web3-specific engagement metric — are users actually using the onchain features, or just the off-chain parts?",
+    calculation: "Total onchain transfers ÷ total users across all tracked apps.",
     benchmarks: "Early-stage Web3 app: 0.1-0.5 tx/user. Growing: 0.5-2 tx/user. Mature DeFi/gaming: 5+ tx/user. Higher is better — it means users are engaging with the blockchain, not just the frontend.",
-    context: "Transactions per user is the Web3 adoption metric. For a studio building AI and Web3 products, high tx/user proves that the blockchain component adds real value — it's not just 'Web3 for marketing purposes.' This is critical for token-based fundraising narratives."
+    context: "Transfers per user is the Web3 adoption metric. For a studio building AI and Web3 products, high tx/user proves that the blockchain component adds real value — it's not just 'Web3 for marketing purposes.' This is critical for token-based fundraising narratives."
   },
   volumePerTx: {
-    title: "Volume Per Transaction",
-    description: "The average dollar amount flowing through each blockchain transaction. Identical to average transaction size, but framed as throughput efficiency — how much economic value each transaction carries.",
+    title: "Volume Per Transfer",
+    description: "The average dollar amount flowing through each blockchain transfer. Identical to average transfer size, but framed as throughput efficiency — how much economic value each transfer carries.",
     calculation: "Total onchain volume (USD) ÷ total onchain transactions.",
     benchmarks: "Micropayment apps: $0.10-5. Standard Web3 transfers: $10-100. DeFi protocols: $500-50,000+. Context matters — a gaming app with $0.50 avg tx doing 10K tx/day is healthier than a DeFi app with $5K avg tx doing 2 tx/day.",
     context: "Volume per transaction helps characterize the portfolio's onchain economic profile. Lower volume with high frequency suggests consumer utility. Higher volume with lower frequency suggests financial infrastructure. Both contribute to the studio's valuation but through different mechanisms."
@@ -289,8 +267,8 @@ const metricDefinitions: Record<string, { title: string; description: string; ca
   },
   projections: {
     title: "Data-Driven Growth Projections",
-    description: "Forward-looking estimates for users, revenue, and transactions at 30, 60, and 90-day horizons. These projections are computed entirely from observed historical data — no assumptions or targets. They model natural growth deceleration using a decay factor, reflecting the well-established principle that maintaining percentage growth becomes harder as the base scales.",
-    calculation: "For each metric (MAU, revenue, transactions), the system computes the actual monthly growth rate from historical snapshots. These rates are then projected forward with a 15% monthly decay factor: Month 1 uses the full observed rate, Month 2 uses 85% of it (rate × 0.85), Month 3 uses 72.25% (rate × 0.85²). Rates are clamped at [-50%, +100%] to prevent extreme outlier extrapolation. Each metric uses its own independent growth rate.",
+    description: "Forward-looking estimates for users, revenue, and transfers at 30, 60, and 90-day horizons. These projections are computed entirely from observed historical data — no assumptions or targets. They model natural growth deceleration using a decay factor, reflecting the well-established principle that maintaining percentage growth becomes harder as the base scales.",
+    calculation: "For each metric (MAU, revenue, transfers), the system computes the actual monthly growth rate from historical snapshots. These rates are then projected forward with a 15% monthly decay factor: Month 1 uses the full observed rate, Month 2 uses 85% of it (rate × 0.85), Month 3 uses 72.25% (rate × 0.85²). Rates are clamped at [-50%, +100%] to prevent extreme outlier extrapolation. Each metric uses its own independent growth rate.",
     benchmarks: "The decay model is conservative by design. If current growth is 20%/mo, projections assume 20% → 17% → 14.5% over 3 months. Actual performance may beat projections (if growth accelerates) or miss them (if growth stalls). The confidence indicator shows how reliable the underlying data is based on snapshot count and time coverage.",
     context: "These projections help the studio operator and investors understand where the portfolio is heading based on current momentum. Unlike pitch deck projections that assume constant or accelerating growth, these use actual data with built-in conservatism. The decay factor mirrors DCF fade rates used in professional startup financial modeling — acknowledging that early growth rates are unsustainable long-term."
   },
@@ -372,7 +350,7 @@ const metricDefinitions: Record<string, { title: string; description: string; ca
     context: "This chart is the portfolio manager's strategic view. It immediately shows which products are the studio's cash cows (upper-right), which are engagement plays waiting to be monetized (lower-right), and which need a rethink. For a solo operator deciding where to spend time, this visualization makes the allocation decision clear."
   },
   volumeTransactions: {
-    title: "Volume vs Transactions Correlation",
+    title: "Volume vs Transfers Correlation",
     description: "A scatter plot showing each app's transaction count against its onchain volume, with bubble size representing MAU. This reveals the relationship between transaction frequency and economic magnitude across the portfolio.",
     calculation: "X-axis: transaction count per app. Y-axis: onchain volume (USD) per app. Bubble size: MAU per app. Each bubble represents one tracked app.",
     benchmarks: "High volume, few transactions: large-value transfers (DeFi-like). Many transactions, low volume: micro-payments (gaming-like). The diagonal represents balanced proportional growth — most healthy apps sit near or above it.",
@@ -910,7 +888,7 @@ function DashboardContent() {
         WAU: s.metrics.users.weekly_active,
         MAU: s.metrics.users.monthly_active,
         Revenue: s.metrics.revenue.net_income,
-        Transactions: s.metrics.onchain.transactions,
+        Transfers: s.metrics.onchain.transactions,
         Volume: s.metrics.onchain.volume,
         KeyActions: s.metrics.engagement.key_actions,
         Sessions: s.metrics.engagement.sessions_today,
@@ -926,11 +904,11 @@ function DashboardContent() {
       WAU: Math.max(acc.WAU, s.metrics.users.weekly_active || 1),
       MAU: Math.max(acc.MAU, s.metrics.users.monthly_active || 1),
       Revenue: Math.max(acc.Revenue, s.metrics.revenue.net_income || 1),
-      Transactions: Math.max(acc.Transactions, s.metrics.onchain.transactions || 1),
+      Transfers: Math.max(acc.Transfers, s.metrics.onchain.transactions || 1),
       Volume: Math.max(acc.Volume, s.metrics.onchain.volume || 1),
-    }), { DAU: 1, WAU: 1, MAU: 1, Revenue: 1, Transactions: 1, Volume: 1 });
+    }), { DAU: 1, WAU: 1, MAU: 1, Revenue: 1, Transfers: 1, Volume: 1 });
     
-    return ['DAU', 'WAU', 'MAU', 'Revenue', 'Transactions', 'Volume'].map(metric => {
+    return ['DAU', 'WAU', 'MAU', 'Revenue', 'Transfers', 'Volume'].map(metric => {
       const result: any = { metric };
       snapshots.forEach(s => {
         const project = projects.find(p => p.id === s.projectId);
@@ -939,7 +917,7 @@ function DashboardContent() {
                       metric === 'WAU' ? s.metrics.users.weekly_active :
                       metric === 'MAU' ? s.metrics.users.monthly_active :
                       metric === 'Revenue' ? s.metrics.revenue.net_income :
-                      metric === 'Transactions' ? s.metrics.onchain.transactions :
+                      metric === 'Transfers' ? s.metrics.onchain.transactions :
                       s.metrics.onchain.volume;
         result[name] = Math.round((value / (maxValues as any)[metric]) * 100);
       });
@@ -1758,7 +1736,7 @@ function DashboardContent() {
                     <span data-testid="value-rev-per-user" className="font-semibold">${financialMetrics.revenuePerUser.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0] flex items-center gap-1">Txns/User <InfoButton metric="txnsPerUser" /></span>
+                    <span className="text-[#a0aec0] flex items-center gap-1">Transfers/User <InfoButton metric="txnsPerUser" /></span>
                     <span data-testid="value-txns-per-user" className="font-semibold">{financialMetrics.transactionsPerUser.toFixed(1)}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
@@ -2291,7 +2269,7 @@ function DashboardContent() {
 
               <Block delay={0.25} className="lg:col-span-2">
                 <h3 className="text-lg font-medium mb-4">Daily Activity Comparison</h3>
-                <p className="text-xs text-[#6b7280] mb-3">Transactions & Volume extrapolated to 24h rate; Payers shown as point-in-time</p>
+                <p className="text-xs text-[#6b7280] mb-3">Transfers & Volume extrapolated to 24h rate; Payers shown as point-in-time</p>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={filteredActivityData}>
@@ -2315,7 +2293,7 @@ function DashboardContent() {
                         labelFormatter={(ts) => format(new Date(ts), "MMM d, yyyy HH:mm:ss")}
                       />
                       <Legend wrapperStyle={{ fontSize: '12px' }} />
-                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transactions" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line yAxisId="left" type="monotone" dataKey="dailyTransactions" name="Est. Daily Transfers" stroke="#3b82f6" strokeWidth={2} dot={false} />
                       <Line yAxisId="left" type="monotone" dataKey="totalPaying" name="Paying Users" stroke="#10b981" strokeWidth={2} dot={false} />
                       <Bar yAxisId="right" dataKey="dailyVolume" name="Est. Daily Volume ($)" fill="#f59e0b" opacity={0.6} />
                     </ComposedChart>
@@ -2349,7 +2327,7 @@ function DashboardContent() {
                       <Legend wrapperStyle={{ fontSize: '12px' }} />
                       <Bar dataKey="MAU" fill="#8b5cf6" />
                       <Bar dataKey="Revenue" fill="#10b981" />
-                      <Bar dataKey="Transactions" fill="#f59e0b" />
+                      <Bar dataKey="Transfers" fill="#f59e0b" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -2434,18 +2412,18 @@ function DashboardContent() {
               </Block>
 
               <Block delay={0.25}>
-                <h3 className="text-lg font-medium mb-4 flex items-center gap-2">Volume vs Transactions <InfoButton metric="volumeTransactions" /></h3>
+                <h3 className="text-lg font-medium mb-4 flex items-center gap-2">Volume vs Transfers <InfoButton metric="volumeTransactions" /></h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
                       <XAxis 
-                        dataKey="Transactions" 
+                        dataKey="Transfers" 
                         type="number" 
                         stroke="#666" 
                         tick={{ fill: '#a0aec0', fontSize: 12 }}
-                        name="Transactions"
-                        label={{ value: 'Transactions', position: 'bottom', fill: '#a0aec0', fontSize: 12 }}
+                        name="Transfers"
+                        label={{ value: 'Transfers', position: 'bottom', fill: '#a0aec0', fontSize: 12 }}
                       />
                       <YAxis 
                         dataKey="Volume" 
@@ -2489,7 +2467,7 @@ function DashboardContent() {
                   Revenue <span className={projections.revenueGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}>{projections.revenueGrowthRate >= 0 ? "+" : ""}{projections.revenueGrowthRate.toFixed(1)}%</span>/mo
                 </span>
                 <span className="text-[#a0aec0]">
-                  Txns <span className={projections.txGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}>{projections.txGrowthRate >= 0 ? "+" : ""}{projections.txGrowthRate.toFixed(1)}%</span>/mo
+                  Transfers <span className={projections.txGrowthRate >= 0 ? "text-[#10b981]" : "text-[#ef4444]"}>{projections.txGrowthRate >= 0 ? "+" : ""}{projections.txGrowthRate.toFixed(1)}%</span>/mo
                 </span>
                 <span className="text-[#666]">({(projections.decayFactor * 100).toFixed(0)}% decay/mo)</span>
               </div>
@@ -2512,7 +2490,7 @@ function DashboardContent() {
                     <span className="text-xl font-semibold text-[#10b981]" data-testid="value-30d-arr">{formatNum(projections.day30.arr, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                    <span className="text-[#a0aec0]">Transactions</span>
+                    <span className="text-[#a0aec0]">Transfers</span>
                     <span className="font-semibold" data-testid="value-30d-txns">{formatNum(projections.day30.transactions)}</span>
                   </div>
                 </div>
@@ -2534,7 +2512,7 @@ function DashboardContent() {
                     <span className="text-xl font-semibold text-[#10b981]" data-testid="value-60d-arr">{formatNum(projections.day60.arr, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-[#2d2d2d] pt-3">
-                    <span className="text-[#a0aec0]">Transactions</span>
+                    <span className="text-[#a0aec0]">Transfers</span>
                     <span className="font-semibold" data-testid="value-60d-txns">{formatNum(projections.day60.transactions)}</span>
                   </div>
                 </div>
@@ -2556,7 +2534,7 @@ function DashboardContent() {
                     <span className="text-xl font-semibold text-[#10b981]" data-testid="value-90d-arr">{formatNum(projections.day90.arr, "$")}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#a0aec0]">Transactions</span>
+                    <span className="text-[#a0aec0]">Transfers</span>
                     <span className="text-xl font-semibold">{formatNum(projections.day90.transactions)}</span>
                   </div>
                 </div>
@@ -2626,7 +2604,7 @@ function DashboardContent() {
                         data-testid="sort-transactions"
                       >
                         <div className="flex items-center justify-end gap-2">
-                          Transactions
+                          Transfers
                           {sortField === 'transactions' && (sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
                         </div>
                       </th>
@@ -2730,7 +2708,7 @@ function DashboardContent() {
                       <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">MAU</th>
                       <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Paying</th>
                       <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Revenue</th>
-                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Txns</th>
+                      <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Transfers</th>
                       <th className="text-right py-3 px-3 text-[#a0aec0] font-medium">Volume</th>
                     </tr>
                   </thead>

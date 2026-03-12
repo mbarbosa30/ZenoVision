@@ -1,11 +1,40 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import { randomBytes } from "crypto";
 import { storage } from "./storage";
 import { insertInquirySchema, insertProjectSchema, metricsSchema, type MetricsSnapshot } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { z } from "zod";
 
 type MetricsData = z.infer<typeof metricsSchema>;
+
+const adminSessions = new Map<string, { createdAt: number }>();
+const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function createAdminSession(): string {
+  const token = randomBytes(32).toString("hex");
+  adminSessions.set(token, { createdAt: Date.now() });
+  return token;
+}
+
+function isValidAdminSession(token: string | undefined): boolean {
+  if (!token) return false;
+  const session = adminSessions.get(token);
+  if (!session) return false;
+  if (Date.now() - session.createdAt > SESSION_MAX_AGE_MS) {
+    adminSessions.delete(token);
+    return false;
+  }
+  return true;
+}
+
+function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies?.adminToken;
+  if (isValidAdminSession(token)) {
+    return next();
+  }
+  res.status(401).json({ success: false, error: "Unauthorized" });
+}
 
 const FETCH_TIMEOUT_MS = 10000;
 
@@ -153,7 +182,7 @@ export async function registerRoutes(
     }
   });
 
-  // Verify admin password
+  // Verify admin password and issue session cookie
   app.post("/api/admin/verify", async (req, res) => {
     const { password } = req.body;
     const adminPassword = process.env.ADMIN_PASSWORD;
@@ -163,14 +192,39 @@ export async function registerRoutes(
     }
     
     if (password === adminPassword) {
+      const token = createAdminSession();
+      res.cookie("adminToken", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: SESSION_MAX_AGE_MS,
+        path: "/",
+      });
       res.json({ success: true });
     } else {
       res.status(401).json({ success: false, error: "Invalid password" });
     }
   });
 
+  // Check if admin session is valid
+  app.get("/api/admin/session", (req, res) => {
+    const token = req.cookies?.adminToken;
+    if (isValidAdminSession(token)) {
+      res.json({ success: true, authenticated: true });
+    } else {
+      res.status(401).json({ success: false, authenticated: false });
+    }
+  });
+
+  // Logout admin session
+  app.post("/api/admin/logout", (req, res) => {
+    const token = req.cookies?.adminToken;
+    if (token) adminSessions.delete(token);
+    res.clearCookie("adminToken", { path: "/" });
+    res.json({ success: true });
+  });
+
   // Get all inquiries (for internal review)
-  app.get("/api/inquiries", async (req, res) => {
+  app.get("/api/inquiries", requireAdmin, async (req, res) => {
     try {
       const inquiries = await storage.getAllInquiries();
       res.json({ success: true, inquiries });
@@ -195,7 +249,7 @@ export async function registerRoutes(
   });
 
   // Create a project
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", requireAdmin, async (req, res) => {
     try {
       const validated = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validated);
@@ -211,7 +265,7 @@ export async function registerRoutes(
   });
 
   // Update a project
-  app.put("/api/projects/:id", async (req, res) => {
+  app.put("/api/projects/:id", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const project = await storage.updateProject(id, req.body);
@@ -226,7 +280,7 @@ export async function registerRoutes(
   });
 
   // Delete a project
-  app.delete("/api/projects/:id", async (req, res) => {
+  app.delete("/api/projects/:id", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await storage.deleteProject(id);
@@ -241,7 +295,7 @@ export async function registerRoutes(
   });
 
   // Fetch metrics from a project's external API and store snapshot
-  app.post("/api/projects/:id/fetch-metrics", async (req, res) => {
+  app.post("/api/projects/:id/fetch-metrics", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const projects = await storage.getAllProjects();
@@ -348,7 +402,7 @@ export async function registerRoutes(
   });
 
   // Fetch metrics for all projects with configured endpoints
-  app.post("/api/metrics/fetch-all", async (req, res) => {
+  app.post("/api/metrics/fetch-all", requireAdmin, async (req, res) => {
     try {
       const projects = await storage.getAllProjects();
       const fetchableProjects = projects.filter(p => p.metricsEndpoint);
@@ -416,7 +470,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/metrics/fetch/:projectId", async (req, res) => {
+  app.post("/api/metrics/fetch/:projectId", requireAdmin, async (req, res) => {
     try {
       const project = await storage.getProject(req.params.projectId);
       if (!project) {
@@ -509,7 +563,7 @@ export async function registerRoutes(
   });
 
   // Delete a single metrics snapshot by ID
-  app.delete("/api/metrics/snapshot/:id", async (req, res) => {
+  app.delete("/api/metrics/snapshot/:id", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await storage.deleteMetricsSnapshot(id);
@@ -525,7 +579,7 @@ export async function registerRoutes(
   });
 
   // Delete all metrics snapshots (reset)
-  app.delete("/api/metrics", async (req, res) => {
+  app.delete("/api/metrics", requireAdmin, async (req, res) => {
     try {
       const deleted = await storage.deleteAllMetricsSnapshots();
       res.json({ success: true, deleted });

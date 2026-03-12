@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { inquiries, projects, metricsSnapshots, type Inquiry, type InsertInquiry, type Project, type InsertProject, type MetricsSnapshot, type InsertMetricsSnapshot } from "@shared/schema";
 
 export interface IStorage {
@@ -74,13 +74,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllLatestMetrics(): Promise<MetricsSnapshot[]> {
-    const allProjects = await this.getAllProjects();
-    const snapshots: MetricsSnapshot[] = [];
-    for (const project of allProjects) {
-      const latest = await this.getLatestMetricsSnapshot(project.id);
-      if (latest) snapshots.push(latest);
-    }
-    return snapshots;
+    const result = await db.execute(sql`
+      SELECT DISTINCT ON (project_id) id, project_id AS "projectId", timestamp, metrics
+      FROM metrics_snapshots
+      ORDER BY project_id, timestamp DESC
+    `);
+    return result.rows as unknown as MetricsSnapshot[];
   }
 
   async getAllMetricsHistory(limit: number = 30): Promise<MetricsSnapshot[]> {

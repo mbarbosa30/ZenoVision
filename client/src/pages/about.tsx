@@ -1,38 +1,8 @@
-import React, { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import React from "react";
 import { ArrowRight, ArrowLeft, Zap, Users, Target, Repeat, Brain, Scale, Eye, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Block } from "@/components/block";
 import { Link } from "wouter";
-
-interface BlockProps {
-  variant?: "dark" | "light" | "accent";
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}
-
-const Block = ({ variant = "dark", children, className = "", delay = 0 }: BlockProps) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  
-  const styles = {
-    dark: "bg-[#1a1a1a] text-white border-[#2d2d2d]",
-    light: "bg-white text-[#1a1a1a] border-[#e5e5e5]",
-    accent: "bg-[#3b82f6] text-white border-[#2563eb]",
-  };
-  
-  return (
-    <motion.div
-      ref={ref}
-      className={`border p-6 md:p-8 ${styles[variant]} ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4, delay }}
-    >
-      {children}
-    </motion.div>
-  );
-};
 
 export default function About() {
   return (

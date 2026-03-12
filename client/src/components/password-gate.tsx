@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,20 @@ interface PasswordGateProps {
 }
 
 export function PasswordGate({ children, storageKey, title = "Protected Page" }: PasswordGateProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem(storageKey) === "true";
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/session", { credentials: "include" })
+      .then(res => {
+        setIsAuthenticated(res.ok);
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +38,10 @@ export function PasswordGate({ children, storageKey, title = "Protected Page" }:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
+        credentials: "include",
       });
       
       if (res.ok) {
-        sessionStorage.setItem(storageKey, "true");
         setIsAuthenticated(true);
       } else {
         setError("Invalid password");
@@ -44,6 +52,14 @@ export function PasswordGate({ children, storageKey, title = "Protected Page" }:
       setLoading(false);
     }
   };
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+        <div className="text-[#a0aec0]">Loading...</div>
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     return <>{children}</>;
