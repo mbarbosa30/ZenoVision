@@ -171,7 +171,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
   const fetchAllMetrics = async () => {
     setFetching(true);
     try {
-      const res = await fetch("/api/metrics/fetch-all", { method: "POST" });
+      const res = await fetch("/api/metrics/fetch-all", { method: "POST", credentials: "include" });
       const data = await res.json();
       if (data.success) {
         const successCount = data.results.filter((r: any) => r.success).length;
@@ -189,7 +189,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
     if (!confirm("Are you sure you want to delete all metrics data? This cannot be undone.")) return;
     setResetting(true);
     try {
-      const res = await fetch("/api/metrics", { method: "DELETE" });
+      const res = await fetch("/api/metrics", { method: "DELETE", credentials: "include" });
       const data = await res.json();
       if (data.success) {
         toast({ title: "Metrics reset", description: `Deleted ${data.deleted} snapshots` });
@@ -460,7 +460,7 @@ function SnapshotManager({ projects, toast }: { projects: Project[]; toast: Retu
   const { data: historyData, isLoading } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
     queryKey: ["/api/metrics/history"],
     queryFn: async () => {
-      const res = await fetch("/api/metrics/history?limit=200");
+      const res = await fetch("/api/metrics/history?limit=200", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch snapshots");
       return res.json();
     },
@@ -470,7 +470,7 @@ function SnapshotManager({ projects, toast }: { projects: Project[]; toast: Retu
     if (!confirm("Delete this snapshot? This cannot be undone.")) return;
     setDeleting(id);
     try {
-      const res = await fetch(`/api/metrics/snapshot/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/metrics/snapshot/${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
         toast({ title: "Snapshot deleted", description: "The snapshot has been removed" });
         queryClient.invalidateQueries({ queryKey: ["/api/metrics/history"] });
@@ -617,7 +617,7 @@ export default function Admin() {
   const { data: inquiriesData, isLoading: inquiriesLoading } = useQuery<{ success: boolean; inquiries: Inquiry[] }>({
     queryKey: ["/api/inquiries"],
     queryFn: async () => {
-      const res = await fetch("/api/inquiries");
+      const res = await fetch("/api/inquiries", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch inquiries");
       return res.json();
     },
@@ -640,6 +640,7 @@ export default function Admin() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(project),
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to create project");
       return res.json();
@@ -661,6 +662,7 @@ export default function Admin() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(project),
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to update project");
       return res.json();
@@ -677,7 +679,7 @@ export default function Admin() {
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/projects/${id}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error("Failed to delete project");
       return res.json();
     },

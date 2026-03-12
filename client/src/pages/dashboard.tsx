@@ -772,7 +772,7 @@ function DashboardContent() {
   const { data: historicalMetrics } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
     queryKey: ["/api/metrics/history"],
     queryFn: async () => {
-      const res = await fetch("/api/metrics/history?limit=30");
+      const res = await fetch("/api/metrics/history?limit=30", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch history");
       return res.json();
     },

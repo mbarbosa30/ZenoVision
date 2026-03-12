@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Zap, TrendingUp, Coins, Target, AlertTriangle, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Block } from "@/components/block";

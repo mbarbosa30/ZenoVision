@@ -390,7 +390,7 @@ export async function registerRoutes(
   });
 
   // Get all historical metrics (for dashboard charts)
-  app.get("/api/metrics/history", async (req, res) => {
+  app.get("/api/metrics/history", requireAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 30;
       const snapshots = await storage.getAllMetricsHistory(limit);
