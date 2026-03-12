@@ -371,7 +371,7 @@ Store the key as METRICS_API_KEY secret.`}
                 <Zap className="w-4 h-4" /> On-chain (Web3 apps only) <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5">CUMULATIVE</span>
               </h4>
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>transactions</strong> — Cumulative count of ALL blockchain transfers through the app (lifetime). Includes user actions, system operations, swaps, transfers — everything on-chain.</p>
+                <p><strong>transfers</strong> — Cumulative count of ALL blockchain transfers through the app (lifetime). Includes user actions, system operations, swaps, transfers — everything on-chain.</p>
                 <p><strong>volume</strong> — Cumulative USD value of on-chain transfers (lifetime). Use price at time of transfer.</p>
                 <p className="italic mt-2">Unlike payments (user purchases only), transfers include all on-chain activity. Set both to 0 if your app doesn't have blockchain functionality.</p>
               </div>

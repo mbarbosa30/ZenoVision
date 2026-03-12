@@ -104,7 +104,7 @@ export default function Proposal() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-[#3b82f6] mt-1 flex-shrink-0" />
-                    <span><strong className="text-white">Focus:</strong> Engagement, onchain transactions on Celo, sustainable revenue</span>
+                    <span><strong className="text-white">Focus:</strong> Engagement, onchain transfers on Celo, sustainable revenue</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-[#3b82f6] mt-1 flex-shrink-0" />
@@ -157,7 +157,7 @@ export default function Proposal() {
                 <div className="text-sm text-[#3b82f6] uppercase tracking-widest mb-3">Product & Retention</div>
                 <ul className="space-y-3 text-sm text-[#a0aec0]">
                   <li><strong className="text-white">Staged Roadmaps:</strong> Pre-launch QA, lean listing, release features in waves to sustain retention</li>
-                  <li><strong className="text-white">Daily Onchain Habit:</strong> Check-in mechanics triggering low-cost Celo transactions</li>
+                  <li><strong className="text-white">Daily Onchain Habit:</strong> Check-in mechanics triggering low-cost Celo transfers</li>
                   <li><strong className="text-white">No Pay-to-Play:</strong> Progression, status, streaks over direct rewards</li>
                 </ul>
               </Block>
@@ -190,8 +190,8 @@ export default function Proposal() {
               </Block>
               <Block variant="dark" delay={0.2}>
                 <Zap className="w-8 h-8 text-[#3b82f6] mb-3" />
-                <h3 className="text-2xl font-semibold mb-2">Transactions</h3>
-                <p className="text-[#a0aec0]">Onchain transactions per user — the value signal. Are users transacting on Celo?</p>
+                <h3 className="text-2xl font-semibold mb-2">Transfers</h3>
+                <p className="text-[#a0aec0]">Onchain transfers per user — the value signal. Are users transacting on Celo?</p>
               </Block>
             </div>
 
@@ -276,7 +276,7 @@ export default function Proposal() {
               <Block variant="dark" delay={0.15}>
                 <h2 className="text-2xl font-semibold mb-4">Value to Opera</h2>
                 <ul className="space-y-2 text-[#a0aec0]">
-                  <li><strong className="text-white">More apps, more stickiness:</strong> Daily engagement and transactions</li>
+                  <li><strong className="text-white">More apps, more stickiness:</strong> Daily engagement and transfers</li>
                   <li><strong className="text-white">AI-native innovation:</strong> Strategic input on product direction</li>
                 </ul>
               </Block>

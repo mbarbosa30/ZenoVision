@@ -185,7 +185,7 @@ export default function ProposalCeloSelf() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { step: "Burn", subtitle: "Real Cost", desc: "User transactions burn CELO (deflationary)", icon: Coins, color: "#ef4444" },
+                { step: "Burn", subtitle: "Real Cost", desc: "User transfers burn CELO (deflationary)", icon: Coins, color: "#ef4444" },
                 { step: "Mint", subtitle: "Influence", desc: "Burning mints non-transferable Prosper Score", icon: Zap, color: "#f59e0b" },
                 { step: "Decay", subtitle: "Rent, Don't Own", desc: "Scores decay at 2% weekly. Influence is rented.", icon: Repeat, color: "#8b5cf6" },
                 { step: "Allocate", subtitle: "Yield", desc: "Weekly Yield Pool routed pro-rata based on score", icon: Target, color: "#10b981" },
@@ -318,7 +318,7 @@ export default function ProposalCeloSelf() {
                   mitigations: [
                     "Decay: 2% weekly decay means whales cannot buy influence once and sit on it",
                     "Linear Minting: No exponential bonus for massive burns",
-                    "Usage Bias: Portion of pool reserved for transaction frequency, not just volume"
+                    "Usage Bias: Portion of pool reserved for transfer frequency, not just volume"
                   ]
                 },
                 { 

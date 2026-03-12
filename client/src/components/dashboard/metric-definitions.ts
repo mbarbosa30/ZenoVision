@@ -25,7 +25,7 @@ export const metricDefinitions: Record<string, { title: string; description: str
   conversion: {
     title: "Free-to-Paid Conversion Rate",
     description: "The percentage of all users across the portfolio who become paying customers. This is the funnel's most critical junction — where attention turns into revenue.",
-    calculation: "(Total paying users ÷ Total users) × 100. Aggregated across all tracked apps. Includes both direct payments and onchain transactions that generate revenue.",
+    calculation: "(Total paying users ÷ Total users) × 100. Aggregated across all tracked apps. Includes both direct payments and onchain transfers that generate revenue.",
     benchmarks: "Freemium apps: 2-5% is standard. Mobile gaming: 1-3%. Web3 with token incentives: 5-15% is achievable because onchain actions often have built-in monetization. Above 10% across a portfolio is exceptional.",
     context: "In the studio model, conversion rate reveals which apps have found pricing/value fit. A portfolio with 8 apps where 2-3 convert at 10%+ and others at 1-2% tells a clear story: double down on what works, iterate on what doesn't. This metric helps prioritize where to allocate the solo operator's limited time."
   },
@@ -153,7 +153,7 @@ export const metricDefinitions: Record<string, { title: string; description: str
     description: "How much revenue each onchain transfer generates. This measures the studio's ability to capture value from blockchain activity — essentially the 'take rate' on onchain flows.",
     calculation: "Total net_income ÷ total onchain transfers across tracked apps.",
     benchmarks: "Payment protocols: $0.01-0.10/tx (high volume, low margin). Gaming transfers: $0.10-1.00/tx. DeFi/trading: highly variable. Higher rev/tx with fewer transfers can be more profitable than low rev/tx at massive scale.",
-    context: "Revenue per transaction is the studio's onchain monetization efficiency. In the ETF model, this helps compare which portfolio apps extract the most value per blockchain interaction — informing where to invest more development time and which monetization mechanics to replicate across products."
+    context: "Revenue per transfer is the studio's onchain monetization efficiency. In the ETF model, this helps compare which portfolio apps extract the most value per blockchain interaction — informing where to invest more development time and which monetization mechanics to replicate across products."
   },
   avgTxSize: {
     title: "Average Transfer Size",
@@ -179,9 +179,9 @@ export const metricDefinitions: Record<string, { title: string; description: str
   volumePerTx: {
     title: "Volume Per Transfer",
     description: "The average dollar amount flowing through each blockchain transfer. Identical to average transfer size, but framed as throughput efficiency — how much economic value each transfer carries.",
-    calculation: "Total onchain volume (USD) ÷ total onchain transactions.",
+    calculation: "Total onchain volume (USD) ÷ total onchain transfers.",
     benchmarks: "Micropayment apps: $0.10-5. Standard Web3 transfers: $10-100. DeFi protocols: $500-50,000+. Context matters — a gaming app with $0.50 avg tx doing 10K tx/day is healthier than a DeFi app with $5K avg tx doing 2 tx/day.",
-    context: "Volume per transaction helps characterize the portfolio's onchain economic profile. Lower volume with high frequency suggests consumer utility. Higher volume with lower frequency suggests financial infrastructure. Both contribute to the studio's valuation but through different mechanisms."
+    context: "Volume per transfer helps characterize the portfolio's onchain economic profile. Lower volume with high frequency suggests consumer utility. Higher volume with lower frequency suggests financial infrastructure. Both contribute to the studio's valuation but through different mechanisms."
   },
   volumePerDau: {
     title: "Volume Per Daily Active User",
@@ -213,7 +213,7 @@ export const metricDefinitions: Record<string, { title: string; description: str
   },
   valVolumeMultiple: {
     title: "Volume Percentage Valuation (1-10%)",
-    description: "Values the studio as a percentage of the total onchain volume flowing through its products. This treats the studio as a value-capture layer on transaction flows — similar to how payment networks (Visa, Stripe) are valued relative to their payment volume.",
+    description: "Values the studio as a percentage of the total onchain volume flowing through its products. This treats the studio as a value-capture layer on transfer flows — similar to how payment networks (Visa, Stripe) are valued relative to their payment volume.",
     calculation: "Annualized onchain volume × capture percentage. Conservative (1%) — minimal fee capture, early infrastructure. Mid (5%) — moderate fees or token burns. Aggressive (10%) — strong moat with embedded fee structures. Annualized volume = current volume extrapolated to 12 months using the daily rate.",
     benchmarks: "Payment networks: valued at 0.5-2% of payment volume. DeFi protocols: 1-5% of TVL or volume. For early-stage studios, even 1% of significant volume implies meaningful value. Uniswap's volume-based valuation equivalent is roughly 2-3% of annualized volume.",
     context: "Volume-based valuation is uniquely relevant to Web3 studios because onchain volume is transparent, verifiable, and directly correlated with economic utility. Unlike Web2 metrics that can be gamed, onchain volume requires real value to flow through the protocols. For the studio/ETF model, volume across all portfolio apps represents the total economic activity the operator has enabled."
@@ -237,7 +237,7 @@ export const metricDefinitions: Record<string, { title: string; description: str
     description: "Values the studio based on its active wallet count. This is a Web3-native valuation method — each connected wallet represents a verified economic actor who has taken the friction-heavy step of setting up and connecting a crypto wallet, making them far more valuable than a typical signup.",
     calculation: "Total paying/active wallets × dollar value per wallet. Conservative ($100) — wallets with minimal activity. Mid ($500) — regular transacting wallets. Aggressive ($1,500) — high-value wallets with frequent onchain activity. Unique to Web3 where wallets are pseudonymous but economically verified.",
     benchmarks: "DeFi protocols: valued at $500-5,000/active wallet. NFT platforms: $200-1,000/wallet. Web3 gaming: $100-500/wallet. The key insight: a 'wallet' in Web3 is more like a 'verified financial account' in traditional finance — it represents genuine economic intent.",
-    context: "Wallet-based valuation is the studio's Web3-native edge. Traditional apps count signups (often fake or dormant). Web3 apps count wallets that have made real onchain transactions — every wallet represents a user who has gone through KYC/wallet setup, funded their wallet, and executed transactions. For the ETF model, unique wallets across the portfolio represent the studio's Web3 distribution moat."
+    context: "Wallet-based valuation is the studio's Web3-native edge. Traditional apps count signups (often fake or dormant). Web3 apps count wallets that have made real onchain transfers — every wallet represents a user who has gone through KYC/wallet setup, funded their wallet, and executed transfers. For the ETF model, unique wallets across the portfolio represent the studio's Web3 distribution moat."
   },
   valBlended: {
     title: "Confidence-Weighted Blended Valuation",
@@ -265,7 +265,7 @@ export const metricDefinitions: Record<string, { title: string; description: str
     description: "How many times each daily active user opens the app per day. Multiple sessions per day indicate the product has created a strong habitual loop — users keep coming back throughout the day.",
     calculation: "Total sessions_today ÷ total daily active users across tracked apps.",
     benchmarks: "Single-session apps: 1-1.5 sessions/DAU. Habitual check-in apps: 2-4 sessions/DAU. Highly addictive (social, gaming): 5-10+ sessions/DAU. Above 3 sessions/DAU strongly indicates the product is part of users' daily routine.",
-    context: "Multiple daily sessions is a leading indicator of monetization potential and retention. For a gaming studio, 3+ sessions/DAU means users are coming back between gaming sessions — the core loop is working. Each additional session is another opportunity to show value, drive transactions, and deepen engagement."
+    context: "Multiple daily sessions is a leading indicator of monetization potential and retention. For a gaming studio, 3+ sessions/DAU means users are coming back between gaming sessions — the core loop is working. Each additional session is another opportunity to show value, drive transfers, and deepen engagement."
   },
   totalSessions: {
     title: "Total Sessions (Portfolio)",
@@ -283,10 +283,10 @@ export const metricDefinitions: Record<string, { title: string; description: str
   },
   volumeTransactions: {
     title: "Volume vs Transfers Correlation",
-    description: "A scatter plot showing each app's transaction count against its onchain volume, with bubble size representing MAU. This reveals the relationship between transaction frequency and economic magnitude across the portfolio.",
-    calculation: "X-axis: transaction count per app. Y-axis: onchain volume (USD) per app. Bubble size: MAU per app. Each bubble represents one tracked app.",
-    benchmarks: "High volume, few transactions: large-value transfers (DeFi-like). Many transactions, low volume: micro-payments (gaming-like). The diagonal represents balanced proportional growth — most healthy apps sit near or above it.",
-    context: "This chart characterizes the portfolio's onchain economic profile. Apps in the upper-left are processing large-value transactions (financial infrastructure). Apps in the lower-right are processing many small transactions (consumer utility). Understanding this distribution helps the studio optimize fee structures and identify which economic models work best across the portfolio."
+    description: "A scatter plot showing each app's transfer count against its onchain volume, with bubble size representing MAU. This reveals the relationship between transfer frequency and economic magnitude across the portfolio.",
+    calculation: "X-axis: transfer count per app. Y-axis: onchain volume (USD) per app. Bubble size: MAU per app. Each bubble represents one tracked app.",
+    benchmarks: "High volume, few transfers: large-value transfers (DeFi-like). Many transfers, low volume: micro-payments (gaming-like). The diagonal represents balanced proportional growth — most healthy apps sit near or above it.",
+    context: "This chart characterizes the portfolio's onchain economic profile. Apps in the upper-left are processing large-value transfers (financial infrastructure). Apps in the lower-right are processing many small transfers (consumer utility). Understanding this distribution helps the studio optimize fee structures and identify which economic models work best across the portfolio."
   },
   valuation: {
     title: "Zeno Studio Portfolio Valuation",
