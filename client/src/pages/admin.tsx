@@ -92,7 +92,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
   const { data: latestMetrics, isLoading: metricsLoading } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
     queryKey: ["/api/metrics/latest"],
     queryFn: async () => {
-      const res = await fetch("/api/metrics/latest");
+      const res = await fetch("/api/metrics/latest", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch metrics");
       return res.json();
     },

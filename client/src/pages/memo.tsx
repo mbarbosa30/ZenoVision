@@ -25,7 +25,7 @@ export default function Memo() {
   const { data: metricsData } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
     queryKey: ["/api/metrics/latest"],
     queryFn: async () => {
-      const res = await fetch("/api/metrics/latest");
+      const res = await fetch("/api/metrics/latest", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch metrics");
       return res.json();
     },

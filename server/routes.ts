@@ -80,7 +80,7 @@ function validateMetricsData(metrics: MetricsData, previousSnapshot?: MetricsSna
   if (metrics.engagement.sessions_today < 0) errors.push("Sessions today cannot be negative");
   if (metrics.revenue.total_payments < 0) errors.push("Total payments cannot be negative");
   if (metrics.revenue.net_income < 0) errors.push("Net income cannot be negative");
-  if (metrics.onchain.transactions < 0) errors.push("Transactions cannot be negative");
+  if (metrics.onchain.transactions < 0) errors.push("Transfers cannot be negative");
   if (metrics.onchain.volume < 0) errors.push("Volume cannot be negative");
 
   // Logical consistency checks
@@ -112,7 +112,7 @@ function validateMetricsData(metrics: MetricsData, previousSnapshot?: MetricsSna
       warnings.push(`Net income decreased from $${prev.revenue.net_income} to $${metrics.revenue.net_income}`);
     }
     if (metrics.onchain.transactions < prev.onchain.transactions) {
-      warnings.push(`Transactions decreased from ${prev.onchain.transactions} to ${metrics.onchain.transactions}`);
+      warnings.push(`Transfers decreased from ${prev.onchain.transactions} to ${metrics.onchain.transactions}`);
     }
 
     // Check for dramatic increases (>500% in one snapshot)
@@ -125,7 +125,7 @@ function validateMetricsData(metrics: MetricsData, previousSnapshot?: MetricsSna
     checkDramaticIncrease("Total users", metrics.users.total, prev.users.total);
     checkDramaticIncrease("DAU", metrics.users.daily_active, prev.users.daily_active);
     checkDramaticIncrease("Revenue", metrics.revenue.net_income, prev.revenue.net_income);
-    checkDramaticIncrease("Transactions", metrics.onchain.transactions, prev.onchain.transactions);
+    checkDramaticIncrease("Transfers", metrics.onchain.transactions, prev.onchain.transactions);
   }
 
   return {
@@ -381,7 +381,7 @@ export async function registerRoutes(
   });
 
   // Get latest metrics for all projects
-  app.get("/api/metrics/latest", async (req, res) => {
+  app.get("/api/metrics/latest", requireAdmin, async (req, res) => {
     try {
       const snapshots = await storage.getAllLatestMetrics();
       res.json({ success: true, snapshots });
