@@ -241,7 +241,9 @@ export async function registerRoutes(
   app.get("/api/projects", async (req, res) => {
     try {
       const projects = await storage.getAllProjects();
-      res.json({ success: true, projects });
+      const isAdmin = isValidAdminSession(req.cookies?.adminToken);
+      const safeProjects = isAdmin ? projects : projects.map(({ metricsApiKey, metricsEndpoint, ...rest }) => rest);
+      res.json({ success: true, projects: safeProjects });
     } catch (error) {
       console.error("Error fetching projects:", error);
       res.status(500).json({ success: false, error: "Failed to fetch projects" });
