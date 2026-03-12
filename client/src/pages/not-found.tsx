@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 
 export default function NotFound() {
+  useEffect(() => { document.title = "404 — Zeno Vision"; }, []);
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#0f0f0f]">
       <div className="w-full max-w-md mx-4 border border-[#2d2d2d] bg-[#1a1a1a] p-8">

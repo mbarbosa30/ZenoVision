@@ -436,7 +436,7 @@ function SnapshotManager({ projects, toast }: { projects: Project[]; toast: Retu
     if (metrics.users.total < 0) issues.push("Negative total users");
     if (metrics.users.daily_active < 0) issues.push("Negative DAU");
     if (metrics.revenue.net_income < 0) issues.push("Negative revenue");
-    if (metrics.onchain.transactions < 0) issues.push("Negative transactions");
+    if (metrics.onchain.transactions < 0) issues.push("Negative transfers");
     if (metrics.users.daily_active > metrics.users.total) issues.push("DAU > total users");
     if (metrics.users.weekly_active > metrics.users.total) issues.push("WAU > total users");
     if (metrics.users.monthly_active > metrics.users.total) issues.push("MAU > total users");
@@ -509,7 +509,7 @@ function SnapshotManager({ projects, toast }: { projects: Project[]; toast: Retu
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         <span>Users: {m.users.total.toLocaleString()}</span>
                         <span>DAU: {m.users.daily_active.toLocaleString()}</span>
-                        <span>Txs: {m.onchain.transactions.toLocaleString()}</span>
+                        <span>Transfers: {m.onchain.transactions.toLocaleString()}</span>
                         <span>Revenue: ${m.revenue.net_income.toLocaleString()}</span>
                       </div>
                       {hasSuspiciousData && (
