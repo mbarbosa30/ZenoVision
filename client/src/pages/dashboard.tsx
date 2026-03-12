@@ -19,6 +19,7 @@ import {
 } from "recharts";
 
 import { InfoButton, StatCard, formatNum, smartTickFormat } from "@/components/dashboard";
+import type { GrowthTimeframe } from "@/components/dashboard";
 import { useDashboardData } from "@/components/dashboard/use-dashboard-data";
 
 function DashboardContent() {
@@ -27,7 +28,7 @@ function DashboardContent() {
   const {
     fetching, fetchProgress, expandedApps, sortField, sortDir,
     growthTimeframe, setGrowthTimeframe, lastRefreshTime, trendRange, setTrendRange,
-    metricsLoading, connectedProjects, projects, snapshots, historicalSnapshots,
+    metricsLoading, allProjects, connectedProjects, projects, snapshots, historicalSnapshots,
     metricVisibility, showCategories, fetchAllMetrics, aggregatedStats,
     historicalData, appComparisonData, radarData, perAppTimeSeries, appColorMap,
     estimatedDailyRevenueData, estimatedDailyActivityData,

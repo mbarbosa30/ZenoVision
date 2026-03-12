@@ -626,6 +626,7 @@ export function useDashboardData() {
     trendRange,
     setTrendRange,
     metricsLoading,
+    allProjects,
     connectedProjects,
     projects,
     snapshots,
