@@ -102,7 +102,7 @@ function MetricsDashboard({ projects, toast }: { projects: Project[]; toast: Ret
     queryKey: ["/api/projects", selectedProject, "metrics"],
     queryFn: async () => {
       if (!selectedProject) return { success: true, snapshots: [] };
-      const res = await fetch(`/api/projects/${selectedProject}/metrics?limit=30`);
+      const res = await fetch(`/api/projects/${selectedProject}/metrics?limit=30`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch project metrics");
       return res.json();
     },

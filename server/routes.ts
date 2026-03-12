@@ -366,7 +366,7 @@ export async function registerRoutes(
   });
 
   // Get metrics history for a project
-  app.get("/api/projects/:id/metrics", async (req, res) => {
+  app.get("/api/projects/:id/metrics", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const limit = parseInt(req.query.limit as string) || 100;
