@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ExternalLink, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,19 +6,14 @@ import { Block } from "@/components/block";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-interface Project {
+import type { PublicMetrics } from "@/lib/types";
+
+interface HomeProject {
   id?: string;
   name: string;
   description: string;
   highlight: string;
   url: string;
-}
-
-interface PublicMetrics {
-  totalUsers: number;
-  trackedApps: number;
-  totalTransactions: number;
-  trackedProjectIds: string[];
 }
 
 function CoBuildSection() {
@@ -169,7 +164,7 @@ function CoBuildSection() {
 }
 
 export default function Home() {
-  const { data } = useQuery<{ success: boolean; projects: Project[] }>({
+  const { data } = useQuery<{ success: boolean; projects: HomeProject[] }>({
     queryKey: ["/api/projects"],
     queryFn: async () => {
       const res = await fetch("/api/projects");
@@ -191,6 +186,10 @@ export default function Home() {
   const projects = (data?.projects || []).filter((p: any) => p.showOnLandingPage !== false);
   const publicMetrics = metricsData?.metrics;
   const trackedProjectIds = new Set(publicMetrics?.trackedProjectIds || []);
+
+  useEffect(() => {
+    document.title = "Zeno Vision — AI-Native Web3 Venture Studio";
+  }, []);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -323,7 +322,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-2">Portfolio</h2>
-              <p className="text-[#a0aec0]">10+ products shipped with real traction</p>
+              <p className="text-[#a0aec0]">{projects.length > 0 ? `${projects.length} products shipped with real traction` : "Loading portfolio..."}</p>
             </Block>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {projects.map((project, i) => (
@@ -391,11 +390,12 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-sm text-[#4a5568]">
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-[#3b82f6]" />
-              <span>Zeno</span>
+              <span>&copy; {new Date().getFullYear()} Zeno Vision</span>
             </div>
             <div className="flex items-center gap-6">
               <Link href="/about" className="hover:text-white transition-colors" data-testid="footer-about">About</Link>
               <Link href="/memo" className="hover:text-white transition-colors" data-testid="footer-memo">Memo</Link>
+              <a href="https://x.com/zenoVision_" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" data-testid="footer-twitter">@zenoVision_</a>
             </div>
           </div>
         </footer>

@@ -20,53 +20,7 @@ import {
   ScatterChart, Scatter, ZAxis
 } from "recharts";
 
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  highlight: string;
-  url: string;
-  sortOrder: number;
-  metricsEndpoint: string | null;
-  metricsApiKey: string | null;
-  showUsersMetrics: boolean;
-  showEngagementMetrics: boolean;
-  showRevenueMetrics: boolean;
-  showOnchainMetrics: boolean;
-  chartColor: string | null;
-}
-
-interface Metrics {
-  app: string;
-  timestamp: string;
-  users: {
-    total: number;
-    daily_active: number;
-    weekly_active: number;
-    monthly_active: number;
-    paying: number;
-  };
-  engagement: {
-    key_actions: number;
-    sessions_today: number;
-  };
-  revenue: {
-    total_payments: number;
-    net_income: number;
-    currency: string;
-  };
-  onchain: {
-    transactions: number;
-    volume: number;
-  };
-}
-
-interface MetricsSnapshot {
-  id: string;
-  projectId: string;
-  timestamp: string;
-  metrics: Metrics;
-}
+import type { Project, Metrics, MetricsSnapshot } from "@/lib/types";
 
 const metricDefinitions: Record<string, { title: string; description: string; calculation: string; benchmarks: string; context: string }> = {
   mrr: {
@@ -740,6 +694,7 @@ function calculateGrowthRates(historical: any[], timeframe: GrowthTimeframe = 'd
 }
 
 function DashboardContent() {
+  useEffect(() => { document.title = "Dashboard — Zeno Vision"; }, []);
   const queryClient = useQueryClient();
   const [fetching, setFetching] = useState(false);
   const [fetchProgress, setFetchProgress] = useState<Record<string, 'pending' | 'fetching' | 'done' | 'error'>>({});

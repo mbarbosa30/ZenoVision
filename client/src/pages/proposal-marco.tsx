@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Code, Users, Zap, Award, Globe, Briefcase, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
@@ -6,6 +6,7 @@ import { PasswordGate } from "@/components/password-gate";
 import { Block } from "@/components/block";
 
 export default function ProposalMarco() {
+  useEffect(() => { document.title = "Personal Proposal — Zeno Vision"; }, []);
   return (
     <PasswordGate storageKey="marcoAuth" title="Personal Proposal">
     <div className="min-h-screen bg-[#0f0f0f] text-white">

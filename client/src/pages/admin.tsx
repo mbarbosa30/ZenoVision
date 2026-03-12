@@ -15,66 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-interface Inquiry {
-  id: string;
-  role: string;
-  name: string;
-  email: string;
-  organization: string | null;
-  exploring: string;
-  links: string | null;
-  consent: string;
-  createdAt: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  highlight: string;
-  url: string;
-  sortOrder: number;
-  metricsEndpoint: string | null;
-  metricsApiKey: string | null;
-  showUsersMetrics: boolean;
-  showEngagementMetrics: boolean;
-  showRevenueMetrics: boolean;
-  showOnchainMetrics: boolean;
-  showOnLandingPage: boolean;
-  chartColor: string | null;
-}
-
-interface Metrics {
-  app: string;
-  timestamp: string;
-  users: {
-    total: number;
-    daily_active: number;
-    weekly_active: number;
-    monthly_active: number;
-    paying: number;
-  };
-  engagement: {
-    key_actions: number;
-    sessions_today: number;
-  };
-  revenue: {
-    total_payments: number;
-    net_income: number;
-    currency: string;
-  };
-  onchain: {
-    transactions: number;
-    volume: number;
-  };
-}
-
-interface MetricsSnapshot {
-  id: string;
-  projectId: string;
-  timestamp: string;
-  metrics: Metrics;
-}
+import type { Inquiry, Project, Metrics, MetricsSnapshot } from "@/lib/types";
 
 function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
   const [password, setPassword] = useState("");
@@ -604,6 +545,7 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
+    document.title = "Admin — Zeno Vision";
     fetch("/api/admin/session", { credentials: "include" })
       .then(res => setIsAuthenticated(res.ok))
       .catch(() => setIsAuthenticated(false));

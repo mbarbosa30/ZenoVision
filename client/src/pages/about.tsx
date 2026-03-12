@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Zap, Users, Target, Repeat, Brain, Scale, Eye, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Block } from "@/components/block";
 import { Link } from "wouter";
 
 export default function About() {
+  useEffect(() => { document.title = "About — Zeno Vision"; }, []);
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
       {/* Header */}

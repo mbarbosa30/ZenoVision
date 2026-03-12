@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Zap, TrendingUp, Coins, Target, AlertTriangle, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,19 +7,7 @@ import { Link } from "wouter";
 import { PasswordGate } from "@/components/password-gate";
 import { useQuery } from "@tanstack/react-query";
 
-interface MetricsSnapshot {
-  id: number;
-  projectId: number;
-  timestamp: string;
-  metrics: {
-    app: string;
-    users: { total: number; paying: number; daily_active: number; weekly_active: number; monthly_active: number };
-    onchain: { volume: number; transactions: number };
-    revenue: { currency: string; net_income: number; total_payments: number };
-    timestamp: string;
-    engagement: { key_actions: number; sessions_today: number };
-  };
-}
+import type { MetricsSnapshot } from "@/lib/types";
 
 function fmt(n: number, prefix = "", fallback = "—"): string {
   if (n === 0) return fallback;
@@ -33,6 +21,7 @@ function fmtDollar(n: number): string {
 }
 
 export default function Memo() {
+  useEffect(() => { document.title = "Investment Memo — Zeno Vision"; }, []);
   const { data: metricsData } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
     queryKey: ["/api/metrics/latest"],
     queryFn: async () => {

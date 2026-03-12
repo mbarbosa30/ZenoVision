@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Shield, Users, Coins, Repeat, Target, AlertTriangle, Calendar, CheckCircle, Zap, Lock } from "lucide-react";
 import { Link } from "wouter";
@@ -7,6 +7,7 @@ import { PasswordGate } from "@/components/password-gate";
 import { Block } from "@/components/block";
 
 export default function ProposalCeloSelf() {
+  useEffect(() => { document.title = "Initiative Proposal — Zeno Vision"; }, []);
   return (
     <PasswordGate storageKey="proposalCeloAuth" title="Initiative Proposal">
     <div className="min-h-screen bg-[#0f0f0f] text-white">
