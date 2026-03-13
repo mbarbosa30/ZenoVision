@@ -19,9 +19,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/memo" component={Memo} />
-      <Route path="/proposal" component={Proposal} />
       <Route path="/proposal/marco" component={ProposalMarco} />
       <Route path="/proposal/celo-self" component={ProposalCeloSelf} />
+      <Route path="/proposal" component={Proposal} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
