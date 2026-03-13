@@ -156,7 +156,7 @@ function CoBuildSection() {
 }
 
 export default function Home() {
-  const { data } = useQuery<{ success: boolean; projects: Project[] }>({
+  const { data, isLoading: projectsLoading } = useQuery<{ success: boolean; projects: Project[] }>({
     queryKey: ["/api/projects"],
     queryFn: async () => {
       const res = await fetch("/api/projects");
@@ -314,7 +314,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <Block variant="dark" className="border-b border-[#2d2d2d]" delay={0.1}>
               <h2 className="text-3xl font-semibold mb-2">Portfolio</h2>
-              <p className="text-[#a0aec0]">{projects.length > 0 ? `${projects.length} products shipped with real traction` : "Loading portfolio..."}</p>
+              <p className="text-[#a0aec0]">{projects.length > 0 ? `${projects.length} products shipped with real traction` : projectsLoading ? "Loading portfolio..." : "Portfolio data unavailable"}</p>
             </Block>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {projects.map((project, i) => (
