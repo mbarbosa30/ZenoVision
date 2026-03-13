@@ -195,6 +195,7 @@ export async function registerRoutes(
       const token = createAdminSession();
       res.cookie("adminToken", token, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: SESSION_MAX_AGE_MS,
         path: "/",
@@ -242,7 +243,10 @@ export async function registerRoutes(
     try {
       const projects = await storage.getAllProjects();
       const isAdmin = isValidAdminSession(req.cookies?.adminToken);
-      const safeProjects = isAdmin ? projects : projects.map(({ metricsApiKey, metricsEndpoint, ...rest }) => rest);
+      const safeProjects = isAdmin ? projects : projects.map(({ metricsApiKey, metricsEndpoint, ...rest }) => ({
+        ...rest,
+        hasMetrics: !!metricsEndpoint,
+      }));
       res.json({ success: true, projects: safeProjects });
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -380,7 +384,7 @@ export async function registerRoutes(
     }
   });
 
-  // Get latest metrics for all projects
+  // Get latest metrics for all projects (admin — includes all data)
   app.get("/api/metrics/latest", requireAdmin, async (req, res) => {
     try {
       const snapshots = await storage.getAllLatestMetrics();
@@ -391,7 +395,18 @@ export async function registerRoutes(
     }
   });
 
-  // Get all historical metrics (for dashboard charts)
+  // Public read-only latest snapshots (for public dashboard)
+  app.get("/api/metrics/public-latest", async (req, res) => {
+    try {
+      const snapshots = await storage.getAllLatestMetrics();
+      res.json({ success: true, snapshots });
+    } catch (error) {
+      console.error("Error fetching public latest metrics:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch latest metrics" });
+    }
+  });
+
+  // Get all historical metrics (admin)
   app.get("/api/metrics/history", requireAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 30;
@@ -399,6 +414,18 @@ export async function registerRoutes(
       res.json({ success: true, snapshots });
     } catch (error) {
       console.error("Error fetching metrics history:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch metrics history" });
+    }
+  });
+
+  // Public read-only historical snapshots (for public dashboard charts)
+  app.get("/api/metrics/public-history", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 30;
+      const snapshots = await storage.getAllMetricsHistory(limit);
+      res.json({ success: true, snapshots });
+    } catch (error) {
+      console.error("Error fetching public metrics history:", error);
       res.status(500).json({ success: false, error: "Failed to fetch metrics history" });
     }
   });

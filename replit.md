@@ -65,7 +65,7 @@ client/           # Frontend React application
       about.tsx   # About page with Why Zeno, vision, team
       memo.tsx    # Investment memo page
       admin.tsx   # Protected admin dashboard
-      dashboard.tsx  # Portfolio metrics dashboard
+      dashboard.tsx  # Portfolio metrics dashboard (public, no auth required)
       proposal.tsx   # Partnership proposal (gated)
       proposal-marco.tsx  # Personal proposal (gated)
       proposal-celo-self.tsx  # Initiative proposal (gated)
@@ -82,16 +82,18 @@ shared/           # Shared code between client/server
 ```
 
 ### Admin Security
-- Server-side auth via HTTP-only `adminToken` cookie
+- Server-side auth via HTTP-only `adminToken` cookie (secure in production)
 - `requireAdmin` middleware protects all admin endpoints
 - `/api/admin/verify` issues cookie, `/api/admin/session` validates, `/api/admin/logout` clears
-- Public endpoints: `/api/projects` (GET), `/api/public-metrics`, `POST /api/inquiries`
+- Public endpoints: `/api/projects` (GET, strips metricsApiKey/metricsEndpoint, adds hasMetrics flag), `/api/public-metrics`, `POST /api/inquiries`, `/api/metrics/public-latest`, `/api/metrics/public-history`
+- Admin-only endpoints: `/api/metrics/latest`, `/api/metrics/history`, `/api/metrics/fetch-all`, `/api/metrics/fetch/:projectId`, `/api/inquiries` (GET), all project CRUD, all metrics DELETE
 
 ### Page Routes
 - `/` - Homepage
 - `/about` - About page
-- `/memo` - Investment Memo page
+- `/memo` - Investment Memo page (password gated)
 - `/admin` - Admin dashboard (password protected)
+- `/dashboard` - Public portfolio metrics dashboard (no auth required, refresh uses admin auth)
 
 ### Development vs Production
 - Development: Vite dev server with HMR, proxied through Express

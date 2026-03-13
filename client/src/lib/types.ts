@@ -17,8 +17,9 @@ export interface Project {
   highlight: string;
   url: string;
   sortOrder: number;
-  metricsEndpoint: string | null;
-  metricsApiKey: string | null;
+  metricsEndpoint?: string | null;
+  metricsApiKey?: string | null;
+  hasMetrics?: boolean;
   showUsersMetrics: boolean;
   showEngagementMetrics: boolean;
   showRevenueMetrics: boolean;

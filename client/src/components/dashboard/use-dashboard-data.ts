@@ -28,25 +28,25 @@ export function useDashboardData() {
   });
 
   const { data: latestMetrics, isLoading: metricsLoading } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
-    queryKey: ["/api/metrics/latest"],
+    queryKey: ["/api/metrics/public-latest"],
     queryFn: async () => {
-      const res = await fetch("/api/metrics/latest", { credentials: "include" });
+      const res = await fetch("/api/metrics/public-latest");
       if (!res.ok) throw new Error("Failed to fetch metrics");
       return res.json();
     },
   });
 
   const { data: historicalMetrics } = useQuery<{ success: boolean; snapshots: MetricsSnapshot[] }>({
-    queryKey: ["/api/metrics/history"],
+    queryKey: ["/api/metrics/public-history"],
     queryFn: async () => {
-      const res = await fetch("/api/metrics/history?limit=30", { credentials: "include" });
+      const res = await fetch("/api/metrics/public-history?limit=30");
       if (!res.ok) throw new Error("Failed to fetch history");
       return res.json();
     },
   });
 
   const allProjects = projectsData?.projects || [];
-  const connectedProjects = allProjects.filter(p => p.metricsEndpoint);
+  const connectedProjects = allProjects.filter(p => p.metricsEndpoint || p.hasMetrics);
   const projects = connectedProjects;
   const snapshots = (latestMetrics?.snapshots || []).filter(s =>
     connectedProjects.some(p => p.id === s.projectId)
@@ -95,8 +95,8 @@ export function useDashboardData() {
         }
         setFetchProgress({ ...progress });
       }
-      queryClient.invalidateQueries({ queryKey: ["/api/metrics/latest"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/metrics/history"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metrics/public-latest"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metrics/public-history"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setLastRefreshTime(new Date());
     } finally {

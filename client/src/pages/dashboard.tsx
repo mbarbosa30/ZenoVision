@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Block } from "@/components/block";
 import { Link } from "wouter";
-import { PasswordGate } from "@/components/password-gate";
 import { format } from "date-fns";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -1424,9 +1423,5 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
-  return (
-    <PasswordGate storageKey="dashboardAuth" title="Portfolio Dashboard">
-      <DashboardContent />
-    </PasswordGate>
-  );
+  return <DashboardContent />;
 }
