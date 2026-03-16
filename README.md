@@ -14,6 +14,11 @@ We don't pitch ideas. We ship products.
 
 Every app in the portfolio is live, measured, and iterated on continuously. AI handles the speed. Partner ecosystems provide the distribution. The result is compounding traction across multiple products at once.
 
+### By the Numbers
+
+| 200,000+ Users | 8 Live Apps | 100,000+ Onchain Transfers |
+|:---:|:---:|:---:|
+
 ## How It Works
 
 | Step | What Happens |
